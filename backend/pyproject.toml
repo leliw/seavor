@@ -1,6 +1,6 @@
 [project]
 name = "backend"
-version = "0.1.0"
+dynamic = [ "version" ] # See app/version.py
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"

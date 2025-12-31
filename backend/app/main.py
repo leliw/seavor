@@ -5,10 +5,15 @@ from log_config import setup_logging
 from routers import (
     config,
 )
+from version import __version__
 
 load_dotenv()
 setup_logging()
-app = FastAPI(lifespan=lifespan())
+app = FastAPI(
+    title="Seavor",
+    version=__version__,
+    lifespan=lifespan(),
+)
 
 
 # Include the client config router
