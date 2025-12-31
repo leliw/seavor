@@ -8,7 +8,7 @@ from routers import (
 
 load_dotenv()
 setup_logging()
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan())
 
 
 # Include the client config router

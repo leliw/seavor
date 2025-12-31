@@ -1,4 +1,4 @@
-from config import ClientConfig
+from app_config import ClientConfig
 from dependencies import ConfigDep
 from fastapi import APIRouter
 

@@ -1,7 +1,7 @@
 import logging
 from typing import Annotated
 
-from config import ServerConfig
+from app_config import AppConfig
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Request
 from fastapi.concurrency import asynccontextmanager
@@ -11,10 +11,13 @@ load_dotenv()
 _log = logging.getLogger(__name__)
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    app.state.config = ServerConfig()
-    yield
+def lifespan(config: AppConfig = AppConfig()):
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        app.state.config = config
+        yield
+
+    return lifespan
 
 
 def get_app(request: Request) -> FastAPI:
@@ -24,8 +27,8 @@ def get_app(request: Request) -> FastAPI:
 AppDep = Annotated[FastAPI, Depends(get_app)]
 
 
-def get_server_config(app: AppDep) -> ServerConfig:
+def get_server_config(app: AppDep) -> AppConfig:
     return app.state.config
 
 
-ConfigDep = Annotated[ServerConfig, Depends(get_server_config)]
+ConfigDep = Annotated[AppConfig, Depends(get_server_config)]
