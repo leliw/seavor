@@ -1,3 +1,6 @@
 {
-    "workbench.preferredLightColorTheme": "Quiet Light"
+    "workbench.preferredDarkColorTheme": "Monokai",
+    "workbench.preferredLightColorTheme": "Quiet Light",
+    "window.title": "${dirty}${activeRepositoryName}${separator}${rootName}${separator}${profileName}",
+    "window.autoDetectColorScheme": true,
 }
