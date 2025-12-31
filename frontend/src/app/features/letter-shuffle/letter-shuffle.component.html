@@ -1,0 +1,12 @@
+<div class="vertically-centered">
+    <div id="question">
+        @for(letter of answer; track $index; let i = $index) {
+        <button type="button" class="letter-box" (click)="onClickAnswer(i)">{{letter}}</button>
+        }
+    </div>
+    <div id="letters">
+        @for(letter of letters; track $index; let i = $index) {
+        <button type="button" class="letter-box" (click)="onClickLetter(i)">{{letter}}</button>
+        }
+    </div>
+</div>
