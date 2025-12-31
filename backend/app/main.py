@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from log_config import setup_logging
 from routers import (
     config,
+    letter_shuffles,
 )
 from version import __version__
 
@@ -21,6 +22,7 @@ app = FastAPI(
 
 # Include the client config router
 app.include_router(config.router, prefix="/api/config")
+app.include_router(letter_shuffles.router, prefix="/api/letter-shuffles")
 
 
 @app.get("/api/ping")
