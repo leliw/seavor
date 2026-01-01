@@ -1,10 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-
-interface LetterShuffleItem {
-  question: string;
-  description: string;
-}
-
+import { LetterShuffleItem, LetterShuffleService, LetterShuffleSet, LetterShuffleSetHeader } from './letter-shuffle.service';
 
 
 @Component({
@@ -14,19 +9,33 @@ interface LetterShuffleItem {
   styleUrl: './letter-shuffle.component.scss'
 })
 export class LetterShuffleComponent implements OnInit {
-
-  item: LetterShuffleItem = {
-    question: "carols",
-    description: "kolędy śpiewane w okresie świątecznym"
-  }
-
+  private sets!: LetterShuffleSetHeader[];
+  set!: LetterShuffleSet;
+  itemIndex = 0;
+  item!: LetterShuffleItem;
   letters!: string[];
   answer!: string[];
 
-
-  constructor() { }
+  constructor(private service: LetterShuffleService) {
+  }
 
   ngOnInit(): void {
+    this.service.getAll().subscribe(sets => {
+      this.sets = sets;
+      this.service.get(this.sets[0].id).subscribe(set => {
+        this.set = set;
+        for (let i = this.set.items.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [this.set.items[i], this.set.items[j]] = [this.set.items[j], this.set.items[i]];
+        }
+        this.itemIndex = 0;
+        this.startItem();
+      });
+    });
+  }
+
+  startItem() {
+    this.item = this.set.items[this.itemIndex];
     this.letters = this.item.question.split('');
     for (let i = this.letters.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -34,6 +43,7 @@ export class LetterShuffleComponent implements OnInit {
     }
     this.answer = [];
   }
+
 
   onClickLetter(index: number) {
     this.answer.push(this.letters[index]);
