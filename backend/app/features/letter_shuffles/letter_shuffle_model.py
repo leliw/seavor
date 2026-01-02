@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 from uuid import UUID, uuid4
+
 from pydantic import BaseModel
 
 
@@ -15,6 +16,8 @@ class LetterShuffleSetHeader(BaseModel):
 class LetterShuffleItem(BaseModel):
     question: str
     description: str
+    question_audio_file_name: Optional[str] = None
+    description_audio_file_name: Optional[str] = None
 
 
 class LetterShuffleSetCreate(BaseModel):
