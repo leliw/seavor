@@ -6,6 +6,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from log_config import setup_logging
 from routers import (
+    audio_files,
     config,
     letter_shuffles,
 )
@@ -23,6 +24,7 @@ app = FastAPI(
 # Include the client config router
 app.include_router(config.router, prefix="/api/config")
 app.include_router(letter_shuffles.router, prefix="/api/letter-shuffles")
+app.include_router(audio_files.router, prefix="/api/audio-files")
 
 
 @app.get("/api/ping")
