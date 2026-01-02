@@ -16,6 +16,19 @@ wheels = [
 ]
 
 [[package]]
+name = "aiogtts"
+version = "1.1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "aiohttp" },
+    { name = "beautifulsoup4" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/86/05/ecc208a30258eccf5d2d45df078130b375ca9838307c51a1748889c1b28b/aiogTTS-1.1.1.tar.gz", hash = "sha256:4f5e219f86c176c1cc568a8e4ec13d6535ea1d0fc2e9db2bacf7155e8f0e0688", size = 13197, upload-time = "2022-03-26T09:51:35.57Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/67/7e/ccbf178b306c79e2dc0424ac7b4d729437bb6a207414d17f6c845458cd92/aiogTTS-1.1.1-py3-none-any.whl", hash = "sha256:bbeb972d5fdee5581febf21019a0235aed9172929811c5b773ece2e2601d4499", size = 15456, upload-time = "2022-03-26T09:51:33.82Z" },
+]
+
+[[package]]
 name = "aiohappyeyeballs"
 version = "2.6.1"
 source = { registry = "https://pypi.org/simple" }
@@ -170,8 +183,10 @@ wheels = [
 name = "backend"
 source = { virtual = "." }
 dependencies = [
+    { name = "aiogtts" },
     { name = "ampf", extra = ["gcp"] },
     { name = "fastapi", extra = ["standard"] },
+    { name = "gtts" },
     { name = "gunicorn" },
     { name = "pydantic-settings" },
     { name = "python-dotenv" },
@@ -189,8 +204,10 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "aiogtts", specifier = ">=1.1.1" },
     { name = "ampf", extras = ["gcp"], specifier = ">=0.9.2" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.128.0" },
+    { name = "gtts", specifier = ">=2.5.4" },
     { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "pydantic-settings", specifier = ">=2.12.0" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
@@ -204,6 +221,19 @@ dev = [
     { name = "pytest", specifier = ">=9.0.2" },
     { name = "pytest-asyncio", specifier = ">=1.3.0" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
+]
+
+[[package]]
+name = "beautifulsoup4"
+version = "4.14.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "soupsieve" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c3/b0/1c6a16426d389813b48d95e26898aff79abbde42ad353958ad95cc8c9b21/beautifulsoup4-4.14.3.tar.gz", hash = "sha256:6292b1c5186d356bba669ef9f7f051757099565ad9ada5dd630bd9de5fa7fb86", size = 627737, upload-time = "2025-11-30T15:08:26.084Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1a/39/47f9197bdd44df24d67ac8893641e16f386c984a0619ef2ee4c51fbbc019/beautifulsoup4-4.14.3-py3-none-any.whl", hash = "sha256:0918bfe44902e6ad8d57732ba310582e98da931428d231a5ecb9e7c703a735bb", size = 107721, upload-time = "2025-11-30T15:08:24.087Z" },
 ]
 
 [[package]]
@@ -312,14 +342,14 @@ wheels = [
 
 [[package]]
 name = "click"
-version = "8.3.1"
+version = "8.1.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama", marker = "sys_platform == 'win32'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3d/fa/656b739db8587d7b5dfa22e22ed02566950fbfbcdc20311993483657a5c0/click-8.3.1.tar.gz", hash = "sha256:12ff4785d337a1bb490bb7e9c2b1ee5da3112e94a8622f26a6c77f5d2fc6842a", size = 295065, upload-time = "2025-11-15T20:45:42.706Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b9/2e/0090cbf739cee7d23781ad4b89a9894a41538e4fcf4c31dcdd705b78eb8b/click-8.1.8.tar.gz", hash = "sha256:ed53c9d8990d83c2a27deae68e4ee337473f6330c040a31d4225c9574d16096a", size = 226593, upload-time = "2024-12-21T18:38:44.339Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/98/78/01c019cdb5d6498122777c1a43056ebb3ebfeef2076d9d026bfe15583b2b/click-8.3.1-py3-none-any.whl", hash = "sha256:981153a64e25f12d547d3426c367a4857371575ee7ad18df2a6183ab0545b2a6", size = 108274, upload-time = "2025-11-15T20:45:41.139Z" },
+    { url = "https://files.pythonhosted.org/packages/7e/d4/7ebdbd03970677812aac39c869717059dbb71a4cfc033ca6e5221787892c/click-8.1.8-py3-none-any.whl", hash = "sha256:63c132bbbed01578a06712a2d1f497bb62d9c1c0d329b7903a866228027263b2", size = 98188, upload-time = "2024-12-21T18:38:41.666Z" },
 ]
 
 [[package]]
@@ -868,6 +898,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/3f/46/e9f19d5be65e8423f886813a2a9d0056ba94757b0c5007aa59aed1a961fa/grpcio_status-1.76.0.tar.gz", hash = "sha256:25fcbfec74c15d1a1cb5da3fab8ee9672852dc16a5a9eeb5baf7d7a9952943cd", size = 13679, upload-time = "2025-10-21T16:28:52.545Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8c/cc/27ba60ad5a5f2067963e6a858743500df408eb5855e98be778eaef8c9b02/grpcio_status-1.76.0-py3-none-any.whl", hash = "sha256:380568794055a8efbbd8871162df92012e0228a5f6dffaf57f2a00c534103b18", size = 14425, upload-time = "2025-10-21T16:28:40.853Z" },
+]
+
+[[package]]
+name = "gtts"
+version = "2.5.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click" },
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/57/79/5ddb1dfcd663581d0d3fca34ccb1d8d841b47c22a24dc8dce416e3d87dfa/gtts-2.5.4.tar.gz", hash = "sha256:f5737b585f6442f677dbe8773424fd50697c75bdf3e36443585e30a8d48c1884", size = 24018, upload-time = "2024-11-10T21:58:00.358Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e3/6c/8b8b1fdcaee7e268536f1bb00183a5894627726b54a9ddc6fc9909888447/gTTS-2.5.4-py3-none-any.whl", hash = "sha256:5dd579377f9f5546893bc26315ab1f846933dc27a054764b168f141065ca8436", size = 29184, upload-time = "2024-11-10T21:57:58.448Z" },
 ]
 
 [[package]]
@@ -1653,6 +1696,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/58/15/8b3609fd3830ef7b27b655beb4b4e9c62313a4e8da8c676e142cc210d58e/shellingham-1.5.4.tar.gz", hash = "sha256:8dbca0739d487e5bd35ab3ca4b36e11c4078f3a234bfce294b0a0291363404de", size = 10310, upload-time = "2023-10-24T04:13:40.426Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e0/f9/0595336914c5619e5f28a1fb793285925a8cd4b432c9da0a987836c7f822/shellingham-1.5.4-py2.py3-none-any.whl", hash = "sha256:7ecfff8f2fd72616f7481040475a65b2bf8af90a56c89140852d1120324e8686", size = 9755, upload-time = "2023-10-24T04:13:38.866Z" },
+]
+
+[[package]]
+name = "soupsieve"
+version = "2.8.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/89/23/adf3796d740536d63a6fbda113d07e60c734b6ed5d3058d1e47fc0495e47/soupsieve-2.8.1.tar.gz", hash = "sha256:4cf733bc50fa805f5df4b8ef4740fc0e0fa6218cf3006269afd3f9d6d80fd350", size = 117856, upload-time = "2025-12-18T13:50:34.655Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/48/f3/b67d6ea49ca9154453b6d70b34ea22f3996b9fa55da105a79d8732227adc/soupsieve-2.8.1-py3-none-any.whl", hash = "sha256:a11fe2a6f3d76ab3cf2de04eb339c1be5b506a8a47f2ceb6d139803177f85434", size = 36710, upload-time = "2025-12-18T13:50:33.267Z" },
 ]
 
 [[package]]

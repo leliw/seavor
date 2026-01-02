@@ -15,6 +15,7 @@ export class LetterShuffleComponent implements OnInit {
   item!: LetterShuffleItem;
   letters!: string[];
   answer!: string[];
+  question_audio!: HTMLAudioElement;
 
   constructor(private service: LetterShuffleService) {
   }
@@ -42,14 +43,17 @@ export class LetterShuffleComponent implements OnInit {
       [this.letters[i], this.letters[j]] = [this.letters[j], this.letters[i]];
     }
     this.answer = [];
+    this.question_audio = new Audio('/api/audio-files/' + this.item.question_audio_file_name);
   }
 
 
   onClickLetter(index: number) {
     this.answer.push(this.letters[index]);
     this.letters.splice(index, 1);
-    if (this.answer.join('') == this.item.question)
+    if (this.answer.join('') == this.item.question) {
       setTimeout(() => alert("Correct!"), 100);
+      this.question_audio.play().catch(err => console.error('Audio play error:', err));
+    }
   }
 
   onClickAnswer(index: number) {

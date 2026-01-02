@@ -73,6 +73,9 @@ def test_post_get_put_patch_delete(client: ApiTestClient):
     # GET
     r = client.get_typed(f"/api/letter-shuffles/{p.id}", 200, LetterShuffleSet)
     assert r.title == value.title
+    assert len(r.items) > 0
+    assert isinstance(r.items[0].question_audio_file_name, str)
+
 
     # PUT
     p.title = "Updated title"

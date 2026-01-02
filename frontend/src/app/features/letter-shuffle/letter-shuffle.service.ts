@@ -22,6 +22,8 @@ export interface LetterShuffleSet {
 export interface LetterShuffleItem {
   question: string;
   description: string;
+  question_audio_file_name: string;
+  description_audio_file_name: string;
 }
 
 @Injectable({
