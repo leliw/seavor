@@ -18,6 +18,7 @@ class LetterShuffleItem(BaseModel):
     description: str
     question_audio_file_name: Optional[str] = None
     description_audio_file_name: Optional[str] = None
+    question_image_name: Optional[str] = None
 
 
 class LetterShuffleSetCreate(BaseModel):
