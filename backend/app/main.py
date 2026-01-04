@@ -8,6 +8,7 @@ from log_config import setup_logging
 from routers import (
     audio_files,
     config,
+    images,
     letter_shuffles,
 )
 from version import __version__
@@ -25,6 +26,7 @@ app = FastAPI(
 app.include_router(config.router, prefix="/api/config")
 app.include_router(letter_shuffles.router, prefix="/api/letter-shuffles")
 app.include_router(audio_files.router, prefix="/api/audio-files")
+app.include_router(images.router, prefix="/api/images")
 
 
 @app.get("/api/ping")

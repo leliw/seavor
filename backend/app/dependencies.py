@@ -7,7 +7,10 @@ from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Request
 from fastapi.concurrency import asynccontextmanager
 from integrations.gtts.gtts_service import GttsService
+from integrations.image_gen.base_image_gen_service import BaseImageGenService
+from integrations.image_gen.openai_image_gen_service import OpenAIImageGenService
 from shared.audio_files.audio_file_service import AudioFileService
+from shared.images.image_service import ImageService
 
 load_dotenv()
 
@@ -51,3 +54,17 @@ def get_audio_file_service(app_state: AppStateDep, tts_service: GttsServiceDep) 
 
 
 AudioFileServiceDep = Annotated[AudioFileService, Depends(get_audio_file_service)]
+
+
+def get_image_gen_service() -> BaseImageGenService:
+    return OpenAIImageGenService()
+
+
+ImageGenServiceDep = Annotated[BaseImageGenService, Depends(get_image_gen_service)]
+
+
+def get_image_service(app_state: AppStateDep, image_gen_service: ImageGenServiceDep) -> ImageService:
+    return ImageService(app_state.factory, image_gen_service)
+
+
+ImageServiceDep = Annotated[ImageService, Depends(get_image_service)]
