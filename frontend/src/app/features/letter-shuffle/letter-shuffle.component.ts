@@ -20,6 +20,8 @@ export class LetterShuffleComponent implements OnInit {
     letters!: string[];
     answer!: string[];
     question_audio!: HTMLAudioElement;
+    description_audio!: HTMLAudioElement;
+
 
     constructor(private service: LetterShuffleService) {
     }
@@ -48,6 +50,7 @@ export class LetterShuffleComponent implements OnInit {
         }
         this.answer = [];
         this.question_audio = new Audio('/api/audio-files/' + this.item.question_audio_file_name);
+        this.description_audio = new Audio('/api/audio-files/' + this.item.description_audio_file_name);
     }
 
 
@@ -66,8 +69,10 @@ export class LetterShuffleComponent implements OnInit {
     private dialog = inject(MatDialog);
 
     onCorrect() {
-        // setTimeout(() => alert("Correct!"), 100);
         this.question_audio.play().catch(err => console.error('Audio play error:', err));
+        this.question_audio.addEventListener('ended', () => {
+            this.description_audio.play().catch(err => console.error('Audio play error:', err));
+        }, { once: true });
         this.dialog
             .open(SimpleDialogComponent, {
                 data: {

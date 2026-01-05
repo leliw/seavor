@@ -1,8 +1,10 @@
 <div class="vertically-centered">
+    @if(set) {
     <div id="title">{{ set.title }}</div>
     <div>{{ set.description }}</div>
-    
-    <img [src]="`/api/images/${item.question_image_name}`" height="640" width="640"/>
+    }
+    @if (item) {
+    <img [src]="`/api/images/${item.question_image_name}`" height="640" width="640" />
     <div id="description">{{ item.description }}</div>
     <div id="question">
         @for(letter of answer; track $index; let i = $index) {
@@ -14,4 +16,5 @@
         <button type="button" class="letter-box" (click)="onClickLetter(i)">{{letter}}</button>
         }
     </div>
+    }
 </div>
