@@ -1,15 +1,11 @@
 <div class="language-selector-container">
     <div class="header">
-        <h1 class="title">Choose your language</h1>
-        <p class="subtitle">
-            Wybierz&nbsp;język / Elige&nbsp;tu&nbsp;idioma / Choisissez&nbsp;votre&nbsp;langue / Sprache&nbsp;wählen /
-            Seleziona&nbsp;la&nbsp;tua&nbsp;lingua / Виберіть&nbsp;свою&nbsp;мову /Выберите&nbsp;язык / 选择语言 / اختر لغتك
-        </p>
+        <h1 class="title" i18n>Select learning language</h1>
     </div>
     <mat-card class="languages-card">
         <mat-card-content>
             <div class="languages-grid">
-                @for(lang of interfaceLanguages; track lang.code) {
+                @for(lang of learningLanguages; track lang.code) {
                 <button mat-stroked-button class="language-button" (click)="selectLanguage(lang.code)">
                     <span class="flag">{{ lang.flag }}</span>
                     <span class="native-name">{{ lang.nativeName }}</span>

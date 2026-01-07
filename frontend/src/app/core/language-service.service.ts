@@ -1,9 +1,12 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 const UI_LANGUAGE_KEY = 'app-ui-language';
+const LEARNING_LANGUAGE_KEY = 'app-learning-language';
 
-export interface AppLanguage {
+
+export interface Language {
     code: string;
     nativeName: string;
     englishName?: string;
@@ -14,13 +17,15 @@ export interface AppLanguage {
     providedIn: 'root'
 })
 export class LanguageService {
-    private currentLanguageSubject = new BehaviorSubject<string | null>(null);
-    public currentLanguage$ = this.currentLanguageSubject.asObservable();
+    private currentInterfaceLanguageSubject = new BehaviorSubject<string | null>(null);
+    public currentInterfaceLanguage$ = this.currentInterfaceLanguageSubject.asObservable();
+    private currentLearningLanguageSubject = new BehaviorSubject<string | null>(null);
+
 
     constructor() {
-        const savedLanguage = localStorage.getItem(UI_LANGUAGE_KEY);
-        if (savedLanguage) {
-            this.currentLanguageSubject.next(savedLanguage);
+        const savedInterfaceLanguage = localStorage.getItem(UI_LANGUAGE_KEY);
+        if (savedInterfaceLanguage) {
+            this.currentInterfaceLanguageSubject.next(savedInterfaceLanguage);
         }
     }
 
@@ -29,30 +34,65 @@ export class LanguageService {
             return;
         }
         localStorage.setItem(UI_LANGUAGE_KEY, code);
-        this.currentLanguageSubject.next(code);
-
-        // Tutaj możesz dodać integrację z ngx-translate lub @angular/localize
-        // Przykład dla ngx-translate:
-        // this.translate.use(code);
-
-        // Przykład dla @angular/localize:
-        // import('@angular/localize/init') – potem $localize.locale = code;
+        this.currentInterfaceLanguageSubject.next(code);
+        $localize.locale = code;
     }
 
     getInterfaceLanguage(): string | null {
-        return this.currentLanguageSubject.value;
+        return this.currentInterfaceLanguageSubject.value;
     }
 
     getCurrentLanguageObservable(): Observable<string | null> {
-        return this.currentLanguage$;
+        return this.currentInterfaceLanguage$;
     }
 
     clearInterfaceLanguage(): void {
         localStorage.removeItem(UI_LANGUAGE_KEY);
-        this.currentLanguageSubject.next(null);
+        this.currentInterfaceLanguageSubject.next(null);
     }
 
     isInterfaceLanguageSelected(): boolean {
         return this.getInterfaceLanguage() !== null;
     }
+
+    setLearningLanguage(code: string): void {
+        if (!code) {
+            return;
+        }
+        localStorage.setItem(LEARNING_LANGUAGE_KEY, code);
+        this.currentLearningLanguageSubject.next(code);
+    }
+
+    getLearningLanguage(): string | null {
+        return this.currentLearningLanguageSubject.value;
+    }
+
+    isLearningLanguageSelected(): boolean {
+        return this.getLearningLanguage() !== null;
+
+    }
 }
+
+export const interfaceLanguageSelectedGuard: CanActivateFn = (route, state) => {
+    const languageService = inject(LanguageService);
+    const router = inject(Router)
+    if (languageService.isInterfaceLanguageSelected()) {
+        return true;
+    } else {
+
+        router.navigate(['/select-interface-language']);
+        return false;
+    }
+}
+
+export const learningLanguageSelectedGuard: CanActivateFn = (route, state) => {
+    const languageService = inject(LanguageService);
+    const router = inject(Router)
+    if (languageService.isLearningLanguageSelected()) {
+        return true;
+    } else {
+
+        router.navigate(['/select-learning-language']);
+        return false;
+    }
+};

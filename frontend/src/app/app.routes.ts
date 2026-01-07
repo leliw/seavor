@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { InterfaceLanguageSelectedGuard } from './core/interface-language-selected.guard';
+import { interfaceLanguageSelectedGuard, learningLanguageSelectedGuard } from './core/language-service.service';
 
 export const routes: Routes = [
     {
@@ -7,8 +7,12 @@ export const routes: Routes = [
         loadComponent: () => import('./core/interface-language-selector/interface-language-selector.component').then(m => m.InterfaceLanguageSelectorComponent)
     },
     {
+        path: 'select-learning-language', canActivate: [interfaceLanguageSelectedGuard],
+        loadComponent: () => import('./core/learning-language-selector/learning-language-selector.component').then(m => m.LearningLanguageSelectorComponent)
+    },
+    {
         path: '',
-        canActivateChild: [InterfaceLanguageSelectedGuard],
+        canActivateChild: [interfaceLanguageSelectedGuard, learningLanguageSelectedGuard],
         children: [
             { path: '', redirectTo: 'letter-shuffle', pathMatch: 'full' },
             {

@@ -3,7 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
-import { AppLanguage, LanguageService } from '../language-service.service';
+import { Language, LanguageService } from '../language-service.service';
 
 
 @Component({
@@ -17,7 +17,7 @@ import { AppLanguage, LanguageService } from '../language-service.service';
     styleUrl: './interface-language-selector.component.scss'
 })
 export class InterfaceLanguageSelectorComponent {
-    popularLanguages: AppLanguage[] = [
+    interfaceLanguages: Language[] = [
         { code: 'en', nativeName: 'English', flag: '🇬🇧' },
         { code: 'pl', nativeName: 'Polski', flag: '🇵🇱' },
         { code: 'es', nativeName: 'Español', flag: '🇪🇸' },
