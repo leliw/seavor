@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { LanguageSelectedGuard } from './core/language-selected.guard';
+import { InterfaceLanguageSelectedGuard } from './core/interface-language-selected.guard';
 
 export const routes: Routes = [
     {
@@ -8,7 +8,7 @@ export const routes: Routes = [
     },
     {
         path: '',
-        canActivateChild: [LanguageSelectedGuard],
+        canActivateChild: [InterfaceLanguageSelectedGuard],
         children: [
             { path: '', redirectTo: 'letter-shuffle', pathMatch: 'full' },
             {

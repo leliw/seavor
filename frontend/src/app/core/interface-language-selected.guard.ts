@@ -5,7 +5,7 @@ import { LanguageService } from './language-service.service';
 @Injectable({
     providedIn: 'root'
 })
-export class LanguageSelectedGuard implements CanActivateChild {
+export class InterfaceLanguageSelectedGuard implements CanActivateChild {
 
     constructor(
         private languageService: LanguageService,
