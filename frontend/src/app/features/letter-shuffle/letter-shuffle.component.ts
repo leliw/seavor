@@ -76,7 +76,7 @@ export class LetterShuffleComponent implements OnInit {
         this.dialog
             .open(SimpleDialogComponent, {
                 data: {
-                    title: 'Correct',
+                    title: $localize`Correct`,
                     message: `<b>${this.item.question}</b> - ${this.item.description}`,
                 }
             })
@@ -85,8 +85,8 @@ export class LetterShuffleComponent implements OnInit {
                 if (this.itemIndex >= this.set.items.length)
                     this.dialog.open(SimpleDialogComponent, {
                         data: {
-                            title: 'Congratulations!',
-                            message: "That's all!"
+                            title: $localize`Congratulations!`,
+                            message: $localize`That's all!`
                         }
                     });
                 else {
