@@ -27,6 +27,10 @@ export class LanguageService {
         if (savedInterfaceLanguage) {
             this.currentInterfaceLanguageSubject.next(savedInterfaceLanguage);
         }
+        const savedLearningLanguage = localStorage.getItem(LEARNING_LANGUAGE_KEY);
+        if (savedLearningLanguage) {
+            this.currentLearningLanguageSubject.next(savedLearningLanguage);
+        }
     }
 
     setInterfaceLanguage(code: string): void {
