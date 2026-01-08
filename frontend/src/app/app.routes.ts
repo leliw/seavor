@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { interfaceLanguageSelectedGuard, learningLanguageSelectedGuard } from './core/language-service.service';
+import { interfaceLanguageSelectedGuard, learningLanguageSelectedGuard } from './core/language.service';
 
 export const routes: Routes = [
     {
