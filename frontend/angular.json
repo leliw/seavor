@@ -5,7 +5,7 @@
   "projects": {
     "frontend": {
         "i18n": {
-            "sourceLocale": "en-US",
+            "sourceLocale": "en",
             "locales": {"pl": "src/locales/messages.pl.xlf"}
         },
       "projectType": "application",
