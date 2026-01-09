@@ -2,13 +2,26 @@
     @if(set) {
     <div id="title">{{ set.title }}</div>
     <div>{{ set.description }}</div>
+    <button class="hint" mat-icon-button (click)="showNextHint()">
+        <mat-icon>help</mat-icon>
+    </button>
     }
     @if (item) {
+    @if(hintIndex > 0) {
     <img [src]="image_src" height="640" width="640" />
+    } @else {
+    <img [src]="" height="640" width="640" />
+    }
+    @if(hintIndex > 1) {
     <div id="description">{{ item.description }}</div>
+    }
     <div id="question">
         @for(letter of answer; track $index; let i = $index) {
+        @if (i < hintIndex-2) { 
+        <button type="button" class="letter-box" disabled>{{letter}}</button>
+        } @else {
         <button type="button" class="letter-box" (click)="onClickAnswer(i)">{{letter}}</button>
+        }
         }
     </div>
     <div id="letters">
