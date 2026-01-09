@@ -19,6 +19,7 @@ export class LetterShuffleComponent implements OnInit {
     item!: LetterShuffleItem;
     letters!: string[];
     answer!: string[];
+    image_src: string = "";
     question_audio!: HTMLAudioElement;
     description_audio!: HTMLAudioElement;
 
@@ -42,15 +43,19 @@ export class LetterShuffleComponent implements OnInit {
     }
 
     startItem() {
+        this.image_src = '';
         this.item = this.set.items[this.itemIndex];
+        this.image_src = '/api/images/' + this.item.question_image_name;
         this.letters = this.item.question.split('');
         for (let i = this.letters.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [this.letters[i], this.letters[j]] = [this.letters[j], this.letters[i]];
         }
         this.answer = [];
-        this.question_audio = new Audio('/api/audio-files/' + this.item.question_audio_file_name);
-        this.description_audio = new Audio('/api/audio-files/' + this.item.description_audio_file_name);
+        setTimeout(() => {
+            this.question_audio = new Audio('/api/audio-files/' + this.item.question_audio_file_name);
+            this.description_audio = new Audio('/api/audio-files/' + this.item.description_audio_file_name);
+        }, 500);
     }
 
 
@@ -81,6 +86,8 @@ export class LetterShuffleComponent implements OnInit {
                 }
             })
             .afterClosed().subscribe(result => {
+                this.question_audio?.pause();
+                this.description_audio?.pause();
                 this.itemIndex++;
                 if (this.itemIndex >= this.set.items.length)
                     this.dialog.open(SimpleDialogComponent, {
