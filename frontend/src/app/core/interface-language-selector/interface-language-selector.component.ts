@@ -37,10 +37,7 @@ export class InterfaceLanguageSelectorComponent {
 
     selectLanguage(code: string): void {
         this.languageService.setInterfaceLanguage(code);
-        this.navigateAfterSelection();
-    }
-
-    private navigateAfterSelection(): void {
-        this.router.navigate(['/']);
+        const basePath = location.pathname.replace(/^\/(pl|en|de)/, '');
+        location.href = `/${code}/`;
     }
 }
