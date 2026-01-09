@@ -1,9 +1,11 @@
+import logging
+
 from ampf.base import KeyNotExistsException
-from ampf.fastapi import StaticFileResponse
 from dependencies import lifespan
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from shared.localized_static_files import LocalizedStaticFiles
 from log_config import setup_logging
 from routers import (
     audio_files,
@@ -12,6 +14,9 @@ from routers import (
     letter_shuffles,
 )
 from version import __version__
+
+_log = logging.getLogger(__name__)
+
 
 load_dotenv()
 setup_logging()
@@ -35,36 +40,10 @@ async def ping() -> None:
 
 
 @app.get("/{full_path:path}")
-async def catch_all(full_path: str):
-    """
-    Catch-all route to serve static files for the Angular frontend.
-
-    This route should be placed at the end of all other API routes.
-    It checks if the path starts with "api/" to distinguish between
-    frontend routes and backend API routes.
-
-    Args:
-        full_path: The full path requested by the client.
-
-    Returns:
-        A StaticFileResponse for frontend assets or raises HTTPException for API paths not found.
-    """
-    if not full_path.startswith("api/"):
-        return StaticFileResponse("static/browser", full_path)
-    else:
-        raise HTTPException(status_code=404, detail="Not found")
+async def catch_all(request: Request):
+    return LocalizedStaticFiles("static/browser").get_static_page(request)
 
 
 @app.exception_handler(KeyNotExistsException)
 async def exception_not_found_callback(request: Request, exc: KeyNotExistsException):
-    """
-    Exception handler for KeyNotExistsException.
-
-    Returns a 404 Not Found JSON response when a requested resource (e.g., chat session)
-    does not exist.
-
-    Args:
-        request: The incoming FastAPI request.
-        exc: The KeyNotExistsException that was raised.
-    """
     return JSONResponse({"detail": "Not found"}, status_code=404)
