@@ -56,11 +56,14 @@ def get_audio_file_service(app_state: AppStateDep, tts_service: GttsServiceDep) 
 AudioFileServiceDep = Annotated[AudioFileService, Depends(get_audio_file_service)]
 
 
-def get_image_gen_service() -> BaseImageGenService:
-    return OpenAIImageGenService()
+def get_image_gen_service() -> BaseImageGenService | None:
+    try:
+        return OpenAIImageGenService()
+    except Exception:
+        return None
 
 
-ImageGenServiceDep = Annotated[BaseImageGenService, Depends(get_image_gen_service)]
+ImageGenServiceDep = Annotated[BaseImageGenService | None, Depends(get_image_gen_service)]
 
 
 def get_image_service(app_state: AppStateDep, image_gen_service: ImageGenServiceDep) -> ImageService:
