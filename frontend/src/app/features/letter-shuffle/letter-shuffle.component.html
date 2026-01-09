@@ -4,7 +4,7 @@
     <div>{{ set.description }}</div>
     }
     @if (item) {
-    <img [src]="`/api/images/${item.question_image_name}`" height="640" width="640" />
+    <img [src]="image_src" height="640" width="640" />
     <div id="description">{{ item.description }}</div>
     <div id="question">
         @for(letter of answer; track $index; let i = $index) {
