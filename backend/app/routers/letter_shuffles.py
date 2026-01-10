@@ -12,6 +12,7 @@ from features.letter_shuffles.letter_shuffle_model import (
     LetterShuffleSetUpdate,
 )
 from features.letter_shuffles.letter_shuffle_service import LetterShuffleService
+from routers import letter_shuffles_translations
 
 router = APIRouter(tags=["Letter shuffles"])
 ITEM_PATH = "/{id}"
@@ -52,3 +53,5 @@ async def patch(service: LetterShuffleServiceDep, id: UUID, value_patch: LetterS
 @router.delete(ITEM_PATH)
 async def delete(service: LetterShuffleServiceDep, id: UUID):
     await service.delete(id)
+
+router.include_router(letter_shuffles_translations.router, prefix=f"{ITEM_PATH}/translations")
