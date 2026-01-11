@@ -18,8 +18,8 @@ router = APIRouter(tags=["Letter shuffles"])
 ITEM_PATH = "/{id}"
 
 
-def get_letter_shuffle_service(app_state: AppStateDep, audio_file_service: AudioFileServiceDep) -> LetterShuffleService:
-    return LetterShuffleService(app_state.factory, audio_file_service)
+def get_letter_shuffle_service(app_state: AppStateDep, audio_file_service: AudioFileServiceDep, target_language_code: str) -> LetterShuffleService:
+    return LetterShuffleService(app_state.factory, audio_file_service, target_language_code)
 
 
 LetterShuffleServiceDep = Annotated[LetterShuffleService, Depends(get_letter_shuffle_service)]

@@ -4,42 +4,48 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-class LetterShuffleSetTranslationHeader(BaseModel):
-    id: UUID
-    language: str
-    title: str
-    description: str
-    created_at: datetime
-    updated_at: datetime
+from .letter_shuffle_model import LetterShuffleItem, LetterShuffleSetHeader
 
-class LetterShuffleItemTranslation(BaseModel):
-    question: str
-    description: str
-    question_audio_file_name: Optional[str] = None
-    description_audio_file_name: Optional[str] = None
+
+class LetterShuffleSetTranslationHeader(LetterShuffleSetHeader):
+    native_language_code: Optional[str] = None
+    native_title: str
+    native_description: str
+
+
+class LetterShuffleItemTranslation(LetterShuffleItem):
+    native_phrase: str
+    native_description: str
+    native_phrase_audio_file_name: Optional[str] = None
+    native_description_audio_file_name: Optional[str] = None
 
 
 class LetterShuffleSetTranslationCreate(BaseModel):
     id: UUID
-    language: str
-    title: str
-    description: str
+    target_language_code: str
+    target_title: str
+    target_description: str
+    native_language_code: str
+    native_title: str
+    native_description: str
     items: List[LetterShuffleItemTranslation]
 
 
 class LetterShuffleSetTranslationUpdate(BaseModel):
-    id: UUID
-    language: str
-    title: str
-    description: str
+    native_title: str
+    native_description: str
     items: List[LetterShuffleItemTranslation]
+
 
 
 class LetterShuffleSetTranslation(BaseModel):
     id: UUID
-    language: str
-    title: str
-    description: str
+    target_language_code: str
+    target_title: str
+    target_description: str
+    native_language_code: str
+    native_title: str
+    native_description: str
     created_at: datetime
     updated_at: datetime
     items: List[LetterShuffleItemTranslation]
@@ -53,7 +59,7 @@ class LetterShuffleSetTranslation(BaseModel):
         )
 
     def update(self, value: LetterShuffleSetTranslationUpdate) -> None:
-        self.title = value.title
-        self.description = value.description
+        self.native_title = value.native_title
+        self.native_description = value.native_description
         self.items = value.items
         self.updated_at = datetime.now()

@@ -7,41 +7,44 @@ from pydantic import BaseModel
 
 class LetterShuffleSetHeader(BaseModel):
     id: UUID
-    title: str
-    description: str
+    target_language_code: str
+    target_title: str
+    target_description: str
     created_at: datetime
     updated_at: datetime
 
 
 class LetterShuffleItem(BaseModel):
-    question: str
-    description: str
-    question_audio_file_name: Optional[str] = None
-    description_audio_file_name: Optional[str] = None
-    question_image_name: Optional[str] = None
+    target_phrase: str
+    target_description: str
+    target_phrase_audio_file_name: Optional[str] = None
+    target_description_audio_file_name: Optional[str] = None
+    phrase_image_name: Optional[str] = None
 
 
 class LetterShuffleSetCreate(BaseModel):
-    title: str
-    description: str
+    target_language_code: str
+    target_title: str
+    target_description: str
     items: List[LetterShuffleItem]
 
 
 class LetterShuffleSetUpdate(BaseModel):
-    title: str
-    description: str
+    target_title: str
+    target_description: str
     items: List[LetterShuffleItem]
 
 
 class LetterShuffleSetPatch(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
+    target_title: Optional[str] = None
+    target_description: Optional[str] = None
 
 
 class LetterShuffleSet(BaseModel):
     id: UUID
-    title: str
-    description: str
+    target_language_code: str
+    target_title: str
+    target_description: str
     created_at: datetime
     updated_at: datetime
     items: List[LetterShuffleItem]
@@ -56,8 +59,8 @@ class LetterShuffleSet(BaseModel):
         )
 
     def update(self, value: LetterShuffleSetUpdate) -> None:
-        self.title = value.title
-        self.description = value.description
+        self.target_title = value.target_title
+        self.target_description = value.target_description
         self.items = value.items
         self.updated_at = datetime.now()
 

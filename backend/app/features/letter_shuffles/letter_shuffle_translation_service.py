@@ -11,11 +11,12 @@ from shared.audio_files.audio_file_service import AudioFileService
 
 
 class LetterShuffleTranslationService:
-    def __init__(self, factory: BaseAsyncFactory, audio_file_service: AudioFileService, id: UUID):
-        self.storage = factory.create_storage(
-            "letter-shuffles-translations", LetterShuffleSetTranslation, key=lambda x: f"{x.id}-{x.language}"
+    def __init__(self, factory: BaseAsyncFactory, audio_file_service: AudioFileService, target_language_code: str, id: UUID):
+        self.storage = factory.create_storage(f"target-languages/{target_language_code}/letter-shuffles/{id}/"
+            , LetterShuffleSetTranslation, key="native_language_code"
         )
         self.audio_file_service = audio_file_service
+        self.target_language_code = target_language_code
         self.id = id
 
     async def get_all(self):
@@ -27,34 +28,34 @@ class LetterShuffleTranslationService:
 
         tasks = []
         for item in value.items:
-            tasks.append(self.audio_file_service.generate_and_upload(item.question, value.language))
-            tasks.append(self.audio_file_service.generate_and_upload(item.description, value.language))
+            tasks.append(self.audio_file_service.generate_and_upload(item.native_phrase, value.native_language_code))
+            tasks.append(self.audio_file_service.generate_and_upload(item.native_description, value.native_language_code))
 
         results = await asyncio.gather(*tasks)
 
         idx = 0
         for item in value.items:
-            item.question_audio_file_name = results[idx]
-            item.description_audio_file_name = results[idx + 1]
+            item.native_phrase_audio_file_name = results[idx]
+            item.native_description_audio_file_name = results[idx + 1]
             idx += 2
 
         await self.storage.create(value)
         return value
 
     async def get(self, code: str) -> LetterShuffleSetTranslation:
-        return await self.storage.get(f"{self.id}-{code}")
+        return await self.storage.get(code)
 
     async def put(self, code: str, value_update: LetterShuffleSetTranslationUpdate) -> LetterShuffleSetTranslation:
-        value = await self.storage.get(f"{self.id}-{code}")
+        value = await self.storage.get(code)
         value.update(value_update)
-        await self.storage.put(f"{self.id}-{code}", value)
+        await self.storage.put(code, value)
         return value
 
     async def delete(self, code: str) -> None:
-        value = await self.storage.get(f"{self.id}-{code}")
+        value = await self.storage.get(code)
         for i in value.items:
-            if i.question_audio_file_name:
-                self.audio_file_service.delete(i.question_audio_file_name)
-            if i.description_audio_file_name:
-                self.audio_file_service.delete(i.description_audio_file_name)
-        await self.storage.delete(f"{self.id}-{code}")
+            if i.native_phrase_audio_file_name:
+                self.audio_file_service.delete(i.native_phrase_audio_file_name)
+            if i.native_description_audio_file_name:
+                self.audio_file_service.delete(i.native_description_audio_file_name)
+        await self.storage.delete(code)
