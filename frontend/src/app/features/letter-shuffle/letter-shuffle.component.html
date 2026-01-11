@@ -1,10 +1,16 @@
 <div class="vertically-centered">
     @if(set) {
-    <div id="title">{{ set.title }}</div>
-    <div>{{ set.description }}</div>
-    <button class="hint" mat-icon-button (click)="showNextHint()">
-        <mat-icon>help</mat-icon>
-    </button>
+    <div id="title">
+        {{ native ? set.native_title : set.target_title }}
+        <button class="hint" mat-icon-button (click)="showNextHint()" matTooltip="Show next hint">
+            <mat-icon>help</mat-icon>
+        </button>
+        <button class="language-switch" mat-icon-button (click)="native = !native" 
+            matTooltip="Switch language">
+            <mat-icon>{{ native ? 'language' : 'translate' }}</mat-icon>
+        </button>
+    </div>
+    <div>{{ native ? set.native_description : set.target_description }}</div>
     }
     @if (item) {
     @if(hintIndex > 0) {
@@ -13,16 +19,15 @@
     <img [src]="" height="640" width="640" />
     }
     @if(hintIndex > 1) {
-    <div id="description">{{ item.description }}</div>
+    <div id="description">{{ native ? item.native_description : item.target_description }}</div>
     }
     <div id="question">
         @for(letter of answer; track $index; let i = $index) {
-        @if (i < hintIndex-2) { 
-        <button type="button" class="letter-box" disabled>{{letter}}</button>
-        } @else {
-        <button type="button" class="letter-box" (click)="onClickAnswer(i)">{{letter}}</button>
-        }
-        }
+        @if (i < hintIndex-2) { <button type="button" class="letter-box" disabled>{{letter}}</button>
+            } @else {
+            <button type="button" class="letter-box" (click)="onClickAnswer(i)">{{letter}}</button>
+            }
+            }
     </div>
     <div id="letters">
         @for(letter of letters; track $index; let i = $index) {
