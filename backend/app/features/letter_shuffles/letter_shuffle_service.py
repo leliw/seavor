@@ -29,8 +29,8 @@ class LetterShuffleService:
 
         tasks = []
         for item in value.items:
-            tasks.append(self.audio_file_service.generate_and_upload(item.target_phrase, "en"))
-            tasks.append(self.audio_file_service.generate_and_upload(item.target_description, "en"))
+            tasks.append(self.audio_file_service.generate_and_upload(item.target_phrase, self.target_language_code))
+            tasks.append(self.audio_file_service.generate_and_upload(item.target_description, self.target_language_code))
         
         results = await asyncio.gather(*tasks)
         

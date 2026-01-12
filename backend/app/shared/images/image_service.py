@@ -21,15 +21,15 @@ class ImageService:
     def delete(self, name: str):
         return self.storage.delete(name)
 
-    async def generate_and_upload(self, text: str, language: str) -> str:
+    async def generate_and_upload(self, text: str, language_code: str) -> str:
         if not self.image_gen_service:
             raise Exception("No image generation service")
         async for blob_create in self.image_gen_service.generate_async(text):
-            name = uuid5(NAMESPACE_DNS, f"{language}-{text}").hex
+            name = uuid5(NAMESPACE_DNS, f"{language_code}-{text}").hex
             blob = ImageBlob(
                 name=name,
                 data=blob_create.data,
-                metadata=ImageMetadata(text=text, language=language),
+                metadata=ImageMetadata(text=text, language=language_code),
                 content_type=blob_create.content_type,
             )
             await self.upload(blob)
