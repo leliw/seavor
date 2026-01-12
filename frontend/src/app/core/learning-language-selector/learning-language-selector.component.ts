@@ -19,6 +19,9 @@ export class LearningLanguageSelectorComponent {
     learningLanguages: Language[] = [
         { code: 'en', nativeName: 'English', flag: '🇬🇧' },
         { code: 'es', nativeName: 'Español', flag: '🇪🇸' },
+        { code: 'fr', nativeName: 'Français', flag: '🇫🇷' },
+        { code: 'de', nativeName: 'Deutsch', flag: '🇩🇪' },
+
     ];
 
     constructor(

@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { LanguageService } from '../../core/language.service';
 
 export interface LetterShuffleSetHeader {
   id: string;
@@ -37,17 +38,21 @@ export interface LetterShuffleItem {
   providedIn: 'root'
 })
 export class LetterShuffleService {
-  private endpoint = "/api/target-languages/en/letter-shuffles"
+  constructor(private httpClient: HttpClient, private languageService: LanguageService) { }
 
-  constructor(private httpClient: HttpClient) { }
+  getEndpoint(): string {
+    const targetLanguage = this.languageService.getLearningLanguage();
+    return `/api/target-languages/${targetLanguage}/letter-shuffles`;
+  }
 
   getAll(): Observable<LetterShuffleSetHeader[]> {
-    return this.httpClient.get<LetterShuffleSetHeader[]>(this.endpoint);
+    return this.httpClient.get<LetterShuffleSetHeader[]>(this.getEndpoint());
   }
 
   get(uid: string): Observable<LetterShuffleSet> {
+    const nativeLanguage = this.languageService.getInterfaceLanguage();
     return this.httpClient.get<LetterShuffleSet>(
-      `${this.endpoint}/${uid}/translations/pl`
+      `${this.getEndpoint()}/${uid}/translations/${nativeLanguage}`
     );
   }
 }
