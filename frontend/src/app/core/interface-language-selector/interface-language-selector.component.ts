@@ -20,14 +20,14 @@ export class InterfaceLanguageSelectorComponent {
     interfaceLanguages: Language[] = [
         { code: 'en', nativeName: 'English', flag: '🇬🇧' },
         { code: 'pl', nativeName: 'Polski', flag: '🇵🇱' },
-        { code: 'es', nativeName: 'Español', flag: '🇪🇸' },
-        { code: 'fr', nativeName: 'Français', flag: '🇫🇷' },
-        { code: 'de', nativeName: 'Deutsch', flag: '🇩🇪' },
-        { code: 'it', nativeName: 'Italiano', flag: '🇮🇹' },
-        { code: 'uk', nativeName: 'Українська', flag: '🇺🇦' },
-        { code: 'ru', nativeName: 'Путин, иди на xyй!', flag: '🇷🇺' },
-        { code: 'zh', nativeName: '中文', flag: '🇨🇳' },
-        { code: 'ar', nativeName: 'العربية', flag: '🇸🇦' },
+        // { code: 'es', nativeName: 'Español', flag: '🇪🇸' },
+        // { code: 'fr', nativeName: 'Français', flag: '🇫🇷' },
+        // { code: 'de', nativeName: 'Deutsch', flag: '🇩🇪' },
+        // { code: 'it', nativeName: 'Italiano', flag: '🇮🇹' },
+        // { code: 'uk', nativeName: 'Українська', flag: '🇺🇦' },
+        // { code: 'ru', nativeName: 'Путин, иди на xyй!', flag: '🇷🇺' },
+        // { code: 'zh', nativeName: '中文', flag: '🇨🇳' },
+        // { code: 'ar', nativeName: 'العربية', flag: '🇸🇦' },
     ];
 
     constructor(

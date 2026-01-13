@@ -2,9 +2,9 @@ import { Component, inject, OnInit } from '@angular/core';
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { SimpleDialogComponent } from '../../shared/simple-dialog/simple-dialog.component';
 import { LetterShuffleItem, LetterShuffleService, LetterShuffleSet, LetterShuffleSetHeader } from './letter-shuffle.service';
-
 
 @Component({
     selector: 'app-letter-shuffle',
@@ -12,6 +12,7 @@ import { LetterShuffleItem, LetterShuffleService, LetterShuffleSet, LetterShuffl
         MatDialogModule,
         MatButtonModule,
         MatIconModule,
+        MatTooltipModule,
     ],
     templateUrl: './letter-shuffle.component.html',
     styleUrl: './letter-shuffle.component.scss'
@@ -29,6 +30,7 @@ export class LetterShuffleComponent implements OnInit {
     question_audio!: HTMLAudioElement;
     description_audio!: HTMLAudioElement;
     hintIndex = 0;
+    native = false;
 
 
     constructor(private service: LetterShuffleService) {
@@ -53,9 +55,9 @@ export class LetterShuffleComponent implements OnInit {
         this.hintIndex = 0;
         this.image_src = '';
         this.item = this.set.items[this.itemIndex];
-        this.image_src = '/api/images/' + this.item.question_image_name;
-        this.question = this.item.question.split('');
-        this.description = this.item.description;
+        this.image_src = '/api/images/' + this.item.phrase_image_name;
+        this.question = this.item.target_phrase.split('');
+        this.description = this.item.target_description;
         for (let i = 0; i < this.question.length; i++) {
             this.question[i] = this.question[i].toLocaleLowerCase();
             if (this.question[i] == ' ') {
@@ -69,8 +71,8 @@ export class LetterShuffleComponent implements OnInit {
         }
         this.answer = [];
         setTimeout(() => {
-            this.question_audio = new Audio('/api/audio-files/' + this.item.question_audio_file_name);
-            this.description_audio = new Audio('/api/audio-files/' + this.item.description_audio_file_name);
+            this.question_audio = new Audio('/api/audio-files/' + this.item.target_phrase_audio_file_name);
+            this.description_audio = new Audio('/api/audio-files/' + this.item.target_description_audio_file_name);
         }, 500);
     }
 
@@ -102,7 +104,7 @@ export class LetterShuffleComponent implements OnInit {
             .open(SimpleDialogComponent, {
                 data: {
                     title: $localize`Correct`,
-                    message: `<b>${this.item.question}</b> - ${this.item.description}`,
+                    message: `<b>${this.item.target_phrase}</b> - ${this.item.target_description}<hr/><b>${this.item.native_phrase}</b> - ${this.item.native_description}`,
                 }
             })
             .afterClosed().subscribe(result => {

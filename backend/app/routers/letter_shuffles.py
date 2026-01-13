@@ -12,13 +12,14 @@ from features.letter_shuffles.letter_shuffle_model import (
     LetterShuffleSetUpdate,
 )
 from features.letter_shuffles.letter_shuffle_service import LetterShuffleService
+from routers import letter_shuffles_translations
 
 router = APIRouter(tags=["Letter shuffles"])
 ITEM_PATH = "/{id}"
 
 
-def get_letter_shuffle_service(app_state: AppStateDep, audio_file_service: AudioFileServiceDep) -> LetterShuffleService:
-    return LetterShuffleService(app_state.factory, audio_file_service)
+def get_letter_shuffle_service(app_state: AppStateDep, audio_file_service: AudioFileServiceDep, target_language_code: str) -> LetterShuffleService:
+    return LetterShuffleService(app_state.factory, audio_file_service, target_language_code)
 
 
 LetterShuffleServiceDep = Annotated[LetterShuffleService, Depends(get_letter_shuffle_service)]
@@ -52,3 +53,5 @@ async def patch(service: LetterShuffleServiceDep, id: UUID, value_patch: LetterS
 @router.delete(ITEM_PATH)
 async def delete(service: LetterShuffleServiceDep, id: UUID):
     await service.delete(id)
+
+router.include_router(letter_shuffles_translations.router, prefix=f"{ITEM_PATH}/translations")

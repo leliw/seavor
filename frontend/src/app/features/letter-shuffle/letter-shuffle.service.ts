@@ -1,47 +1,58 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { LanguageService } from '../../core/language.service';
 
 export interface LetterShuffleSetHeader {
   id: string;
-  title: string;
-  description: string;
+  target_title: string;
+  target_description: string;
   created_at: string;
   updated_at: string;
 }
 
 export interface LetterShuffleSet {
   id: string;
-  title: string;
-  description: string;
+  target_title: string;
+  target_description: string;
+  native_title: string;
+  native_description: string;
   created_at: string;
   updated_at: string;
   items: LetterShuffleItem[];
 }
 
 export interface LetterShuffleItem {
-  question: string;
-  description: string;
-  question_audio_file_name: string;
-  description_audio_file_name: string;
-  question_image_name?: string;
+  target_phrase: string;
+  target_description: string;
+  target_phrase_audio_file_name: string;
+  target_description_audio_file_name: string;
+  phrase_image_name?: string;
+  native_phrase: string;
+  native_description: string;
+  native_phrase_audio_file_name: string;
+  native_description_audio_file_name: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class LetterShuffleService {
-  private endpoint = "/api/letter-shuffles"
+  constructor(private httpClient: HttpClient, private languageService: LanguageService) { }
 
-  constructor(private httpClient: HttpClient) { }
+  getEndpoint(): string {
+    const targetLanguage = this.languageService.getLearningLanguage();
+    return `/api/target-languages/${targetLanguage}/letter-shuffles`;
+  }
 
   getAll(): Observable<LetterShuffleSetHeader[]> {
-    return this.httpClient.get<LetterShuffleSetHeader[]>(this.endpoint);
+    return this.httpClient.get<LetterShuffleSetHeader[]>(this.getEndpoint());
   }
 
   get(uid: string): Observable<LetterShuffleSet> {
+    const nativeLanguage = this.languageService.getInterfaceLanguage();
     return this.httpClient.get<LetterShuffleSet>(
-      `${this.endpoint}/${uid}`
+      `${this.getEndpoint()}/${uid}/translations/${nativeLanguage}`
     );
   }
 }
