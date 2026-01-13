@@ -2,11 +2,11 @@
     @if(set) {
     <div id="title">
         {{ native ? set.native_title : set.target_title }}
-        <button class="hint" mat-icon-button (click)="showNextHint()" matTooltip="Show next hint">
+        <button class="hint" mat-icon-button (click)="showNextHint()" i18n-matTooltip matTooltip="Show next hint">
             <mat-icon>help</mat-icon>
         </button>
         <button class="language-switch" mat-icon-button (click)="native = !native" 
-            matTooltip="Switch language">
+            i18n-matTooltip matTooltip="Switch language">
             <mat-icon>{{ native ? 'language' : 'translate' }}</mat-icon>
         </button>
     </div>
