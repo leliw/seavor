@@ -9,39 +9,67 @@
           <context context-type="linenumber">3,4</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="7757870399692369982" datatype="html">
+        <source>Guess the word or phrase</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/letter-shuffle/letter-shuffle.component.html</context>
+          <context context-type="linenumber">14,15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="443741147477790010" datatype="html">
+        <source>Click the letters one by one to form the answer</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/letter-shuffle/letter-shuffle.component.html</context>
+          <context context-type="linenumber">15,16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1121468336400291525" datatype="html">
+        <source>To get the <x id="START_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;i&gt;"/>next<x id="CLOSE_ITALIC_TEXT" ctype="x-i" equiv-text="&lt;/i&gt;"/> hint, click &quot;<x id="START_BOLD_TEXT" ctype="x-b" equiv-text="&lt;b&gt;"/>?<x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="&lt;/b&gt;"/>&quot;</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/letter-shuffle/letter-shuffle.component.html</context>
+          <context context-type="linenumber">16,17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="348145788339645664" datatype="html">
+        <source>Have fun!</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/letter-shuffle/letter-shuffle.component.html</context>
+          <context context-type="linenumber">17,18</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="2747442768669907105" datatype="html">
         <source>Show next hint</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/letter-shuffle/letter-shuffle.component.html</context>
-          <context context-type="linenumber">5,6</context>
+          <context context-type="linenumber">33,34</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8952554382316647903" datatype="html">
         <source>Switch language</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/letter-shuffle/letter-shuffle.component.html</context>
-          <context context-type="linenumber">9,10</context>
+          <context context-type="linenumber">37</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7841430672042223267" datatype="html">
         <source>Correct</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/letter-shuffle/letter-shuffle.component.ts</context>
-          <context context-type="linenumber">106</context>
+          <context context-type="linenumber">108</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3762527362373672599" datatype="html">
         <source>Congratulations!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/letter-shuffle/letter-shuffle.component.ts</context>
-          <context context-type="linenumber">117</context>
+          <context context-type="linenumber">119</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4526265934344329970" datatype="html">
         <source>That&apos;s all!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/letter-shuffle/letter-shuffle.component.ts</context>
-          <context context-type="linenumber">118</context>
+          <context context-type="linenumber">120</context>
         </context-group>
       </trans-unit>
     </body>

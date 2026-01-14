@@ -8,7 +8,15 @@
             <div id="title">
                 {{ native ? set.native_title : set.target_title }}
             </div>
-            <div>{{ native ? set.native_description : set.target_description }}</div>
+            <div>{{ native ? set.native_description : set.target_description }}
+
+                <ol>
+                    <li i18n>Guess the word or phrase</li>
+                    <li i18n>Click the letters one by one to form the answer</li>
+                    <li i18n>To get the <i>next</i> hint, click "<b>?</b>"</li>
+                    <li i18n>Have fun!</li>
+                </ol>
+            </div>
             } @else {
             <img id="hint-image" [ngSrc]="image_src" width="800" height="800"
                 [sizes]="'(min-width: 800px) 100dvw, 50dvw'" />
