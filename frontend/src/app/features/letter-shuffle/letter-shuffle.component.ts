@@ -1,4 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
+import {NgOptimizedImage} from '@angular/common';
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,6 +10,7 @@ import { LetterShuffleItem, LetterShuffleService, LetterShuffleSet, LetterShuffl
 @Component({
     selector: 'app-letter-shuffle',
     imports: [
+        NgOptimizedImage,
         MatDialogModule,
         MatButtonModule,
         MatIconModule,

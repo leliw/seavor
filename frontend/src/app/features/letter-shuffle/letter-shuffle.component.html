@@ -1,38 +1,49 @@
-<div class="vertically-centered">
-    @if(set) {
-    <div id="title">
-        {{ native ? set.native_title : set.target_title }}
-        <button class="hint" mat-icon-button (click)="showNextHint()" i18n-matTooltip matTooltip="Show next hint">
-            <mat-icon>help</mat-icon>
-        </button>
-        <button class="language-switch" mat-icon-button (click)="native = !native" 
-            i18n-matTooltip matTooltip="Switch language">
-            <mat-icon>{{ native ? 'language' : 'translate' }}</mat-icon>
-        </button>
-    </div>
-    <div>{{ native ? set.native_description : set.target_description }}</div>
-    }
-    @if (item) {
-    @if(hintIndex > 0) {
-    <img [src]="image_src" height="640" width="640" />
-    } @else {
-    <img [src]="" height="640" width="640" />
-    }
-    @if(hintIndex > 1) {
-    <div id="description">{{ native ? item.native_description : item.target_description }}</div>
-    }
-    <div id="question">
-        @for(letter of answer; track $index; let i = $index) {
-        @if (i < hintIndex-2) { <button type="button" class="letter-box" disabled>{{letter}}</button>
+<div class="layout-container">
+    <div class="part left">
+        @if(set) {
+        }
+        @if (item) {
+        <div class="vertically-centered">
+            @if(hintIndex == 0) {
+            <div id="title">
+                {{ native ? set.native_title : set.target_title }}
+            </div>
+            <div>{{ native ? set.native_description : set.target_description }}</div>
             } @else {
-            <button type="button" class="letter-box" (click)="onClickAnswer(i)">{{letter}}</button>
+            <img id="hint-image" [ngSrc]="image_src" width="800" height="800"
+                [sizes]="'(min-width: 800px) 100dvw, 50dvw'" />
             }
-            }
-    </div>
-    <div id="letters">
-        @for(letter of letters; track $index; let i = $index) {
-        <button type="button" class="letter-box" (click)="onClickLetter(i)">{{letter}}</button>
+        </div>
+        @if(hintIndex > 1) {
+        <div id="description">{{ native ? item.native_description : item.target_description }}</div>
+        }
         }
     </div>
-    }
+    <div class="part right vertically-centered">
+        @if (item) {
+        <div class="action-buttons">
+            <button mat-fab (click)="showNextHint()" i18n-matTooltip matTooltip="Show next hint">
+                <mat-icon>help</mat-icon>
+            </button>
+            <button class="language-switch" mat-fab (click)="native = !native" i18n-matTooltip
+                matTooltip="Switch language" [disabled]="hintIndex==1">
+                <mat-icon>{{ native ? 'language' : 'translate' }}</mat-icon>
+            </button>
+        </div>
+        <div id="question">
+            @for(letter of answer; track $index; let i = $index) {
+            @if (i < hintIndex-2) { <button type="button" class="letter-box" disabled>{{letter}}</button>
+                } @else {
+                <button type="button" class="letter-box" (click)="onClickAnswer(i)">{{letter}}</button>
+                }
+                }
+        </div>
+        <div id="letters">
+            @for(letter of letters; track $index; let i = $index) {
+            <button type="button" class="letter-box" (click)="onClickLetter(i)">{{letter}}</button>
+            }
+        </div>
+        }
+
+    </div>
 </div>
