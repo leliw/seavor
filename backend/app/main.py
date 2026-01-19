@@ -1,6 +1,7 @@
 import logging
 
 from ampf.base import KeyNotExistsException
+from app_config import AppConfig
 from dependencies import lifespan
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
@@ -17,13 +18,16 @@ from version import __version__
 
 _log = logging.getLogger(__name__)
 
-
 load_dotenv()
 setup_logging()
+app_config = AppConfig()
 app = FastAPI(
     title="Seavor",
     version=__version__,
-    lifespan=lifespan(),
+    lifespan=lifespan(app_config),
+    docs_url="/docs" if not app_config.production else None,
+    redoc_url="/redoc" if not app_config.production else None,
+    openapi_url="/openapi.json" if not app_config.production else None,
 )
 
 

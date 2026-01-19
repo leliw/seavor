@@ -4,7 +4,7 @@ from typing import Annotated
 from app_config import AppConfig
 from app_state import AppState
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.concurrency import asynccontextmanager
 from integrations.gtts.gtts_service import GttsService
 from integrations.image_gen.base_image_gen_service import BaseImageGenService
@@ -71,3 +71,10 @@ def get_image_service(app_state: AppStateDep, image_gen_service: ImageGenService
 
 
 ImageServiceDep = Annotated[ImageService, Depends(get_image_service)]
+
+
+def not_production(app_state: AppStateDep) -> bool:
+    if app_state.config.production:
+        raise HTTPException(status_code=404, detail="Not found")
+    return not app_state.config.production
+

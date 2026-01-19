@@ -8,7 +8,7 @@ class AppConfig(BaseSettings):
     model_config = SettingsConfigDict(env_nested_delimiter="__")
 
     version: str = __version__
-
+    production: bool = True
     data_dir: str = "./data/"
     
     gcp_root_storage: Optional[str] = None

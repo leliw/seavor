@@ -15,6 +15,7 @@ from main import app as main_app
 def config(tmp_path) -> AppConfig:
     config = AppConfig(
         data_dir=str(tmp_path),
+        production=False,
     )
     return config
 

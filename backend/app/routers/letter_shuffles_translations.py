@@ -2,7 +2,7 @@ from typing import Annotated, List
 from uuid import UUID
 
 from ampf.fastapi import JsonStreamingResponse
-from dependencies import AppStateDep, AudioFileServiceDep
+from dependencies import AppStateDep, AudioFileServiceDep, not_production
 from fastapi import APIRouter, Depends
 from features.letter_shuffles.letter_shuffle_translation_model import (
     LetterShuffleSetTranslation,
@@ -32,7 +32,7 @@ async def get_all(service: LetterShuffleTranslationServiceDep):
     return JsonStreamingResponse(service.get_all())
 
 
-@router.post("")
+@router.post("", dependencies=[Depends(not_production)])
 async def post(
     service: LetterShuffleTranslationServiceDep, value_create: LetterShuffleSetTranslationCreate
 ) -> LetterShuffleSetTranslation:
@@ -44,7 +44,7 @@ async def get(service: LetterShuffleTranslationServiceDep, native_language_code:
     return await service.get(native_language_code)
 
 
-@router.put(ITEM_PATH)
+@router.put(ITEM_PATH, dependencies=[Depends(not_production)])
 async def put(
     service: LetterShuffleTranslationServiceDep,
     native_language_code: str,
@@ -53,6 +53,6 @@ async def put(
     return await service.put(native_language_code, value_update)
 
 
-@router.delete(ITEM_PATH)
+@router.delete(ITEM_PATH, dependencies=[Depends(not_production)])
 async def delete(service: LetterShuffleTranslationServiceDep, native_language_code: str):
     await service.delete(native_language_code)
