@@ -1,9 +1,8 @@
 from typing import Optional
-from ampf.base import Blob
-from pydantic import BaseModel
+from ampf.base import Blob, BaseBlobMetadata
 
 
-class ImageMetadata(BaseModel):
+class ImageMetadata(BaseBlobMetadata):
     text: str
     description: Optional[str] = None
     language: Optional[str] = None

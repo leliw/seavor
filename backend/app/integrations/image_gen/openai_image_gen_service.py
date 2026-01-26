@@ -27,10 +27,9 @@ class OpenAIImageGenService(BaseImageGenService):
             with httpx.Client() as client:
                 response = client.get(result.data[0].url)
 
-            yield BlobCreate(
-                # name=response.headers.get("Content-Disposition").split("filename=")[1],
+            yield BlobCreate.from_content(
                 content_type=response.headers.get("Content-Type"),
-                data=response.content,
+                content=response.content,
             )
 
     async def generate_async(self, prompt: str) -> AsyncIterator[BlobCreate]:
@@ -44,8 +43,7 @@ class OpenAIImageGenService(BaseImageGenService):
             async with httpx.AsyncClient() as client:
                 response = await client.get(result.data[0].url)
 
-            yield BlobCreate(
-                # name=response.headers.get("Content-Disposition").split("filename=")[1],
+            yield BlobCreate.from_content(
                 content_type=response.headers.get("Content-Type"),
-                data=response.content,
+                content=response.content,
             )

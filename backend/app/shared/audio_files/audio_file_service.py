@@ -23,7 +23,7 @@ class AudioFileService:
         audio = await self.tts_service.text_to_speech_async(text, language)
         name = uuid5(NAMESPACE_DNS, f"{language}-{text}").hex
         blob = AudioFileBlob(
-            name=name, data=audio, metadata=AudioFileMetadata(text=text, language=language), content_type="audio/mpeg"
+            name=name, data=audio, metadata=AudioFileMetadata(text=text, language=language, content_type="audio/mpeg")
         )
         await self.upload(blob)
         return name

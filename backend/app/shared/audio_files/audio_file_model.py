@@ -1,8 +1,7 @@
-from ampf.base import Blob
-from pydantic import BaseModel
+from ampf.base import BaseBlobMetadata, Blob
 
 
-class AudioFileMetadata(BaseModel):
+class AudioFileMetadata(BaseBlobMetadata):
     text: str
     language: str
 

@@ -10,7 +10,7 @@ async def test_get_images(factory: BaseAsyncFactory, client: ApiTestClient):
     # Given: A stored audio file
     service = ImageService(factory, ImageGenServiceMock())
     image_name = await service.generate_and_upload("Hello world!", "en")
-    # When: Download the audio file
+    # When: Download the image file
     ret = client.get(f"/api/images/{image_name}", 200)
     # Then: It is downloaded
     assert ret

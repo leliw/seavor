@@ -28,9 +28,8 @@ class ImageService:
             name = uuid5(NAMESPACE_DNS, f"{language_code}-{text}").hex
             blob = ImageBlob(
                 name=name,
-                data=blob_create.data,
-                metadata=ImageMetadata(text=text, language=language_code),
-                content_type=blob_create.content_type,
+                content=blob_create.content,
+                metadata=ImageMetadata(text=text, language=language_code, content_type=blob_create.metadata.content_type),
             )
             await self.upload(blob)
             return name

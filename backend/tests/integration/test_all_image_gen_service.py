@@ -12,12 +12,14 @@ def service(request) -> BaseImageGenService:
 def test_generate(service: BaseImageGenService):
     blob_create = next(service.generate("Big black dog."))
 
-    assert blob_create.content_type
-    assert blob_create.data
+    assert blob_create.metadata
+    assert blob_create.metadata.content_type
+    assert blob_create.content
 
 
 @pytest.mark.asyncio
 async def test_generate_async(service: BaseImageGenService):
     async for blob_create in service.generate_async("Big black dog."):
-        assert blob_create.content_type
-        assert blob_create.data
+        assert blob_create.metadata
+        assert blob_create.metadata.content_type
+        assert blob_create.content

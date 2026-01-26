@@ -36,11 +36,10 @@ class GenAIImageGenService(BaseImageGenService):
                 continue
             if chunk.candidates[0].content.parts[0].inline_data:
                 inline_data = chunk.candidates[0].content.parts[0].inline_data
-                if inline_data.data:
-                    yield BlobCreate(
-                        name=inline_data.display_name,
+                if inline_data.data and inline_data.mime_type:
+                    yield BlobCreate.from_content(
                         content_type=inline_data.mime_type,
-                        data=inline_data.data,
+                        content=inline_data.data,
                     )
                 else:
                     _log.warning("No binary data!?")
@@ -65,11 +64,10 @@ class GenAIImageGenService(BaseImageGenService):
                 continue
             if chunk.candidates[0].content.parts[0].inline_data:
                 inline_data = chunk.candidates[0].content.parts[0].inline_data
-                if inline_data.data:
-                    yield BlobCreate(
-                        name=inline_data.display_name,
+                if inline_data.data and inline_data.mime_type:
+                    yield BlobCreate.from_content(
                         content_type=inline_data.mime_type,
-                        data=inline_data.data,
+                        content=inline_data.data,
                     )
                 else:
                     _log.warning("No binary data!?")

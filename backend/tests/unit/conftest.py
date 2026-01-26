@@ -27,7 +27,7 @@ class TtsServiceMock(GttsService):
 
 class ImageGenServiceMock(BaseImageGenService):
     async def generate_async(self, text: str) -> AsyncGenerator[BlobCreate]:
-        yield BlobCreate(content_type="image/png", data=b"yyy")
+        yield BlobCreate.from_content(b"yyy", "image/png")
 
 
 @pytest.fixture
