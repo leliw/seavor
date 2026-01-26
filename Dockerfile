@@ -10,7 +10,11 @@
    
 # ------ Stage 2: Python/FastAPI project ------
     FROM python:3.13.9-trixie
-    COPY --from=ghcr.io/astral-sh/uv:0.9.5-python3.13-trixie-slim /usr/local/bin/uv /bin/    
+    COPY --from=ghcr.io/astral-sh/uv:0.9.5-python3.13-trixie-slim /usr/local/bin/uv /bin/
+
+    RUN apt-get update && apt-get install -y \
+    libvips-dev \
+    && rm -rf /var/lib/apt/lists/*
 
     # Creates a non-root user with an explicit UID and adds permission to access the /app folder
     RUN mkdir /app
