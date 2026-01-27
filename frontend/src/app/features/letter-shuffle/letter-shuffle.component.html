@@ -3,7 +3,7 @@
         @if(set) {
         }
         @if (item) {
-        <div class="vertically-centered">
+        <div class="vertically-centered image-container">
             @if(hintIndex == 0) {
             <div id="title">
                 {{ native ? set.native_title : set.target_title }}
@@ -18,12 +18,11 @@
                 </ol>
             </div>
             } @else {
-            <img id="hint-image" [ngSrc]="image_src" width="800" height="800"
-                [sizes]="'(min-width: 800px) 100dvw, 50dvw'" />
+            <img id="hint-image" [ngSrc]="image_src" fill [ngSrcset]="'400w, 600w, 800w, 1024w'"/>
             }
         </div>
         @if(hintIndex > 1) {
-        <div id="description">{{ native ? item.native_description : item.target_description }}</div>
+        <div id="description" class="vertically-centered">{{ native ? item.native_description : item.target_description }}</div>
         }
         }
     </div>

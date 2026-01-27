@@ -53,6 +53,15 @@
     align-items: center;
 }
 
+.image-container {
+    position: relative;
+
+    img[fill] {
+        object-fit: cover;
+        object-position: center;
+    }
+}
+
 #title {
     font-size: x-large;
     width: 100%;
