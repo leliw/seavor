@@ -1,9 +1,8 @@
 <div class="layout-container">
     <div class="part left">
-        @if(set) {
-        }
         @if (item) {
         <div class="vertically-centered image-container">
+            <img id="hint-image" [ngSrc]="image_src" fill [ngSrcset]="'400w, 600w, 800w, 1024w'" priority [hidden]="hintIndex === 0"/>
             @if(hintIndex == 0) {
             <div id="title">
                 {{ native ? set.native_title : set.target_title }}
@@ -17,12 +16,11 @@
                     <li i18n>Have fun!</li>
                 </ol>
             </div>
-            } @else {
-            <img id="hint-image" [ngSrc]="image_src" fill [ngSrcset]="'400w, 600w, 800w, 1024w'"/>
             }
         </div>
         @if(hintIndex > 1) {
-        <div id="description" class="vertically-centered">{{ native ? item.native_description : item.target_description }}</div>
+        <div id="description" class="vertically-centered">{{ native ? item.native_description : item.target_description
+            }}</div>
         }
         }
     </div>
