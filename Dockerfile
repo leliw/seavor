@@ -9,7 +9,7 @@
     RUN npm run build
    
 # ------ Stage 2: Python/FastAPI project ------
-    FROM python:3.13.9-trixie
+    FROM python:3.13.11-slim-trixie
     COPY --from=ghcr.io/astral-sh/uv:0.9.5-python3.13-trixie-slim /usr/local/bin/uv /bin/
 
     RUN apt-get update && apt-get install -y \
