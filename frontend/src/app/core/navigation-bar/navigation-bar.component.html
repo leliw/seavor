@@ -2,16 +2,19 @@
     <router-outlet></router-outlet>
 </div>
 
-<!-- Stały bottom navigation -->
 <mat-toolbar color="primary" class="bottom-nav">
     <mat-nav-list class="horizontal">
-        <a mat-list-item routerLink="/letter-shuffle">
+        <a mat-list-item routerLink="/topics">
+            <mat-icon matListItemIcon>home</mat-icon>
+            <span matListItemTitle>Home</span>
+        </a>
+        <a mat-list-item routerLink="/repetitions">
             <mat-icon matListItemIcon>repeat</mat-icon>
             <span matListItemTitle>Repetitions</span>
         </a>
-        <a mat-list-item routerLink="/topics">
-            <mat-icon matListItemIcon>book</mat-icon>
-            <span matListItemTitle>Topics</span>
+        <a mat-list-item routerLink="/select-learning-language">
+            <mat-icon matListItemIcon>language</mat-icon>
+            <span matListItemTitle>Language</span>
         </a>
         <a mat-list-item routerLink="/select-interface-language">
             <mat-icon matListItemIcon>settings</mat-icon>

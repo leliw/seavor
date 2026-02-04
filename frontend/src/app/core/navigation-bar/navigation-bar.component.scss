@@ -29,6 +29,7 @@ app-root {
     bottom: 0;
     left: 0;
     right: 0;
+    padding: 0px;
     height: 64px;
     z-index: 1000;
     border-top: 1px solid var(--mat-divider-color);
@@ -41,9 +42,9 @@ app-root {
 mat-nav-list.horizontal {
     // width: 100%;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     grid-template-rows: 1fr;
-    gap: 0.5em;
+    gap: 0.2em;
 
     justify-content: space-around; // lub space-between / center
     padding: 0;
@@ -62,7 +63,7 @@ mat-nav-list.horizontal {
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            font-size: small;
+            font-size: x-small;
             padding-top: 0.3em;
             padding-right: 0.5em;
             padding-left: 0.5em;
