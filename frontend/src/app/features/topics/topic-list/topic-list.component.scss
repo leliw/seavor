@@ -1,0 +1,23 @@
+.container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 16px;
+    padding: 16px;
+    height: 100%;
+    box-sizing: border-box;
+
+    @media (max-width: 599px) {
+        grid-template-columns: 1fr;
+    }
+
+    mat-card {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+
+        mat-card-content {
+            flex-grow: 1;
+        }
+    }
+
+}

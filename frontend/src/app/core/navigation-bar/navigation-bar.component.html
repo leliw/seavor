@@ -1,0 +1,21 @@
+<div class="full-screen-container">
+    <router-outlet></router-outlet>
+</div>
+
+<!-- Stały bottom navigation -->
+<mat-toolbar color="primary" class="bottom-nav">
+    <mat-nav-list class="horizontal">
+        <a mat-list-item routerLink="/letter-shuffle">
+            <mat-icon matListItemIcon>repeat</mat-icon>
+            <span matListItemTitle>Repetitions</span>
+        </a>
+        <a mat-list-item routerLink="/topics">
+            <mat-icon matListItemIcon>book</mat-icon>
+            <span matListItemTitle>Topics</span>
+        </a>
+        <a mat-list-item routerLink="/select-interface-language">
+            <mat-icon matListItemIcon>settings</mat-icon>
+            <span matListItemTitle>Settings</span>
+        </a>
+    </mat-nav-list>
+</mat-toolbar>

@@ -1,0 +1,13 @@
+<div class="container">
+    @for(topic of topics; track topic.id) {
+    <mat-card>
+        <mat-card-title>{{topic.target_title}}</mat-card-title>
+        <mat-card-content>{{topic.target_description}}</mat-card-content>
+        <mat-card-actions align="end">
+            <button mat-icon-button color="primary" [routerLink]="['/', topic.content_type, topic.id]">
+                <mat-icon>play_arrow</mat-icon>
+            </button>
+        </mat-card-actions>
+    </mat-card>
+    }
+</div>
