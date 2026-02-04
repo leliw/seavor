@@ -22,6 +22,28 @@ export const routes: Routes = [
             }
         ]
     },
+    {
+        path: 'repetitions',
+        canActivate: [interfaceLanguageSelectedGuard, learningLanguageSelectedGuard],
+        loadComponent: () => import("./core/navigation-bar/navigation-bar.component").then(m => m.NavigationBarComponent),
+        children: [
+            {
+                path: '',
+                loadComponent: () => import('./features/repetitions/repetitions-page/repetitions-page.component').then(m => m.RepetitionsPageComponent)
+            }
+        ]
+    },
+    {
+        path: 'info/:id',
+        canActivate: [interfaceLanguageSelectedGuard, learningLanguageSelectedGuard],
+        loadComponent: () => import("./core/navigation-bar/navigation-bar.component").then(m => m.NavigationBarComponent),
+        children: [
+            {
+                path: '',
+                loadComponent: () => import('./features/info-page/info-page.component').then(m => m.InfoPageComponent)
+            }
+        ]
+    },
 
     {
         path: '',
