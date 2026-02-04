@@ -1,11 +1,32 @@
 <div class="container">
+    <mat-card>
+        <mat-card-header>
+            <mat-card-title>Repetitions</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>Repetitions status</mat-card-content>
+        <mat-card-actions align="end">
+            <button mat-icon-button color="primary" routerLink="/repetitions">
+                <mat-icon>repeat</mat-icon>
+            </button>
+        </mat-card-actions>
+    </mat-card>
+
     @for(topic of topics; track topic.id) {
     <mat-card>
-        <mat-card-title>{{topic.target_title}}</mat-card-title>
+        <mat-card-header>
+            <mat-card-title>{{topic.target_title}}</mat-card-title>
+        </mat-card-header>
         <mat-card-content>{{topic.target_description}}</mat-card-content>
         <mat-card-actions align="end">
             <button mat-icon-button color="primary" [routerLink]="['/', topic.content_type, topic.id]">
-                <mat-icon>play_arrow</mat-icon>
+                <mat-icon>
+                    @if(topic.content_type=="letter-shuffle"){
+                    quiz
+                    }@else if(topic.content_type=="info"){
+                    menu_book
+                    }@else{
+                    play_arrow
+                    }</mat-icon>
             </button>
         </mat-card-actions>
     </mat-card>
