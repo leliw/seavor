@@ -1,1 +1,22 @@
-<p>info-page works!</p>
+<mat-accordion>
+    @for(tab of infoPage.tabs; track tab.target_title; let i = $index) {
+    <mat-expansion-panel [expanded]="step() === i" (opened)="setStep(i)" hideToggle>
+        <mat-expansion-panel-header>
+            <mat-panel-title>{{tab.target_title}}</mat-panel-title>
+        </mat-expansion-panel-header>
+        {{tab.target_content}}
+        <mat-action-row>
+            @if(i != 0){
+            <button matIconButton (click)="prevStep()">
+                <mat-icon>arrow_back</mat-icon>
+            </button>
+            }
+            @if (i != infoPage.tabs.length - 1) {
+            <button matIconButton (click)="nextStep()">
+                <mat-icon>arrow_forward</mat-icon>
+            </button>
+            }
+        </mat-action-row>
+    </mat-expansion-panel>
+    }
+</mat-accordion>
