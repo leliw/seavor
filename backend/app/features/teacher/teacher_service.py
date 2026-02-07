@@ -1,5 +1,6 @@
 from typing import Dict
 
+from features.languages import LANGUAGE_NAMES, Language
 from features.letter_shuffles.letter_shuffle_model import LetterShuffleItem, LetterShuffleSet, LetterShuffleSetCreate
 from features.letter_shuffles.letter_shuffle_translation_model import (
     LetterShuffleItemTranslation,
@@ -10,21 +11,9 @@ from haintech.ai.open_ai import OpenAIModel
 
 
 class TeacherService:
-    languages = {
-        "en": "English",
-        "pl": "Polish",
-        "es": "Spanish",
-        "fr": "French",
-        "de": "German",
-        "it": "Italian",
-        "uk": "Ukrainian",
-        "ru": "Russian",
-        "zh": "Chinese",
-        "ar": "Arabic",
-    }
 
-    def __init__(self, target_language_code: str = "en") -> None:
-        target_language = self.languages[target_language_code]
+    def __init__(self, target_language_code: Language = Language.EN) -> None:
+        target_language = LANGUAGE_NAMES[target_language_code]
         self.ai_model = OpenAIModel("gpt-4.1-mini", {"temperature": 0})
         self.target_language_code = target_language_code
         self.target_language = target_language
@@ -35,7 +24,7 @@ class TeacherService:
     def create_letter_shuffle_set(self, theme_en: str, number_of_words: int = 10) -> LetterShuffleSetCreate:
         description_en = f"Words and phrases related to {theme_en}"
         words = self.generate_word_list(theme_en, number_of_words)
-        if self.target_language_code != "en":
+        if self.target_language_code != Language.EN:
             translation = self.translate_expression_and_definition(self.target_language_code, theme_en, description_en)
             theme = translation["expression"]
             description = translation["definition"]
@@ -52,7 +41,7 @@ class TeacherService:
         return ret
 
     def create_letter_shuffle_set_translation(
-        self, letter_shuffle_set: LetterShuffleSet, native_language_code: str
+        self, letter_shuffle_set: LetterShuffleSet, native_language_code: Language
     ) -> LetterShuffleSetTranslationCreate:
         translation = self.translate_expression_and_definition(
             native_language_code, letter_shuffle_set.target_title, letter_shuffle_set.target_description
@@ -109,9 +98,9 @@ class TeacherService:
         return ret
 
     def translate_expression_and_definition(
-        self, language_code: str, expression: str, definition: str
+        self, language_code: Language, expression: str, definition: str
     ) -> Dict[str, str]:
-        language = self.languages[language_code]
+        language = LANGUAGE_NAMES[language_code]
         message = f"Translate the expression and its definition from {self.target_language} to {language}. "
         message += "Return the response as a single JSON dictionary."
         message += f"\nExpression: **{expression}**"
