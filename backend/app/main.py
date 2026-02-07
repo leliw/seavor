@@ -13,6 +13,7 @@ from routers import (
     config,
     images,
     letter_shuffles,
+    topics,
 )
 from version import __version__
 
@@ -33,6 +34,7 @@ app = FastAPI(
 
 # Include the client config router
 app.include_router(config.router, prefix="/api/config")
+app.include_router(topics.router, prefix="/api/topics")
 app.include_router(letter_shuffles.router, prefix="/api/target-languages/{target_language_code}/letter-shuffles")
 app.include_router(audio_files.router, prefix="/api/audio-files")
 app.include_router(images.router, prefix="/api/images")

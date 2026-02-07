@@ -2,7 +2,7 @@ from typing import Annotated, List
 from uuid import UUID
 
 from ampf.fastapi import JsonStreamingResponse
-from dependencies import AppStateDep, AudioFileServiceDep, not_production
+from dependencies import AppStateDep, AudioFileServiceDep, TopicServiceDep, not_production
 from fastapi import APIRouter, Depends
 from features.letter_shuffles.letter_shuffle_translation_model import (
     LetterShuffleSetTranslation,
@@ -34,9 +34,9 @@ async def get_all(service: LetterShuffleTranslationServiceDep):
 
 @router.post("", dependencies=[Depends(not_production)])
 async def post(
-    service: LetterShuffleTranslationServiceDep, value_create: LetterShuffleSetTranslationCreate
+    service: LetterShuffleTranslationServiceDep, topic_service: TopicServiceDep, value_create: LetterShuffleSetTranslationCreate
 ) -> LetterShuffleSetTranslation:
-    return await service.post(value_create)
+    return await service.post(topic_service, value_create)
 
 
 @router.get(ITEM_PATH)

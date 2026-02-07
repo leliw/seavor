@@ -1,5 +1,6 @@
 import asyncio
 from uuid import UUID
+
 from ampf.base import BaseAsyncFactory
 from features.letter_shuffles.letter_shuffle_translation_model import (
     LetterShuffleSetTranslation,
@@ -7,13 +8,20 @@ from features.letter_shuffles.letter_shuffle_translation_model import (
     LetterShuffleSetTranslationHeader,
     LetterShuffleSetTranslationUpdate,
 )
+from features.levels import Level
+from features.topics.topic_model import Topic
+from features.topics.topic_service import TopicService
 from shared.audio_files.audio_file_service import AudioFileService
 
 
 class LetterShuffleTranslationService:
-    def __init__(self, factory: BaseAsyncFactory, audio_file_service: AudioFileService, target_language_code: str, id: UUID):
-        self.storage = factory.create_storage(f"target-languages/{target_language_code}/letter-shuffles/{id}/"
-            , LetterShuffleSetTranslation, key="native_language_code"
+    def __init__(
+        self, factory: BaseAsyncFactory, audio_file_service: AudioFileService, target_language_code: str, id: UUID
+    ):
+        self.storage = factory.create_storage(
+            f"target-languages/{target_language_code}/letter-shuffles/{id}/",
+            LetterShuffleSetTranslation,
+            key="native_language_code",
         )
         self.audio_file_service = audio_file_service
         self.target_language_code = target_language_code
@@ -23,13 +31,17 @@ class LetterShuffleTranslationService:
         async for set in self.storage.where("id", "==", self.id).get_all():
             yield LetterShuffleSetTranslationHeader(**set.model_dump())
 
-    async def post(self, value_create: LetterShuffleSetTranslationCreate) -> LetterShuffleSetTranslation:
+    async def post(
+        self, topic_service: TopicService, value_create: LetterShuffleSetTranslationCreate
+    ) -> LetterShuffleSetTranslation:
         value = LetterShuffleSetTranslation.create(value_create)
 
         tasks = []
         for item in value.items:
             tasks.append(self.audio_file_service.generate_and_upload(item.native_phrase, value.native_language_code))
-            tasks.append(self.audio_file_service.generate_and_upload(item.native_description, value.native_language_code))
+            tasks.append(
+                self.audio_file_service.generate_and_upload(item.native_description, value.native_language_code)
+            )
 
         results = await asyncio.gather(*tasks)
 
@@ -40,6 +52,11 @@ class LetterShuffleTranslationService:
             idx += 2
 
         await self.storage.create(value)
+        calls = [
+            topic_service.save(Topic.from_letter_shuffle_translation(level, value))
+            for level in value.levels or list(Level)
+        ]
+        await asyncio.gather(*calls)
         return value
 
     async def get(self, code: str) -> LetterShuffleSetTranslation:

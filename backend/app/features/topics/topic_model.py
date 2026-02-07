@@ -1,0 +1,36 @@
+from datetime import datetime
+from uuid import UUID, uuid4, uuid5
+
+from features.letter_shuffles.letter_shuffle_translation_model import LetterShuffleSetTranslation
+from features.levels import Level
+from pydantic import BaseModel
+
+
+class Topic(BaseModel):
+    id: UUID
+    target_language_code: str
+    level: Level
+    target_title: str
+    target_description: str
+    native_language_code: str
+    native_title: str
+    native_description: str
+    created_at: datetime
+    updated_at: datetime
+
+    @classmethod
+    def from_letter_shuffle_translation(cls, level: Level, value: LetterShuffleSetTranslation) -> "Topic":
+        return cls(
+            id=uuid5(value.id, level),
+            target_language_code=value.target_language_code,
+            level=level,
+            target_title=value.target_title,
+            target_description=value.target_description,
+            native_language_code=value.native_language_code,
+            native_title=value.native_title,
+            native_description=value.native_description,
+            created_at=value.created_at,
+            updated_at=value.updated_at,
+        )
+
+

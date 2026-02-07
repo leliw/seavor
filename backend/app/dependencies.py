@@ -6,6 +6,7 @@ from app_state import AppState
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.concurrency import asynccontextmanager
+from features.topics.topic_service import TopicService
 from integrations.gtts.gtts_service import GttsService
 from integrations.image_gen.base_image_gen_service import BaseImageGenService
 from integrations.image_gen.openai_image_gen_service import OpenAIImageGenService
@@ -78,3 +79,9 @@ def not_production(app_state: AppStateDep) -> bool:
         raise HTTPException(status_code=404, detail="Not found")
     return not app_state.config.production
 
+
+def get_topic_service(app_state: AppStateDep) -> TopicService:
+    return TopicService(app_state.factory)
+
+
+TopicServiceDep = Annotated[TopicService, Depends(get_topic_service)]
