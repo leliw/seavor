@@ -10,6 +10,8 @@ from pydantic import BaseModel
 
 class Topic(BaseModel):
     id: UUID
+    content_id: Optional[UUID] = None
+    content_type: Optional[str] = None
     target_language_code: Language
     levels: Optional[List[Level]] = None
     target_title: str
@@ -24,6 +26,8 @@ class Topic(BaseModel):
     def from_letter_shuffle_translation(cls, level: Level, value: LetterShuffleSetTranslation) -> "Topic":
         return cls(
             id=uuid5(value.id, level),
+            content_id = value.id,
+            content_type = "letter-shuffle",
             target_language_code=value.target_language_code,
             levels=value.levels,
             target_title=value.target_title,
