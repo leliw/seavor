@@ -55,6 +55,7 @@ class TeacherService:
             native_title=translation["expression"],
             native_description=translation["definition"],
             items=[],
+            image_name=letter_shuffle_set.image_name,
         )
         for item in letter_shuffle_set.items:
             translation = self.translate_expression_and_definition(

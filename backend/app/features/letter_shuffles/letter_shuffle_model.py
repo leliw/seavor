@@ -31,19 +31,21 @@ class LetterShuffleSetCreate(BaseModel):
     target_title: str
     target_description: str
     items: List[LetterShuffleItem]
-
+    image_name: Optional[str] = None
 
 class LetterShuffleSetUpdate(BaseModel):
     levels: Optional[List[Level]] = None
     target_title: str
     target_description: str
     items: List[LetterShuffleItem]
+    image_name: Optional[str] = None
 
 
 class LetterShuffleSetPatch(BaseModel):
     levels: Optional[List[Level]] = None
     target_title: Optional[str] = None
     target_description: Optional[str] = None
+    image_name: Optional[str] = None
 
 
 class LetterShuffleSet(BaseModel):
@@ -55,7 +57,8 @@ class LetterShuffleSet(BaseModel):
     created_at: datetime
     updated_at: datetime
     items: List[LetterShuffleItem]
-
+    image_name: Optional[str] = None
+    
     @classmethod
     def create(cls, value: LetterShuffleSetCreate) -> "LetterShuffleSet":
         return cls(
@@ -70,6 +73,7 @@ class LetterShuffleSet(BaseModel):
         self.target_title = value.target_title
         self.target_description = value.target_description
         self.items = value.items
+        self.image_name = value.image_name
         self.updated_at = datetime.now()
 
     def patch(self, patch_value: LetterShuffleSetPatch) -> None:

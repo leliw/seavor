@@ -10,7 +10,6 @@ from .letter_shuffle_model import LetterShuffleItem, LetterShuffleSetHeader
 from features.levels import Level
 
 
-
 class LetterShuffleSetTranslationHeader(LetterShuffleSetHeader):
     native_language_code: Language
     native_title: str
@@ -34,13 +33,14 @@ class LetterShuffleSetTranslationCreate(BaseModel):
     native_title: str
     native_description: str
     items: List[LetterShuffleItemTranslation]
+    image_name: Optional[str] = None
 
 
 class LetterShuffleSetTranslationUpdate(BaseModel):
     native_title: str
     native_description: str
     items: List[LetterShuffleItemTranslation]
-
+    image_name: Optional[str] = None
 
 
 class LetterShuffleSetTranslation(BaseModel):
@@ -55,6 +55,7 @@ class LetterShuffleSetTranslation(BaseModel):
     created_at: datetime
     updated_at: datetime
     items: List[LetterShuffleItemTranslation]
+    image_name: Optional[str] = None
 
     @classmethod
     def create(cls, value: LetterShuffleSetTranslationCreate) -> "LetterShuffleSetTranslation":
@@ -68,4 +69,5 @@ class LetterShuffleSetTranslation(BaseModel):
         self.native_title = value.native_title
         self.native_description = value.native_description
         self.items = value.items
+        self.image_name = value.image_name
         self.updated_at = datetime.now()
