@@ -5,6 +5,8 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from .letter_shuffle_model import LetterShuffleItem, LetterShuffleSetHeader
+from features.levels import Level
+
 
 
 class LetterShuffleSetTranslationHeader(LetterShuffleSetHeader):
@@ -23,6 +25,7 @@ class LetterShuffleItemTranslation(LetterShuffleItem):
 class LetterShuffleSetTranslationCreate(BaseModel):
     id: UUID
     target_language_code: str
+    levels: Optional[List[Level]] = None
     target_title: str
     target_description: str
     native_language_code: str
@@ -41,6 +44,7 @@ class LetterShuffleSetTranslationUpdate(BaseModel):
 class LetterShuffleSetTranslation(BaseModel):
     id: UUID
     target_language_code: str
+    levels: Optional[List[Level]] = None
     target_title: str
     target_description: str
     native_language_code: str

@@ -2,12 +2,14 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID, uuid4
 
+from features.levels import Level
 from pydantic import BaseModel
 
 
 class LetterShuffleSetHeader(BaseModel):
     id: UUID
     target_language_code: str
+    levels: Optional[List[Level]] = None
     target_title: str
     target_description: str
     created_at: datetime
@@ -24,18 +26,21 @@ class LetterShuffleItem(BaseModel):
 
 class LetterShuffleSetCreate(BaseModel):
     target_language_code: str
+    levels: Optional[List[Level]] = None
     target_title: str
     target_description: str
     items: List[LetterShuffleItem]
 
 
 class LetterShuffleSetUpdate(BaseModel):
+    levels: Optional[List[Level]] = None
     target_title: str
     target_description: str
     items: List[LetterShuffleItem]
 
 
 class LetterShuffleSetPatch(BaseModel):
+    levels: Optional[List[Level]] = None
     target_title: Optional[str] = None
     target_description: Optional[str] = None
 
@@ -43,6 +48,7 @@ class LetterShuffleSetPatch(BaseModel):
 class LetterShuffleSet(BaseModel):
     id: UUID
     target_language_code: str
+    levels: Optional[List[Level]] = None
     target_title: str
     target_description: str
     created_at: datetime
@@ -59,6 +65,7 @@ class LetterShuffleSet(BaseModel):
         )
 
     def update(self, value: LetterShuffleSetUpdate) -> None:
+        self.levels = value.levels
         self.target_title = value.target_title
         self.target_description = value.target_description
         self.items = value.items
