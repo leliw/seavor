@@ -59,6 +59,6 @@ def test_post_get_put_patch_delete(client: ApiTestClient, id: UUID, endpoint: st
         assert 1 == len(r)
         assert r[0].target_title == value.target_title
         assert r[0].native_title == value.native_title
-        assert r[0].level == level
+        assert not  r[0].levels
         assert r[0].native_language_code == value.native_language_code
         assert r[0].target_language_code == value.target_language_code

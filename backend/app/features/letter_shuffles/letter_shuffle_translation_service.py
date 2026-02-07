@@ -53,7 +53,7 @@ class LetterShuffleTranslationService:
 
         await self.storage.create(value)
         calls = [
-            topic_service.save(Topic.from_letter_shuffle_translation(level, value))
+            topic_service.save(Topic.from_letter_shuffle_translation(level, value), level)
             for level in value.levels or list(Level)
         ]
         await asyncio.gather(*calls)

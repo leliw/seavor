@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List, Optional
 from uuid import UUID, uuid5
 
 from features.languages import Language
@@ -10,7 +11,7 @@ from pydantic import BaseModel
 class Topic(BaseModel):
     id: UUID
     target_language_code: Language
-    level: Level
+    levels: Optional[List[Level]] = None
     target_title: str
     target_description: str
     native_language_code: Language
@@ -24,7 +25,7 @@ class Topic(BaseModel):
         return cls(
             id=uuid5(value.id, level),
             target_language_code=value.target_language_code,
-            level=level,
+            levels=value.levels,
             target_title=value.target_title,
             target_description=value.target_description,
             native_language_code=value.native_language_code,

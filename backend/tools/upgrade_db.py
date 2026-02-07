@@ -33,7 +33,7 @@ async def go(app_state: AppState, client: ApiTestClient):
                 print(lsth)
                 lst = await lst_service.get(lsth.native_language_code)
                 calls = [
-                    topic_service.save(Topic.from_letter_shuffle_translation(level, lst))
+                    topic_service.save(Topic.from_letter_shuffle_translation(level, lst), level)
                     for level in lst.levels or list(Level)
                 ]
                 await asyncio.gather(*calls)
