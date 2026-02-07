@@ -19,7 +19,7 @@ dependencies = [
     "uvicorn[standard]>=0.40.0",
 ]
 [tool.setuptools]
-py-modules = []
+py-modules = ["app"]
 
 [tool.pytest.ini_options]
 pythonpath = [

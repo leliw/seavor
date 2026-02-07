@@ -2,6 +2,7 @@ from uuid import UUID
 
 import pytest
 from ampf.testing import ApiTestClient
+from features.languages import Language
 from features.letter_shuffles.letter_shuffle_model import (
     LetterShuffleSet,
 )
@@ -33,10 +34,10 @@ def test_post_get_put_patch_delete(client: ApiTestClient, id: UUID, endpoint: st
     value = LetterShuffleSetTranslation.create(
         LetterShuffleSetTranslationCreate(
             id=id,
-            target_language_code="en",
+            target_language_code=Language.EN,
             target_title="Christmas",
             target_description="Words and phrases related to Christmas",
-            native_language_code="pl",
+            native_language_code=Language.PL,
             native_title="Boże Narodzenie",
             native_description="Słowa i wyrażenia związane z Bożym Narodzeniem",
             items=[

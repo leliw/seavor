@@ -1,6 +1,7 @@
 from datetime import datetime
 from uuid import UUID, uuid5
 
+from features.languages import Language
 from features.letter_shuffles.letter_shuffle_translation_model import LetterShuffleSetTranslation
 from features.levels import Level
 from pydantic import BaseModel
@@ -8,11 +9,11 @@ from pydantic import BaseModel
 
 class Topic(BaseModel):
     id: UUID
-    target_language_code: str
+    target_language_code: Language
     level: Level
     target_title: str
     target_description: str
-    native_language_code: str
+    native_language_code: Language
     native_title: str
     native_description: str
     created_at: datetime
@@ -32,5 +33,3 @@ class Topic(BaseModel):
             created_at=value.created_at,
             updated_at=value.updated_at,
         )
-
-
