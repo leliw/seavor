@@ -1,5 +1,5 @@
 from datetime import datetime
-from uuid import UUID, uuid4, uuid5
+from uuid import UUID, uuid5
 
 from features.letter_shuffles.letter_shuffle_translation_model import LetterShuffleSetTranslation
 from features.levels import Level
