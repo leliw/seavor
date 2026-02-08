@@ -24,17 +24,12 @@ def id(client: ApiTestClient) -> UUID:
 
 
 @pytest.fixture()
-def endpoint(client: ApiTestClient, id) -> str:
+def endpoint(client: ApiTestClient, id: UUID) -> str:
     return f"/api/target-languages/en/letter-shuffles/{id}/translations"
 
-
-def test_get_all(client: ApiTestClient, endpoint: str):
-    r = client.get_typed_list(endpoint, 200, LetterShuffleSetTranslationHeader)
-    assert 0 == len(r)
-
-
-def test_post_get_put_patch_delete(client: ApiTestClient, id: UUID, endpoint: str):
-    value = LetterShuffleSetTranslation.create(
+@pytest.fixture()
+def letter_shuffle_set_translation(id: UUID) -> LetterShuffleSetTranslation:
+    return LetterShuffleSetTranslation.create(
         LetterShuffleSetTranslationCreate(
             id=id,
             target_language_code=Language.EN,
@@ -54,19 +49,27 @@ def test_post_get_put_patch_delete(client: ApiTestClient, id: UUID, endpoint: st
         )
     )
 
+
+def test_get_all(client: ApiTestClient, endpoint: str):
+    r = client.get_typed_list(endpoint, 200, LetterShuffleSetTranslationHeader)
+    assert 0 == len(r)
+
+
+def test_post_get_put_patch_delete(client: ApiTestClient, endpoint: str, letter_shuffle_set_translation: LetterShuffleSetTranslation):
+
     # POST
-    p = client.post_typed(endpoint, 200, LetterShuffleSetTranslation, json=value)
+    p = client.post_typed(endpoint, 200, LetterShuffleSetTranslation, json=letter_shuffle_set_translation)
 
     # GET ALL
     r = client.get_typed_list(endpoint, 200, LetterShuffleSetTranslationHeader)
     assert 1 == len(r)
-    assert r[0].target_title == value.target_title
-    assert r[0].native_title == value.native_title
+    assert r[0].target_title == letter_shuffle_set_translation.target_title
+    assert r[0].native_title == letter_shuffle_set_translation.native_title
 
     # GET
     r = client.get_typed(f"{endpoint}/pl", 200, LetterShuffleSetTranslation)
-    assert r.target_title == value.target_title
-    assert r.native_title == value.native_title
+    assert r.target_title == letter_shuffle_set_translation.target_title
+    assert r.native_title == letter_shuffle_set_translation.native_title
     assert len(r.items) > 0
     assert isinstance(r.items[0].native_phrase_audio_file_name, str)
 
