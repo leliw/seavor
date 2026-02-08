@@ -5,6 +5,7 @@ from ampf.testing import ApiTestClient
 from features.languages import Language
 from features.letter_shuffles.letter_shuffle_model import (
     LetterShuffleSet,
+    LetterShuffleSetPatch,
 )
 from features.letter_shuffles.letter_shuffle_translation_model import (
     LetterShuffleItemTranslation,
@@ -25,7 +26,7 @@ def id(client: ApiTestClient) -> UUID:
 
 @pytest.fixture()
 def endpoint(client: ApiTestClient, id: UUID) -> str:
-    return f"/api/target-languages/en/letter-shuffles/{id}/translations"
+    return f"/api/target-languages/en/letter-shuffles/{id}"
 
 @pytest.fixture()
 def letter_shuffle_set_translation(id: UUID) -> LetterShuffleSetTranslation:
@@ -51,23 +52,23 @@ def letter_shuffle_set_translation(id: UUID) -> LetterShuffleSetTranslation:
 
 
 def test_get_all(client: ApiTestClient, endpoint: str):
-    r = client.get_typed_list(endpoint, 200, LetterShuffleSetTranslationHeader)
+    r = client.get_typed_list(f"{endpoint}/translations", 200, LetterShuffleSetTranslationHeader)
     assert 0 == len(r)
 
 
 def test_post_get_put_patch_delete(client: ApiTestClient, endpoint: str, letter_shuffle_set_translation: LetterShuffleSetTranslation):
 
     # POST
-    p = client.post_typed(endpoint, 200, LetterShuffleSetTranslation, json=letter_shuffle_set_translation)
+    p = client.post_typed(f"{endpoint}/translations", 200, LetterShuffleSetTranslation, json=letter_shuffle_set_translation)
 
     # GET ALL
-    r = client.get_typed_list(endpoint, 200, LetterShuffleSetTranslationHeader)
+    r = client.get_typed_list(f"{endpoint}/translations", 200, LetterShuffleSetTranslationHeader)
     assert 1 == len(r)
     assert r[0].target_title == letter_shuffle_set_translation.target_title
     assert r[0].native_title == letter_shuffle_set_translation.native_title
 
     # GET
-    r = client.get_typed(f"{endpoint}/pl", 200, LetterShuffleSetTranslation)
+    r = client.get_typed(f"{endpoint}/translations/pl", 200, LetterShuffleSetTranslation)
     assert r.target_title == letter_shuffle_set_translation.target_title
     assert r.native_title == letter_shuffle_set_translation.native_title
     assert len(r.items) > 0
@@ -75,10 +76,20 @@ def test_post_get_put_patch_delete(client: ApiTestClient, endpoint: str, letter_
 
     # PUT
     p.native_title = "Updated title"
-    client.put(f"{endpoint}/pl", 200, json=p)
-    r = client.get_typed(f"{endpoint}/pl", 200, LetterShuffleSetTranslation)
+    client.put(f"{endpoint}/translations/pl", 200, json=p)
+    r = client.get_typed(f"{endpoint}/translations/pl", 200, LetterShuffleSetTranslation)
     assert r.native_title == "Updated title"
 
     # DELETE
-    client.delete(f"{endpoint}/pl", 200)
-    client.get(f"{endpoint}/pl", 404)
+    client.delete(f"{endpoint}/translations/pl", 200)
+    client.get(f"{endpoint}/translations/pl", 404)
+
+
+def test_patch_set(client: ApiTestClient, endpoint: str, letter_shuffle_set_translation: LetterShuffleSetTranslation):
+    # Given: A saved translation
+    client.post_typed(f"{endpoint}/translations", 200, LetterShuffleSetTranslation, json=letter_shuffle_set_translation)
+    # When: A set is patched
+    client.patch_typed(endpoint, 200, LetterShuffleSet, json=LetterShuffleSetPatch(image_name="xxx"))
+    # Then: The translation is patched eitheras well
+    t = client.get_typed(f"{endpoint}/translations/pl", 200, LetterShuffleSetTranslation)
+    assert t.image_name=="xxx"

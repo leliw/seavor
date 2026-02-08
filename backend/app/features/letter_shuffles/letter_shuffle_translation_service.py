@@ -6,6 +6,7 @@ from features.letter_shuffles.letter_shuffle_translation_model import (
     LetterShuffleSetTranslation,
     LetterShuffleSetTranslationCreate,
     LetterShuffleSetTranslationHeader,
+    LetterShuffleSetTranslationPatch,
     LetterShuffleSetTranslationUpdate,
 )
 from features.levels import Level
@@ -65,6 +66,12 @@ class LetterShuffleTranslationService:
     async def put(self, code: str, value_update: LetterShuffleSetTranslationUpdate) -> LetterShuffleSetTranslation:
         value = await self.storage.get(code)
         value.update(value_update)
+        await self.storage.put(code, value)
+        return value
+
+    async def patch(self, code: str, value_patch: LetterShuffleSetTranslationPatch) -> LetterShuffleSetTranslation:
+        value = await self.storage.get(code)
+        value.patch(value_patch)
         await self.storage.put(code, value)
         return value
 

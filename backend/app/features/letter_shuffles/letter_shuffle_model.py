@@ -6,6 +6,8 @@ from features.languages import Language
 from features.levels import Level
 from pydantic import BaseModel
 
+from .letter_shuffle_translation_model import LetterShuffleSetTranslationPatch
+
 
 class LetterShuffleSetHeader(BaseModel):
     id: UUID
@@ -33,6 +35,7 @@ class LetterShuffleSetCreate(BaseModel):
     items: List[LetterShuffleItem]
     image_name: Optional[str] = None
 
+
 class LetterShuffleSetUpdate(BaseModel):
     levels: Optional[List[Level]] = None
     target_title: str
@@ -47,6 +50,14 @@ class LetterShuffleSetPatch(BaseModel):
     target_description: Optional[str] = None
     image_name: Optional[str] = None
 
+    def to_translation_patch(self) -> "LetterShuffleSetTranslationPatch":
+        return LetterShuffleSetTranslationPatch(
+            levels=self.levels,
+            target_title=self.target_title,
+            target_description=self.target_description,
+            image_name=self.image_name,
+        )
+
 
 class LetterShuffleSet(BaseModel):
     id: UUID
@@ -58,7 +69,7 @@ class LetterShuffleSet(BaseModel):
     updated_at: datetime
     items: List[LetterShuffleItem]
     image_name: Optional[str] = None
-    
+
     @classmethod
     def create(cls, value: LetterShuffleSetCreate) -> "LetterShuffleSet":
         return cls(
