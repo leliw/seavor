@@ -4,16 +4,20 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIcon } from "@angular/material/icon";
 import { RouterModule } from "@angular/router";
 import { Topic, TopicService } from '../topic.service';
+import { NgOptimizedImage } from '@angular/common';
+import { MatTooltip } from "@angular/material/tooltip";
 
 
 @Component({
     selector: 'app-topic-list',
     imports: [
-        MatCardModule,
-        MatButtonModule,
-        MatIcon,
-        RouterModule
-    ],
+    NgOptimizedImage,
+    MatCardModule,
+    MatButtonModule,
+    MatIcon,
+    RouterModule,
+    MatTooltip
+],
     templateUrl: './topic-list.component.html',
     styleUrl: './topic-list.component.scss',
 })

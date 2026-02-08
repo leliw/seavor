@@ -1,9 +1,8 @@
 .container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(17em, 1fr));
     gap: 16px;
     padding: 16px;
-    height: 100%;
     box-sizing: border-box;
 
     @media (max-width: 599px) {
@@ -13,10 +12,26 @@
     mat-card {
         display: flex;
         flex-direction: column;
-        height: 100%;
 
         mat-card-content {
             flex-grow: 1;
+            aspect-ratio: 4/3;
+            overflow: hidden;
+            padding-left: 0.5em;
+            padding-right:0.5em;
+            cursor: pointer;
+            div {
+                height: 100%;
+                width: 100%;
+                box-sizing: border-box;
+                position: relative;
+                img[fill] {
+                    object-fit: cover;
+                    object-position: center;
+                    border-radius: 16px;
+                    // mask-image: linear-gradient(to bottom, black 60%, transparent 90%);
+                }
+            }
         }
     }
 

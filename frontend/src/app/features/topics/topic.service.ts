@@ -15,6 +15,7 @@ export interface Topic {
   native_language_code: string;
   native_title: string;
   native_description: string;
+  image_name?: string;
   created_at?: string;
   updated_at?: string;
 }
