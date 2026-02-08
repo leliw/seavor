@@ -19,6 +19,7 @@ class LetterShuffleTranslationService:
     def __init__(
         self, factory: BaseAsyncFactory, audio_file_service: AudioFileService, target_language_code: str, id: UUID
     ):
+        self.factory = factory
         self.storage = factory.create_storage(
             f"target-languages/{target_language_code}/letter-shuffles/{id}/",
             LetterShuffleSetTranslation,
@@ -73,6 +74,12 @@ class LetterShuffleTranslationService:
         value = await self.storage.get(code)
         value.patch(value_patch)
         await self.storage.put(code, value)
+        topic_service = TopicService(self.factory)
+        calls = [
+            topic_service.save(Topic.from_letter_shuffle_translation(level, value), level)
+            for level in value.levels or list(Level)
+        ]
+        await asyncio.gather(*calls)
         return value
 
     async def delete(self, code: str) -> None:

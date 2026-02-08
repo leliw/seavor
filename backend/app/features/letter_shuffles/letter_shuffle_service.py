@@ -67,8 +67,11 @@ class LetterShuffleService:
         translation_service = LetterShuffleTranslationService(
             self.factory, self.audio_file_service, self.target_language_code, uid
         )
-        async for t in translation_service.get_all():
-            await translation_service.patch(t.native_language_code, translation_patch)
+        calls = [
+            translation_service.patch(t.native_language_code, translation_patch)
+            async for t in translation_service.get_all()
+        ]
+        await asyncio.gather(*calls)
         return value
 
     async def delete(self, uid: UUID) -> None:

@@ -14,6 +14,8 @@ from features.letter_shuffles.letter_shuffle_translation_model import (
     LetterShuffleSetTranslationHeader,
 )
 
+from features.levels import Level
+from features.topics.topic_model import Topic
 from tests.unit.routers.test_letter_shuffles import letter_shuffle_set
 
 
@@ -90,6 +92,11 @@ def test_patch_set(client: ApiTestClient, endpoint: str, letter_shuffle_set_tran
     client.post_typed(f"{endpoint}/translations", 200, LetterShuffleSetTranslation, json=letter_shuffle_set_translation)
     # When: A set is patched
     client.patch_typed(endpoint, 200, LetterShuffleSet, json=LetterShuffleSetPatch(image_name="xxx"))
-    # Then: The translation is patched eitheras well
+    # Then: The translation is patched as well
     t = client.get_typed(f"{endpoint}/translations/pl", 200, LetterShuffleSetTranslation)
     assert t.image_name=="xxx"
+    # And: The topics are patched as well
+    for level in list(Level):
+        r = client.get_typed_list(f"/api/topics/en/{level}/pl", 200, Topic)
+        assert 1 == len(r)
+        assert r[0].image_name == "xxx"

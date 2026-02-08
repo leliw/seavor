@@ -19,6 +19,7 @@ class Topic(BaseModel):
     native_language_code: Language
     native_title: str
     native_description: str
+    image_name: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
@@ -35,6 +36,7 @@ class Topic(BaseModel):
             native_language_code=value.native_language_code,
             native_title=value.native_title,
             native_description=value.native_description,
+            image_name=value.image_name,
             created_at=value.created_at,
             updated_at=value.updated_at,
         )
