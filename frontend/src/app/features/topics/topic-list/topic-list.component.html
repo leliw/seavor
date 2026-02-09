@@ -14,21 +14,19 @@
     @for(topic of topics; track topic.id) {
     <mat-card>
         <mat-card-header>
-            <mat-card-title>{{topic.target_title}}</mat-card-title>
+            <mat-card-title>Quiz</mat-card-title>
+            <mat-card-subtitle>{{topic.target_title}}</mat-card-subtitle>
         </mat-card-header>
-        <mat-card-content>{{topic.target_description}}</mat-card-content>
-        <mat-card-actions align="end">
-            <button mat-icon-button color="primary" [routerLink]="['/', topic.content_type, topic.id]">
-                <mat-icon>
-                    @if(topic.content_type=="letter-shuffle"){
-                    quiz
-                    }@else if(topic.content_type=="info"){
-                    menu_book
-                    }@else{
-                    play_arrow
-                    }</mat-icon>
-            </button>
-        </mat-card-actions>
+        <mat-card-content [routerLink]="['/', topic.content_type, topic.content_id]">
+            <div>
+                @if (topic.image_name) {
+                <img [ngSrc]="`/api/images/${topic.image_name}`" fill [ngSrcset]="'400w, 600w, 800w, 1024w'" priority
+                    [matTooltip]="topic.target_description" />
+                } @else {
+                {{topic.target_description}}
+                }
+            </div>
+        </mat-card-content>
     </mat-card>
     }
 </div>

@@ -2,6 +2,7 @@ from typing import Optional
 from uuid import NAMESPACE_DNS, uuid5
 
 from ampf.base import BaseAsyncFactory
+from features.languages import Language
 from integrations.image_gen.base_image_gen_service import BaseImageGenService
 
 from .image_model import ImageBlob, ImageMetadata
@@ -21,15 +22,15 @@ class ImageService:
     def delete(self, name: str):
         return self.storage.delete(name)
 
-    async def generate_and_upload(self, text: str, language_code: str) -> str:
+    async def generate_and_upload(self, text: str, language_code: Language) -> str:
         if not self.image_gen_service:
             raise Exception("No image generation service")
         async for blob_create in self.image_gen_service.generate_async(text):
-            name = uuid5(NAMESPACE_DNS, f"{language_code}-{text}").hex
+            name = uuid5(NAMESPACE_DNS, f"{language_code.value}-{text}").hex
             blob = ImageBlob(
                 name=name,
                 content=blob_create.content,
-                metadata=ImageMetadata(text=text, language=language_code, content_type=blob_create.metadata.content_type),
+                metadata=ImageMetadata(text=text, language=language_code.value, content_type=blob_create.metadata.content_type),
             )
             await self.upload(blob)
             return name

@@ -1,21 +1,27 @@
+import { NgOptimizedImage } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import {NgOptimizedImage} from '@angular/common';
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SimpleDialogComponent } from '../../shared/simple-dialog/simple-dialog.component';
 import { LetterShuffleItem, LetterShuffleService, LetterShuffleSet, LetterShuffleSetHeader } from './letter-shuffle.service';
+import { MatToolbarModule } from "@angular/material/toolbar";
+import { MatListModule } from "@angular/material/list";
 
 @Component({
     selector: 'app-letter-shuffle',
     imports: [
-        NgOptimizedImage,
-        MatDialogModule,
-        MatButtonModule,
-        MatIconModule,
-        MatTooltipModule,
-    ],
+    NgOptimizedImage,
+    RouterModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+    MatToolbarModule,
+    MatListModule,
+],
     templateUrl: './letter-shuffle.component.html',
     styleUrl: './letter-shuffle.component.scss'
 })
@@ -34,22 +40,28 @@ export class LetterShuffleComponent implements OnInit {
     hintIndex = 0;
     native = false;
 
+    id!: string | null;
 
-    constructor(private service: LetterShuffleService) {
+
+    constructor(private router: Router, private route: ActivatedRoute, private service: LetterShuffleService) {
     }
 
     ngOnInit(): void {
-        this.service.getAll().subscribe(sets => {
-            this.sets = sets;
-            this.service.get(this.sets[0].id).subscribe(set => {
-                this.set = set;
-                for (let i = this.set.items.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [this.set.items[i], this.set.items[j]] = [this.set.items[j], this.set.items[i]];
-                }
-                this.itemIndex = 0;
-                this.startItem();
-            });
+        this.route.params.subscribe(params => {
+            this.id = params['id'];
+            if (this.id) {
+                this.service.get(this.id).subscribe(set => {
+                    this.set = set;
+                    for (let i = this.set.items.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [this.set.items[i], this.set.items[j]] = [this.set.items[j], this.set.items[i]];
+                    }
+                    this.itemIndex = 0;
+                    this.startItem();
+                });
+            } else {
+                this.router.navigate(['/topics']);
+            }
         });
     }
 

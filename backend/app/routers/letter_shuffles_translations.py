@@ -2,12 +2,13 @@ from typing import Annotated, List
 from uuid import UUID
 
 from ampf.fastapi import JsonStreamingResponse
-from dependencies import AppStateDep, AudioFileServiceDep, not_production
+from dependencies import AppStateDep, AudioFileServiceDep, TopicServiceDep, not_production
 from fastapi import APIRouter, Depends
 from features.letter_shuffles.letter_shuffle_translation_model import (
     LetterShuffleSetTranslation,
     LetterShuffleSetTranslationCreate,
     LetterShuffleSetTranslationHeader,
+    LetterShuffleSetTranslationPatch,
     LetterShuffleSetTranslationUpdate,
 )
 from features.letter_shuffles.letter_shuffle_translation_service import LetterShuffleTranslationService
@@ -34,9 +35,9 @@ async def get_all(service: LetterShuffleTranslationServiceDep):
 
 @router.post("", dependencies=[Depends(not_production)])
 async def post(
-    service: LetterShuffleTranslationServiceDep, value_create: LetterShuffleSetTranslationCreate
+    service: LetterShuffleTranslationServiceDep, topic_service: TopicServiceDep, value_create: LetterShuffleSetTranslationCreate
 ) -> LetterShuffleSetTranslation:
-    return await service.post(value_create)
+    return await service.post(topic_service, value_create)
 
 
 @router.get(ITEM_PATH)
@@ -52,6 +53,13 @@ async def put(
 ) -> LetterShuffleSetTranslation:
     return await service.put(native_language_code, value_update)
 
+@router.patch(ITEM_PATH, dependencies=[Depends(not_production)])
+async def patch(
+    service: LetterShuffleTranslationServiceDep,
+    native_language_code: str,
+    value_patch: LetterShuffleSetTranslationPatch,
+) -> LetterShuffleSetTranslation:
+    return await service.patch(native_language_code, value_patch)
 
 @router.delete(ITEM_PATH, dependencies=[Depends(not_production)])
 async def delete(service: LetterShuffleTranslationServiceDep, native_language_code: str):

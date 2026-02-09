@@ -2,12 +2,17 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID, uuid4
 
+from features.languages import Language
+from features.levels import Level
 from pydantic import BaseModel
+
+from .letter_shuffle_translation_model import LetterShuffleSetTranslationPatch
 
 
 class LetterShuffleSetHeader(BaseModel):
     id: UUID
-    target_language_code: str
+    target_language_code: Language
+    levels: Optional[List[Level]] = None
     target_title: str
     target_description: str
     created_at: datetime
@@ -23,31 +28,47 @@ class LetterShuffleItem(BaseModel):
 
 
 class LetterShuffleSetCreate(BaseModel):
-    target_language_code: str
+    target_language_code: Language
+    levels: Optional[List[Level]] = None
     target_title: str
     target_description: str
     items: List[LetterShuffleItem]
+    image_name: Optional[str] = None
 
 
 class LetterShuffleSetUpdate(BaseModel):
+    levels: Optional[List[Level]] = None
     target_title: str
     target_description: str
     items: List[LetterShuffleItem]
+    image_name: Optional[str] = None
 
 
 class LetterShuffleSetPatch(BaseModel):
+    levels: Optional[List[Level]] = None
     target_title: Optional[str] = None
     target_description: Optional[str] = None
+    image_name: Optional[str] = None
+
+    def to_translation_patch(self) -> "LetterShuffleSetTranslationPatch":
+        return LetterShuffleSetTranslationPatch(
+            levels=self.levels,
+            target_title=self.target_title,
+            target_description=self.target_description,
+            image_name=self.image_name,
+        )
 
 
 class LetterShuffleSet(BaseModel):
     id: UUID
-    target_language_code: str
+    target_language_code: Language
+    levels: Optional[List[Level]] = None
     target_title: str
     target_description: str
     created_at: datetime
     updated_at: datetime
     items: List[LetterShuffleItem]
+    image_name: Optional[str] = None
 
     @classmethod
     def create(cls, value: LetterShuffleSetCreate) -> "LetterShuffleSet":
@@ -59,9 +80,11 @@ class LetterShuffleSet(BaseModel):
         )
 
     def update(self, value: LetterShuffleSetUpdate) -> None:
+        self.levels = value.levels
         self.target_title = value.target_title
         self.target_description = value.target_description
         self.items = value.items
+        self.image_name = value.image_name
         self.updated_at = datetime.now()
 
     def patch(self, patch_value: LetterShuffleSetPatch) -> None:
