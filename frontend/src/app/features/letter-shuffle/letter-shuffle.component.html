@@ -2,7 +2,8 @@
     <div class="part left">
         @if (item) {
         <div class="vertically-centered image-container">
-            <img id="hint-image" [ngSrc]="image_src" fill [ngSrcset]="'400w, 600w, 800w, 1024w'" priority [hidden]="hintIndex === 0"/>
+            <img id="hint-image" [ngSrc]="image_src" fill [ngSrcset]="'400w, 600w, 800w, 1024w'" priority
+                [hidden]="hintIndex === 0" />
             @if(hintIndex == 0) {
             <div id="title">
                 {{ native ? set.native_title : set.target_title }}
@@ -26,15 +27,6 @@
     </div>
     <div class="part right vertically-centered">
         @if (item) {
-        <div class="action-buttons">
-            <button mat-fab (click)="showNextHint()" i18n-matTooltip matTooltip="Show next hint">
-                <mat-icon>help</mat-icon>
-            </button>
-            <button class="language-switch" mat-fab (click)="native = !native" i18n-matTooltip
-                matTooltip="Switch language" [disabled]="hintIndex==1">
-                <mat-icon>{{ native ? 'language' : 'translate' }}</mat-icon>
-            </button>
-        </div>
         <div id="question">
             @for(letter of answer; track $index; let i = $index) {
             @if (i < hintIndex-2) { <button type="button" class="letter-box" disabled>{{letter}}</button>
@@ -52,3 +44,21 @@
 
     </div>
 </div>
+<mat-toolbar color="primary" class="bottom-nav">
+    <mat-nav-list class="horizontal">
+        <a mat-list-item routerLink="/topics">
+            <mat-icon matListItemIcon>home</mat-icon>
+            <span matListItemTitle>Home</span>
+        </a>
+        <a mat-list-item (click)="showNextHint()" i18n-matTooltip matTooltip="Show next hint">
+            <mat-icon matListItemIcon>help</mat-icon>
+            <span matListItemTitle>Clue</span>
+        </a>
+        <a mat-list-item (click)="native = !native" i18n-matTooltip matTooltip="Switch language"
+            [disabled]="hintIndex==1">
+            <mat-icon matListItemIcon>{{ native ? 'language' : 'translate' }}</mat-icon>
+            <span matListItemTitle>Language</span>
+        </a>
+
+    </mat-nav-list>
+</mat-toolbar>

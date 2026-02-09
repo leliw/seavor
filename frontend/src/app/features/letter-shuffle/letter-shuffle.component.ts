@@ -4,19 +4,24 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SimpleDialogComponent } from '../../shared/simple-dialog/simple-dialog.component';
 import { LetterShuffleItem, LetterShuffleService, LetterShuffleSet, LetterShuffleSetHeader } from './letter-shuffle.service';
+import { MatToolbarModule } from "@angular/material/toolbar";
+import { MatListModule } from "@angular/material/list";
 
 @Component({
     selector: 'app-letter-shuffle',
     imports: [
-        NgOptimizedImage,
-        MatDialogModule,
-        MatButtonModule,
-        MatIconModule,
-        MatTooltipModule,
-    ],
+    NgOptimizedImage,
+    RouterModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+    MatToolbarModule,
+    MatListModule,
+],
     templateUrl: './letter-shuffle.component.html',
     styleUrl: './letter-shuffle.component.scss'
 })
