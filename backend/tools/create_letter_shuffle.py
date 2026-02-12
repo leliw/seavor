@@ -1,3 +1,4 @@
+import asyncio
 
 import _set_path as _set_path
 from ampf.testing import ApiTestClient
@@ -5,17 +6,20 @@ from app_state import AppState
 from dependencies import get_image_gen_service, get_image_service
 from features.languages import Language
 from features.letter_shuffles.letter_shuffle_model import LetterShuffleSet, LetterShuffleSetPatch
-from features.letter_shuffles.letter_shuffle_translation_model import LetterShuffleSetTranslation, LetterShuffleSetTranslationHeader
+from features.letter_shuffles.letter_shuffle_translation_model import (
+    LetterShuffleSetTranslation,
+    LetterShuffleSetTranslationHeader,
+)
 from features.teacher.teacher_service import TeacherService
 from main import app
 
-theme = "love and Valentine's Day"
-# number_of_words = 10
-# target_languages = [Language.EN, Language.ES, Language.DE, Language.FR]
-# native_languages = [Language.EN, Language.PL]
-number_of_words = 1
-target_languages = [Language.EN]
-native_languages = [Language.PL]
+theme = "Winter Olympics Games"
+number_of_words = 10
+target_languages = [Language.EN, Language.ES, Language.DE, Language.FR]
+native_languages = [Language.EN, Language.PL]
+# number_of_words = 1
+# target_languages = [Language.EN]
+# native_languages = [Language.PL]
 
 
 class Generator:
@@ -81,7 +85,7 @@ class Generator:
                     client.patch(
                         f"/api/target-languages/{target_language_code}/letter-shuffles/{letter_shuffle_set.id}/translations/{translation.native_language_code}",
                         200,
-                        json={ "items": [{"target_phrase": i.target_phrase, "phrase_image_name": i.phrase_image_name }]},
+                        json={"items": [{"target_phrase": i.target_phrase, "phrase_image_name": i.phrase_image_name}]},
                     )
 
     def translate_letter_shuffle_set(self, target_language_code: Language, letter_shuffle_set_id: str):
@@ -108,6 +112,8 @@ if __name__ == "__main__":
     with ApiTestClient(app) as client:
         generator = Generator(client.app.state.app_state, client)  # type: ignore
         # asyncio.run(generator.go())
-        # asyncio.run(generator.generate_images(Language.EN, "638fe8e7-7ea1-438f-82e8-aa78f6765c3e"))
-        # generator.translate_letter_shuffle_set(Language.EN, "638fe8e7-7ea1-438f-82e8-aa78f6765c3e")
-        generator.update_images(Language.EN, "638fe8e7-7ea1-438f-82e8-aa78f6765c3e")
+        language = Language.DE
+        set_id = "7bc9606b-9268-4bcc-9ecc-d49b9e85823d"
+        asyncio.run(generator.generate_images(language, set_id))
+        generator.translate_letter_shuffle_set(language, set_id)
+        # generator.update_images(Language.EN, "638fe8e7-7ea1-438f-82e8-aa78f6765c3e")
