@@ -22,7 +22,7 @@ cat <<EOF >> proxy-dev.conf.json
  }
 EOF
 
-ng serve -o --proxy-config=proxy-dev.conf.json --port=$PORT
+ng serve -o --proxy-config=proxy-dev.conf.json --host 0.0.0.0 --port=$PORT
 
 rm proxy-dev.conf.json
 
