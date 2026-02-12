@@ -21,7 +21,7 @@
             <div>
                 @if (topic.image_name) {
                 <img [ngSrc]="`/api/images/${topic.image_name}`" fill [ngSrcset]="'400w, 600w, 800w, 1024w'" priority
-                    [matTooltip]="topic.target_description" />
+                    [matTooltip]="topic.target_description" [matTooltipTouchGestures]="'off'" />
                 } @else {
                 {{topic.target_description}}
                 }
