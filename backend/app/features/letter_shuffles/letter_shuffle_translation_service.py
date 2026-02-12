@@ -21,7 +21,7 @@ class LetterShuffleTranslationService:
     ):
         self.factory = factory
         self.storage = factory.create_storage(
-            f"target-languages/{target_language_code}/letter-shuffles/{id}/",
+            f"target-languages/{target_language_code}/letter-shuffles/{id}/native-languages",
             LetterShuffleSetTranslation,
             key="native_language_code",
         )

@@ -17,8 +17,9 @@ class AppState:
         if config.gcp_root_storage:
             from ampf.gcp import GcpAsyncFactory
 
-            factory = GcpAsyncFactory(root_storage=config.gcp_root_storage)
+            factory = GcpAsyncFactory(root_storage=config.gcp_root_storage, bucket_name=config.gcp_bucket_name)
             _log.info(f"GCP storage root: {config.gcp_root_storage}")
+            _log.info(f"GCP storage bucket: {config.gcp_bucket_name}")
         elif config.data_dir:
             from ampf.local import LocalAsyncFactory
 
