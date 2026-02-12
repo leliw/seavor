@@ -17,9 +17,3 @@ app-root {
     overflow: hidden;
 }
 
-.full-screen-container {
-    height: calc(100vh - 64px);
-    /* 64px = wysokość bottom bar */
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-}

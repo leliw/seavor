@@ -1,8 +1,49 @@
-/* You can add global styles to this file, and also import other style files */
+/* mobile default */
+:root {
+    --app-bar-height: 56px;
+}
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+/* Tablets / small desktops */
+@media (min-width: 600px) {
+    :root {
+        --app-bar-height: 64px;
+    }
+}
 
+/* Middle desktops / landscape tablets */
+@media (min-width: 960px) {
+    :root {}
+}
+
+/* large desktops */
+@media (min-width: 1280px) {
+    :root {}
+}
+
+html,
+body,
+app-root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+body {
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+app-root {
+    display: block;
+}
+
+
+.full-screen-container {
+    height: calc(100dvh - var(--app-bar-height) - env(safe-area-inset-bottom));
+    margin: 0px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
 
 .bottom-nav {
     position: fixed;
@@ -10,7 +51,8 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     left: 0;
     right: 0;
     padding: 0px;
-    height: 64px;
+    padding-bottom: env(safe-area-inset-bottom);
+    height: calc(var(--app-bar-height) + env(safe-area-inset-bottom));
     z-index: 1000;
     border-top: 1px solid var(--mat-divider-color);
     align-items: center;
@@ -21,7 +63,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
         // width: 100%;
         display: grid;
         grid-auto-flow: column;
-        grid-auto-columns: 1fr;        
+        grid-auto-columns: 1fr;
         gap: 0.2em;
         justify-items: center;
         justify-content: center;
@@ -39,10 +81,14 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
-                font-size: xx-small;
                 padding-top: 0.3em;
                 padding-right: 0.5em;
                 padding-left: 0.5em;
+
+                span.mat-mdc-list-item-title {
+                    font-size: small;
+
+                }
             }
         }
     }
