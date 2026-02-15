@@ -13,7 +13,7 @@ from features.letter_shuffles.letter_shuffle_translation_model import (
 from features.teacher.teacher_service import TeacherService
 from main import app
 
-theme = "Winter Olympics Games"
+theme = "Love and Valentine's Day"
 number_of_words = 10
 target_languages = [Language.EN, Language.ES, Language.DE, Language.FR]
 native_languages = [Language.EN, Language.PL]
@@ -112,8 +112,8 @@ if __name__ == "__main__":
     with ApiTestClient(app) as client:
         generator = Generator(client.app.state.app_state, client)  # type: ignore
         # asyncio.run(generator.go())
-        language = Language.DE
-        set_id = "7bc9606b-9268-4bcc-9ecc-d49b9e85823d"
+        language = Language.FR
+        set_id = "3b4f9a88-1ee4-4a3b-9e24-dd32aa1d473c"
         asyncio.run(generator.generate_images(language, set_id))
         generator.translate_letter_shuffle_set(language, set_id)
         # generator.update_images(Language.EN, "638fe8e7-7ea1-438f-82e8-aa78f6765c3e")
