@@ -20,6 +20,7 @@ class OpenAIImageGenService(BaseImageGenService):
         result = self.client.images.generate(
             model=self.model,
             prompt=prompt,
+            moderation="low",
             size="1024x1024",
             n=1,
         )
