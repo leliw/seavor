@@ -1,15 +1,15 @@
 <div class="container">
-    <mat-card>
+    <!-- <mat-card>
         <mat-card-header>
             <mat-card-title>Repetitions</mat-card-title>
         </mat-card-header>
-        <mat-card-content>Repetitions status</mat-card-content>
-        <mat-card-actions align="end">
-            <button mat-icon-button color="primary" routerLink="/repetitions">
-                <mat-icon>repeat</mat-icon>
-            </button>
-        </mat-card-actions>
-    </mat-card>
+        <mat-card-content routerLink="/repetitions">
+            <div>
+                <img [ngSrc]="`/Not_implemented_yet.png`" fill [ngSrcset]="'400w, 600w, 800w, 1024w'" priority
+                    matTooltip="Not implemented yet" [matTooltipTouchGestures]="'off'" />
+            </div>
+        </mat-card-content>
+    </mat-card> -->
 
     @for(topic of topics; track topic.id) {
     <mat-card>
