@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from '@angular/material/card';
-import { MatIcon } from "@angular/material/icon";
+import { MatIconModule } from "@angular/material/icon";
 import { RouterModule } from "@angular/router";
 import { Topic, TopicService } from '../topic.service';
 import { NgOptimizedImage } from '@angular/common';
@@ -14,7 +14,7 @@ import { MatTooltip } from "@angular/material/tooltip";
     NgOptimizedImage,
     MatCardModule,
     MatButtonModule,
-    MatIcon,
+    MatIconModule,
     RouterModule,
     MatTooltip
 ],
