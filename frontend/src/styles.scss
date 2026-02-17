@@ -37,7 +37,6 @@
         max-width: 1200px;
         margin: auto;
     }
-
 }
 
 /* Middle desktops / landscape tablets */
@@ -48,7 +47,6 @@
 /* large desktops */
 @media (min-width: 1280px) {
     :root {}
-
 }
 
 html,
@@ -102,12 +100,11 @@ app-root {
 
         .mat-mdc-list-item {
             text-align: left;
-            height: auto;
-
             display: flex;
             flex-direction: row;
 
             @media (max-width: 800px) {
+                height: auto;
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
