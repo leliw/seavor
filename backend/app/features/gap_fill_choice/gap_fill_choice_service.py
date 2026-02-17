@@ -16,7 +16,9 @@ from features.gap_fill_choice.gap_fill_choice_model import (
 
 class GapFillChoiceService:
     def __init__(self, factory: BaseAsyncFactory, audio_file_service: AudioFileService, target_language_code: str):
-        self.storage = factory.create_storage("gap_fill_choice_exercises", GapFillChoiceExercise)
+        self.storage = factory.create_storage(
+            f"target-languages/{target_language_code}/gap_fill_choice_exercises", GapFillChoiceExercise
+        )
         self.audio_file_service = audio_file_service
         self.target_language_code = target_language_code
 
@@ -58,7 +60,9 @@ class GapFillChoiceService:
         if new_exercise.target_distractors_explanation:
             new_exercise.target_distractors_explanation_audio_file_name = {}
             for distractor in new_exercise.target_distractors_explanation.items():
-                new_exercise.target_distractors_explanation_audio_file_name[distractor[0]] = audio_file_names[audio_file_index]
+                new_exercise.target_distractors_explanation_audio_file_name[distractor[0]] = audio_file_names[
+                    audio_file_index
+                ]
                 audio_file_index += 1
 
         await self.storage.create(new_exercise)
@@ -79,8 +83,6 @@ class GapFillChoiceService:
         # If audio regeneration is needed, a more complex logic similar to POST would be required.
 
         await self.storage.put(key, updated_exercise)
-
-
 
     async def patch(self, uid: UUID, value_patch: GapFillChoiceExercisePatch) -> GapFillChoiceExercise:
         value = await self.storage.get(uid)

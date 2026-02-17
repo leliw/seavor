@@ -20,12 +20,12 @@ class GapFillChoiceExerciseCreate(LevelRange):
     options: List[str]
     correct_index: int
     target_explanation: Optional[str] = None
-    target_distractors_explanation: Optional[Dict[int, str]] = None
+    target_distractors_explanation: Optional[Dict[str, str]] = None
 
     hint: Optional[str] = None
     target_sentence_audio_file_name: Optional[str] = None
     target_explanation_audio_file_name: Optional[str] = None
-    target_distractors_explanation_audio_file_name: Optional[Dict[int, str]] = None
+    target_distractors_explanation_audio_file_name: Optional[Dict[str, str]] = None
     target_hint_audio_file_name: Optional[str] = None
 
 
@@ -35,12 +35,12 @@ class GapFillChoiceExercisePatch(LevelRange):
     options: Optional[List[str]] = None
     correct_index: Optional[int] = None
     target_explanation: Optional[str] = None
-    target_distractors_explanation: Optional[Dict[int, str]] = None
+    target_distractors_explanation: Optional[Dict[str, str]] = None
 
     hint: Optional[str] = None
     target_sentence_audio_file_name: Optional[str] = None
     target_explanation_audio_file_name: Optional[str] = None
-    target_distractors_explanation_audio_file_name: Optional[Dict[int, str]] = None
+    target_distractors_explanation_audio_file_name: Optional[Dict[str, str]] = None
     target_hint_audio_file_name: Optional[str] = None
 
 
@@ -52,12 +52,12 @@ class GapFillChoiceExercise(LevelRange):
     options: List[str]
     correct_index: int
     target_explanation: Optional[str] = None
-    target_distractors_explanation: Optional[Dict[int, str]] = None
+    target_distractors_explanation: Optional[Dict[str, str]] = None
 
     hint: Optional[str] = None
     target_sentence_audio_file_name: Optional[str] = None
     target_explanation_audio_file_name: Optional[str] = None
-    target_distractors_explanation_audio_file_name: Optional[Dict[int, str]] = None
+    target_distractors_explanation_audio_file_name: Optional[Dict[str, str]] = None
     target_hint_audio_file_name: Optional[str] = None
 
     created_at: datetime
