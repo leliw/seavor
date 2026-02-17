@@ -44,7 +44,6 @@ export const routes: Routes = [
             }
         ]
     },
-
     {
         path: '',
         canActivateChild: [interfaceLanguageSelectedGuard, learningLanguageSelectedGuard],
@@ -53,7 +52,11 @@ export const routes: Routes = [
             {
                 path: 'letter-shuffle/:id',
                 loadComponent: () => import('./features/letter-shuffle/letter-shuffle.component').then(m => m.LetterShuffleComponent)
+            },
+            {
+                path: 'gap-fill-choice/:id',
+                loadComponent: () => import('./features/gap-fill-choice/gap-fill-choice.component').then(m => m.GapFillChoiceComponent)
             }
         ]
-    }
+    },
 ];
