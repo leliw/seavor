@@ -1,28 +1,9 @@
-.layout-container {
-    position: relative;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr;
-    gap: 0.5em;
-    padding: 0.5em;
-    box-sizing: border-box;
-
-
-    max-height: 800px;
-    max-width: 1200px;
-    margin: auto;
-
+.layout-container-2 {
     @media (max-width: 800px) {
         grid-template-columns: 1fr;
         grid-template-rows: 3fr 2fr;
         max-height: none;
     }
-}
-
-.part {
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
 }
 
 .part.left {
@@ -35,12 +16,7 @@
     grid-template-rows: 1fr 1fr;
 }
 
-.vertically-centered {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
+
 
 .image-container {
     position: relative;
