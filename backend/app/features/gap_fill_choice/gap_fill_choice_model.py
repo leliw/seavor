@@ -21,8 +21,8 @@ class GapFillChoiceExerciseCreate(LevelRange):
     correct_index: int
     target_explanation: Optional[str] = None
     target_distractors_explanation: Optional[Dict[str, str]] = None
+    target_hint: Optional[str] = None
 
-    hint: Optional[str] = None
     target_sentence_audio_file_name: Optional[str] = None
     target_explanation_audio_file_name: Optional[str] = None
     target_distractors_explanation_audio_file_name: Optional[Dict[str, str]] = None
@@ -36,8 +36,8 @@ class GapFillChoiceExercisePatch(LevelRange):
     correct_index: Optional[int] = None
     target_explanation: Optional[str] = None
     target_distractors_explanation: Optional[Dict[str, str]] = None
+    target_hint: Optional[str] = None
 
-    hint: Optional[str] = None
     target_sentence_audio_file_name: Optional[str] = None
     target_explanation_audio_file_name: Optional[str] = None
     target_distractors_explanation_audio_file_name: Optional[Dict[str, str]] = None
@@ -53,8 +53,8 @@ class GapFillChoiceExercise(LevelRange):
     correct_index: int
     target_explanation: Optional[str] = None
     target_distractors_explanation: Optional[Dict[str, str]] = None
+    target_hint: Optional[str] = None
 
-    hint: Optional[str] = None
     target_sentence_audio_file_name: Optional[str] = None
     target_explanation_audio_file_name: Optional[str] = None
     target_distractors_explanation_audio_file_name: Optional[Dict[str, str]] = None

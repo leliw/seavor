@@ -34,8 +34,8 @@ class GapFillChoiceService:
             texts_to_synthesize.append(new_exercise.target_sentence)
         if new_exercise.target_explanation:
             texts_to_synthesize.append(new_exercise.target_explanation)
-        if new_exercise.hint:
-            texts_to_synthesize.append(new_exercise.hint)
+        if new_exercise.target_hint:
+            texts_to_synthesize.append(new_exercise.target_hint)
         if new_exercise.target_distractors_explanation:
             for distractor in new_exercise.target_distractors_explanation.items():
                 texts_to_synthesize.append(distractor[1])
@@ -54,7 +54,7 @@ class GapFillChoiceService:
         if new_exercise.target_explanation:
             new_exercise.target_explanation_audio_file_name = audio_file_names[audio_file_index]
             audio_file_index += 1
-        if new_exercise.hint:
+        if new_exercise.target_hint:
             new_exercise.target_hint_audio_file_name = audio_file_names[audio_file_index]
             audio_file_index += 1
         if new_exercise.target_distractors_explanation:
