@@ -54,7 +54,7 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/letter-shuffle/letter-shuffle.component').then(m => m.LetterShuffleComponent)
             },
             {
-                path: 'gap-fill-choice/:id',
+                path: 'gap-fill-choices/:id',
                 loadComponent: () => import('./features/gap-fill-choice/gap-fill-choice.component').then(m => m.GapFillChoiceComponent)
             }
         ]

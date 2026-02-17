@@ -9,6 +9,12 @@ mat-radio-group {
     font-size: large;
 }
 
+#hint {
+    margin-top: 1em;
+    font-size: larger;
+    font-style: italic;
+}
+
 #answer {
     --mat-radio-label-text-size: large;
 }
