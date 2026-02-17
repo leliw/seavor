@@ -12,17 +12,13 @@ class Level(StrEnum):
     C1 = "C1"
     C2 = "C2"
 
-    @property
-    def index(self) -> int:
-        return list(Level).index(self)
-
 class LevelRange(BaseModel):
     min_level: Level = Field(..., examples=["A1", "A2"])
     max_level: Level = Field(..., examples=["B2", "C1"])
 
     @model_validator(mode="after")
     def check_min_le_max(self) -> Self:
-        if self.min_level.index > self.max_level.index:
+        if self.min_level > self.max_level:
             raise ValueError("min_level must be <= max_level")
         return self
 
