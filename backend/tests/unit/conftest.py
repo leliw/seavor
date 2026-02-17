@@ -15,6 +15,8 @@ from main import app as main_app
 def config(tmp_path) -> AppConfig:
     config = AppConfig(
         data_dir=str(tmp_path),
+        gcp_root_storage=None,
+        gcp_bucket_name=None,
         production=False,
     )
     return config

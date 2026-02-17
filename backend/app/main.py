@@ -11,6 +11,7 @@ from log_config import setup_logging
 from routers import (
     audio_files,
     config,
+    gap_fill_choices,
     images,
     letter_shuffles,
     topics,
@@ -36,6 +37,7 @@ app = FastAPI(
 app.include_router(config.router, prefix="/api/config")
 app.include_router(topics.router, prefix="/api/topics")
 app.include_router(letter_shuffles.router, prefix="/api/target-languages/{target_language_code}/letter-shuffles")
+app.include_router(gap_fill_choices.router, prefix="/api/target-languages/{target_language_code}/gap-fill-choices")
 app.include_router(audio_files.router, prefix="/api/audio-files")
 app.include_router(images.router, prefix="/api/images")
 

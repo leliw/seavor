@@ -1,4 +1,5 @@
 from ampf.testing import ApiTestClient
+from features.languages import Language
 from features.letter_shuffles.letter_shuffle_model import (
     LetterShuffleItem,
     LetterShuffleSet,
@@ -7,7 +8,7 @@ from features.letter_shuffles.letter_shuffle_model import (
 )
 
 letter_shuffle_set = LetterShuffleSetCreate(
-    target_language_code="en",
+    target_language_code=Language.EN,
     target_title="Christmas",
     target_description="Words and phrases related to Christmas",
     items=[
@@ -55,6 +56,8 @@ letter_shuffle_set = LetterShuffleSetCreate(
 )
 
 endpoint = "/api/target-languages/en/letter-shuffles"
+
+
 def test_get_all(client: ApiTestClient):
     r = client.get_typed_list(endpoint, 200, LetterShuffleSetHeader)
     assert 0 == len(r)
@@ -76,7 +79,6 @@ def test_post_get_put_patch_delete(client: ApiTestClient):
     assert r.target_title == value.target_title
     assert len(r.items) > 0
     assert isinstance(r.items[0].target_phrase_audio_file_name, str)
-
 
     # PUT
     p.target_title = "Updated title"
