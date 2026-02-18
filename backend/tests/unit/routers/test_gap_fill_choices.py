@@ -13,8 +13,7 @@ from features.levels import Level
 @pytest.fixture
 def gap_fill_choice_exercise_create() -> GapFillChoiceExerciseCreate:
     return GapFillChoiceExerciseCreate(
-        min_level=Level.A1,
-        max_level=Level.A2,
+        level=Level.A1,
         target_language_code=Language.EN,
         target_sentence="Hello [___]!",
         gap_marker="[___]",
@@ -49,8 +48,7 @@ def test_post_get_put_delete(client: ApiTestClient, gap_fill_choice_exercise_cre
     # PATCH
     updated_sentence = "Hi [___]!"
     gfce_patch = GapFillChoiceExercisePatch(
-        min_level=Level.A1,
-        max_level=Level.A2,
+        level=Level.A1,
         target_sentence=updated_sentence,
         correct_index=1,  # Change correct answer
     )

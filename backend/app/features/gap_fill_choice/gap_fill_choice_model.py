@@ -2,19 +2,23 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional, Self
 from uuid import UUID, uuid4
 
+from pydantic import BaseModel
+
 from features.languages import Language
-from features.levels import LevelRange
+from features.levels import Level
 
 
-class GapFillChoiceExerciseHeader(LevelRange):
+class GapFillChoiceExerciseHeader(BaseModel):
     id: UUID
     target_language_code: Language
+    level: Level
     created_at: datetime
     updated_at: datetime
 
 
-class GapFillChoiceExerciseCreate(LevelRange):
+class GapFillChoiceExerciseCreate(BaseModel):
     target_language_code: Language
+    level: Level
     target_sentence: str
     gap_marker: Optional[str] = None
     options: List[str]
@@ -29,7 +33,8 @@ class GapFillChoiceExerciseCreate(LevelRange):
     target_hint_audio_file_name: Optional[str] = None
 
 
-class GapFillChoiceExercisePatch(LevelRange):
+class GapFillChoiceExercisePatch(BaseModel):
+    level: Optional[Level] = None
     target_sentence: Optional[str] = None
     gap_marker: Optional[str] = None
     options: Optional[List[str]] = None
@@ -44,9 +49,10 @@ class GapFillChoiceExercisePatch(LevelRange):
     target_hint_audio_file_name: Optional[str] = None
 
 
-class GapFillChoiceExercise(LevelRange):
+class GapFillChoiceExercise(BaseModel):
     id: UUID
     target_language_code: Language
+    level: Level
     target_sentence: str
     gap_marker: Optional[str] = None
     options: List[str]
