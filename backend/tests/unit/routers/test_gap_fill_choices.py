@@ -21,8 +21,8 @@ def gap_fill_choice_exercise_create() -> GapFillChoiceExerciseCreate:
         options=["World", "Earth", "Moon"],
         correct_index=0,
         target_explanation="The common greeting.",
-        target_distractors_explanation={1: "Not a planet.", 2: "Also not a planet."},
-        hint="Starts with W",
+        target_distractors_explanation={"1": "Not a planet.", "2": "Also not a planet."},
+        target_hint="Starts with W",
     )
 
 
