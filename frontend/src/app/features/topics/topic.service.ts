@@ -31,7 +31,7 @@ export class TopicService {
     const targetLanguage = this.languageService.getLearningLanguage();
     const nativeLanguage = this.languageService.getInterfaceLanguage();
     const level = "A1"
-    return `/api/topics/${targetLanguage}/${level}/${nativeLanguage}`;
+    return `/api/topics/${targetLanguage}/${level}/native-languages/${nativeLanguage}`;
   }
 
   getAll(): Observable<Topic[]> {

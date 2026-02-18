@@ -97,6 +97,6 @@ def test_patch_set(client: ApiTestClient, endpoint: str, letter_shuffle_set_tran
     assert t.image_name=="xxx"
     # And: The topics are patched as well
     for level in list(Level):
-        r = client.get_typed_list(f"/api/topics/en/{level}/pl", 200, Topic)
+        r = client.get_typed_list(f"/api/topics/en/{level}/native-languages/pl", 200, Topic)
         assert 1 == len(r)
         assert r[0].image_name == "xxx"

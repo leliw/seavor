@@ -1,8 +1,9 @@
 from typing import AsyncGenerator, Optional
+from uuid import UUID
 
 from ampf.base import BaseAsyncFactory
 from features.levels import Level
-from features.topics.topic_model import Topic
+from features.topics.topic_model import Topic, TopicCreate
 
 
 class TopicService:
@@ -29,3 +30,15 @@ class TopicService:
             Topic,
         )
         await storage.save(value)
+
+    async def create(self, value_create: TopicCreate) -> Topic:
+        value = Topic.create(value_create)
+        target_language_code = value.target_language_code
+        level = value_create.level
+        storage = self.factory.create_storage(f"target-languages/{target_language_code}/levels/{level}/topics", Topic)
+        await storage.create(value)
+        return value
+
+    async def get(self, target_language_code: str, level: str, id: UUID) -> Topic:
+        storage = self.factory.create_storage(f"target-languages/{target_language_code}/levels/{level}/topics", Topic)
+        return await storage.get(id)
