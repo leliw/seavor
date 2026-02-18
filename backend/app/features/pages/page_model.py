@@ -1,17 +1,30 @@
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Self
+from enum import StrEnum
+from typing import Dict, List, Literal, Optional, Self, Union
 from uuid import UUID, uuid4
-
-from pydantic import BaseModel
 
 from features.languages import Language
 from features.levels import Level
+from pydantic import BaseModel, ConfigDict, Field
+from typing_extensions import Annotated
 
 
-class GapFillChoiceExerciseHeader(BaseModel):
+class PageType(StrEnum):
+    LETTER_SHUFFLE = "letter-shuffle"
+    GAP_FILL_CHOICE = "gap-fill-choice"
+    INFO = "info"
+
+
+class BasePage(BaseModel):
+    """Common fields for ALL page types"""
+
+    model_config = ConfigDict(extra="forbid")
+
     id: UUID
     target_language: Language
     level: Level
+    order: int
+    type: PageType  # literal below will override this
     created_at: datetime
     updated_at: datetime
 
@@ -19,6 +32,7 @@ class GapFillChoiceExerciseHeader(BaseModel):
 class GapFillChoiceExerciseCreate(BaseModel):
     target_language: Language
     level: Level
+    order: int
     target_sentence: str
     gap_marker: Optional[str] = None
     options: List[str]
@@ -49,10 +63,8 @@ class GapFillChoiceExercisePatch(BaseModel):
     target_hint_audio_file_name: Optional[str] = None
 
 
-class GapFillChoiceExercise(BaseModel):
-    id: UUID
-    target_language: Language
-    level: Level
+class GapFillChoiceExercise(BasePage):
+    type: Literal[PageType.GAP_FILL_CHOICE] = PageType.GAP_FILL_CHOICE
     target_sentence: str
     gap_marker: Optional[str] = None
     options: List[str]
@@ -65,9 +77,6 @@ class GapFillChoiceExercise(BaseModel):
     target_explanation_audio_file_name: Optional[str] = None
     target_distractors_explanation_audio_file_name: Optional[Dict[str, str]] = None
     target_hint_audio_file_name: Optional[str] = None
-
-    created_at: datetime
-    updated_at: datetime
 
     @classmethod
     def create(cls, value_create: GapFillChoiceExerciseCreate) -> Self:
@@ -86,3 +95,19 @@ class GapFillChoiceExercise(BaseModel):
 
 class GapFillChoiceExercisePut(GapFillChoiceExercise):
     pass
+
+
+class InfoPage(BasePage):
+    type: Literal[PageType.INFO]
+    title: str
+    content: str  # markdown / HTML / JSON
+    image_url: str | None = None
+
+
+Page = Annotated[
+    Union[
+        GapFillChoiceExercise,
+        InfoPage,
+    ],
+    Field(discriminator="type"),
+]

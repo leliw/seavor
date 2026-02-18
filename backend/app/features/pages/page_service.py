@@ -4,19 +4,22 @@ from typing import AsyncGenerator
 from uuid import UUID
 
 from ampf.base import BaseAsyncFactory
-from features.gap_fill_choice.gap_fill_choice_model import (
+from pydantic import TypeAdapter
+from features.pages.page_model import (
+    BasePage,
     GapFillChoiceExercise,
     GapFillChoiceExerciseCreate,
-    GapFillChoiceExerciseHeader,
     GapFillChoiceExercisePatch,
     GapFillChoiceExercisePut,
+    Page,
 )
 from features.languages import Language
 from features.levels import Level
 from shared.audio_files.audio_file_service import AudioFileService
 
+PageAdapter = TypeAdapter(Page)
 
-class GapFillChoiceService:
+class PageService:
     def __init__(
         self,
         factory: BaseAsyncFactory,
@@ -26,17 +29,18 @@ class GapFillChoiceService:
         topic_id: UUID,
     ):
         self.storage = factory.create_storage(
-            f"target-languages/{target_language}/levels/{level}/topics/{topic_id}/gap_fill_choice_exercises",
-            GapFillChoiceExercise,
+            f"target-languages/{target_language}/levels/{level}/topics/{topic_id}/pages", PageAdapter, "id" # type: ignore
         )
+        self.storage.from_storage = lambda value: PageAdapter.validate_python(value)  # type: ignore
+
         self.audio_file_service = audio_file_service
         self.target_language_code = target_language
 
-    async def get_all(self) -> AsyncGenerator[GapFillChoiceExerciseHeader]:
+    async def get_all(self) -> AsyncGenerator[BasePage]:
         async for value in self.storage.get_all():
-            yield GapFillChoiceExerciseHeader(**value.model_dump())
+            yield BasePage(**value.model_dump())
 
-    async def post(self, value: GapFillChoiceExerciseCreate) -> GapFillChoiceExercise:
+    async def post(self, value: GapFillChoiceExerciseCreate) -> Page:
         new_exercise = GapFillChoiceExercise.create(value)
 
         texts_to_synthesize = []
@@ -78,7 +82,7 @@ class GapFillChoiceService:
         await self.storage.create(new_exercise)
         return new_exercise
 
-    async def get(self, key: UUID) -> GapFillChoiceExercise:
+    async def get(self, key: UUID) -> Page:
         return await self.storage.get(key)
 
     async def put(self, key: UUID, value: GapFillChoiceExercisePut) -> None:
@@ -94,7 +98,7 @@ class GapFillChoiceService:
 
         await self.storage.put(key, updated_exercise)
 
-    async def patch(self, uid: UUID, value_patch: GapFillChoiceExercisePatch) -> GapFillChoiceExercise:
+    async def patch(self, uid: UUID, value_patch: GapFillChoiceExercisePatch) -> Page:
         value = await self.storage.get(uid)
         value.patch(value_patch)
         await self.storage.put(uid, value)

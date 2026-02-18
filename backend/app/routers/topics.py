@@ -7,7 +7,7 @@ from fastapi import APIRouter
 from features.languages import Language
 from features.levels import Level
 from features.topics.topic_model import Topic, TopicCreate
-from routers import gap_fill_choices
+from routers import topics_pages
 
 router = APIRouter(tags=["Topics"])
 ITEM_PATH = "/{target_language}/{level}/{topic_id}"
@@ -28,4 +28,4 @@ async def get(service: TopicServiceDep, target_language: Language, level: Level,
     return await service.get(target_language, level, topic_id)
 
 
-router.include_router(gap_fill_choices.router, prefix=f"{ITEM_PATH}/gap-fill-choices")
+router.include_router(topics_pages.router, prefix=f"{ITEM_PATH}/pages")

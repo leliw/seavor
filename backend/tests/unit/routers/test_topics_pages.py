@@ -1,15 +1,15 @@
-from uuid import UUID, uuid4
+from uuid import UUID
 
 import pytest
 from ampf.testing import ApiTestClient
-from features.gap_fill_choice.gap_fill_choice_model import (
-    GapFillChoiceExercise,
-    GapFillChoiceExerciseCreate,
-    GapFillChoiceExerciseHeader,
-    GapFillChoiceExercisePatch,
-)
 from features.languages import Language
 from features.levels import Level
+from features.pages.page_model import (
+    BasePage,
+    GapFillChoiceExercise,
+    GapFillChoiceExerciseCreate,
+    GapFillChoiceExercisePatch,
+)
 from features.topics.topic_model import Topic, TopicCreate
 
 
@@ -17,6 +17,7 @@ from features.topics.topic_model import Topic, TopicCreate
 def gap_fill_choice_exercise_create() -> GapFillChoiceExerciseCreate:
     return GapFillChoiceExerciseCreate(
         level=Level.A1,
+        order=1,
         target_language=Language.EN,
         target_sentence="Hello [___]!",
         gap_marker="[___]",
@@ -36,11 +37,11 @@ def topic_id(client: ApiTestClient, topic_create: TopicCreate) -> UUID:
 
 @pytest.fixture
 def endpoint(topic_id: UUID) -> str:
-    return f"/api/topics/en/A1/{topic_id}/gap-fill-choices"
+    return f"/api/topics/en/A1/{topic_id}/pages"
 
 
 def test_get_all(client: ApiTestClient, endpoint: str):
-    r = client.get_typed_list(endpoint, 200, GapFillChoiceExerciseHeader)
+    r = client.get_typed_list(endpoint, 200, BasePage)
     assert isinstance(r, list)
     assert 0 == len(r)
 
