@@ -14,7 +14,7 @@ from features.levels import Level
 def gap_fill_choice_exercise_create() -> GapFillChoiceExerciseCreate:
     return GapFillChoiceExerciseCreate(
         level=Level.A1,
-        target_language_code=Language.EN,
+        target_language=Language.EN,
         target_sentence="Hello [___]!",
         gap_marker="[___]",
         options=["World", "Earth", "Moon"],
@@ -25,7 +25,7 @@ def gap_fill_choice_exercise_create() -> GapFillChoiceExerciseCreate:
     )
 
 
-endpoint = "/api/target-languages/en/gap-fill-choices"
+endpoint = "/api/gap-fill-choices/en"
 
 
 def test_get_all(client: ApiTestClient):

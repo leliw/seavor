@@ -17,7 +17,7 @@ class GapFillChoiceExerciseHeader(BaseModel):
 
 
 class GapFillChoiceExerciseCreate(BaseModel):
-    target_language_code: Language
+    target_language: Language
     level: Level
     target_sentence: str
     gap_marker: Optional[str] = None
@@ -51,7 +51,7 @@ class GapFillChoiceExercisePatch(BaseModel):
 
 class GapFillChoiceExercise(BaseModel):
     id: UUID
-    target_language_code: Language
+    target_language: Language
     level: Level
     target_sentence: str
     gap_marker: Optional[str] = None
