@@ -12,7 +12,7 @@ from features.letter_shuffles.letter_shuffle_translation_model import (
     LetterShuffleSetTranslationCreate,
 )
 from features.levels import Level
-from features.topics.topic_model import Topic, TopicCreate, TopicType
+from features.topics.topic_model import Topic, TopicCreate
 
 from tests.unit.routers.test_letter_shuffles import letter_shuffle_set
 
@@ -64,18 +64,11 @@ def test_post_get_put_patch_delete_letter_shuffle_translation(client: ApiTestCli
         assert r[0].target_language_code == value.target_language_code
 
 
-def test_post_get(client: ApiTestClient):
+def test_post_get(client: ApiTestClient, topic_create: TopicCreate):
     # POST
-    value_create = TopicCreate(
-        target_language_code=Language.EN,
-        level=Level.A1,
-        target_title="Semi-modals",
-        target_description="Semi-modals vs. pure modal verbs",
-        type=TopicType.GRAMMAR,
-    )
-    r = client.post_typed("/api/topics", 200, Topic, json=value_create)
-    assert r.target_title == value_create.target_title
+    r = client.post_typed("/api/topics", 200, Topic, json=topic_create)
+    assert r.target_title == topic_create.target_title
 
     # GET
-    r = client.get_typed(f"/api/topics/{r.target_language_code}/{value_create.level}/{r.id}", 200, Topic)
-    assert r.target_title == value_create.target_title
+    r = client.get_typed(f"/api/topics/{r.target_language_code}/{topic_create.level}/{r.id}", 200, Topic)
+    assert r.target_title == topic_create.target_title

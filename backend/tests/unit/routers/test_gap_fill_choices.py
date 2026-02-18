@@ -1,3 +1,5 @@
+from uuid import UUID, uuid4
+
 import pytest
 from ampf.testing import ApiTestClient
 from features.gap_fill_choice.gap_fill_choice_model import (
@@ -8,6 +10,7 @@ from features.gap_fill_choice.gap_fill_choice_model import (
 )
 from features.languages import Language
 from features.levels import Level
+from features.topics.topic_model import Topic, TopicCreate
 
 
 @pytest.fixture
@@ -25,16 +28,24 @@ def gap_fill_choice_exercise_create() -> GapFillChoiceExerciseCreate:
     )
 
 
-endpoint = "/api/gap-fill-choices/en"
+@pytest.fixture
+def topic_id(client: ApiTestClient, topic_create: TopicCreate) -> UUID:
+    r = client.post_typed("/api/topics", 200, Topic, json=topic_create)
+    return r.id
 
 
-def test_get_all(client: ApiTestClient):
+@pytest.fixture
+def endpoint(topic_id: UUID) -> str:
+    return f"/api/topics/en/A1/{topic_id}/gap-fill-choices"
+
+
+def test_get_all(client: ApiTestClient, endpoint: str):
     r = client.get_typed_list(endpoint, 200, GapFillChoiceExerciseHeader)
     assert isinstance(r, list)
     assert 0 == len(r)
 
 
-def test_post_get_put_delete(client: ApiTestClient, gap_fill_choice_exercise_create):
+def test_post_get_put_delete(client: ApiTestClient, endpoint: str, gap_fill_choice_exercise_create):
     # POST
     posted_exercise = client.post_typed(endpoint, 200, GapFillChoiceExercise, json=gap_fill_choice_exercise_create)
     exercise_id = posted_exercise.id

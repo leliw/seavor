@@ -10,7 +10,7 @@ from features.levels import Level
 
 class GapFillChoiceExerciseHeader(BaseModel):
     id: UUID
-    target_language_code: Language
+    target_language: Language
     level: Level
     created_at: datetime
     updated_at: datetime

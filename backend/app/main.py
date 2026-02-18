@@ -6,16 +6,15 @@ from dependencies import lifespan
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from shared.localized_static_files import LocalizedStaticFiles
 from log_config import setup_logging
 from routers import (
     audio_files,
     config,
-    gap_fill_choices,
     images,
     letter_shuffles,
     topics,
 )
+from shared.localized_static_files import LocalizedStaticFiles
 from version import __version__
 
 _log = logging.getLogger(__name__)
@@ -37,7 +36,6 @@ app = FastAPI(
 app.include_router(config.router, prefix="/api/config")
 app.include_router(topics.router, prefix="/api/topics")
 app.include_router(letter_shuffles.router, prefix="/api/target-languages/{target_language_code}/letter-shuffles")
-app.include_router(gap_fill_choices.router, prefix="/api/gap-fill-choices/{target_language}")
 app.include_router(audio_files.router, prefix="/api/audio-files")
 app.include_router(images.router, prefix="/api/images")
 

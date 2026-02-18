@@ -12,15 +12,16 @@ from features.gap_fill_choice.gap_fill_choice_model import (
 )
 from features.gap_fill_choice.gap_fill_choice_service import GapFillChoiceService
 from features.languages import Language
+from features.levels import Level
 
 router = APIRouter(tags=["Gap Fill Choice Exercises"])
 ITEM_PATH = "/{id}"
 
 
 def get_gap_fill_choice_service(
-    app_state: AppStateDep, audio_file_service: AudioFileServiceDep, target_language: Language
+    app_state: AppStateDep, audio_file_service: AudioFileServiceDep, target_language: Language, level: Level, topic_id: UUID
 ):
-    return GapFillChoiceService(app_state.factory, audio_file_service, target_language)
+    return GapFillChoiceService(app_state.factory, audio_file_service, target_language, level, topic_id)
 
 
 GapFillChoiceServiceDep = Annotated[GapFillChoiceService, Depends(get_gap_fill_choice_service)]

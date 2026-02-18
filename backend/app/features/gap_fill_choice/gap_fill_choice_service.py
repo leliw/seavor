@@ -4,21 +4,30 @@ from typing import AsyncGenerator
 from uuid import UUID
 
 from ampf.base import BaseAsyncFactory
-from features.languages import Language
-from shared.audio_files.audio_file_service import AudioFileService
 from features.gap_fill_choice.gap_fill_choice_model import (
     GapFillChoiceExercise,
-    GapFillChoiceExerciseHeader,
     GapFillChoiceExerciseCreate,
+    GapFillChoiceExerciseHeader,
     GapFillChoiceExercisePatch,
     GapFillChoiceExercisePut,
 )
+from features.languages import Language
+from features.levels import Level
+from shared.audio_files.audio_file_service import AudioFileService
 
 
 class GapFillChoiceService:
-    def __init__(self, factory: BaseAsyncFactory, audio_file_service: AudioFileService, target_language: Language):
+    def __init__(
+        self,
+        factory: BaseAsyncFactory,
+        audio_file_service: AudioFileService,
+        target_language: Language,
+        level: Level,
+        topic_id: UUID,
+    ):
         self.storage = factory.create_storage(
-            f"target-languages/{target_language}/gap_fill_choice_exercises", GapFillChoiceExercise
+            f"target-languages/{target_language}/levels/{level}/topics/{topic_id}/gap_fill_choice_exercises",
+            GapFillChoiceExercise,
         )
         self.audio_file_service = audio_file_service
         self.target_language_code = target_language
