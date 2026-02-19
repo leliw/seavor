@@ -53,7 +53,7 @@ def factory(client: ApiTestClient) -> BaseAsyncFactory:
 @pytest.fixture()
 def topic_create() -> TopicCreate:
     return TopicCreate(
-        target_language_code=Language.EN,
+        target_language=Language.EN,
         level=Level.A1,
         target_title="Semi-modals",
         target_description="Semi-modals vs. pure modal verbs",

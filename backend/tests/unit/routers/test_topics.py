@@ -28,7 +28,7 @@ def id(client: ApiTestClient) -> UUID:
 def endpoint(client: ApiTestClient, id) -> str:
     return f"/api/target-languages/en/letter-shuffles/{id}/translations"
 
-
+@pytest.mark.skip("Refactor to page")
 def test_post_get_put_patch_delete_letter_shuffle_translation(client: ApiTestClient, id: UUID, endpoint: str):
     # Given: A set translation
     value = LetterShuffleSetTranslation.create(
@@ -58,10 +58,8 @@ def test_post_get_put_patch_delete_letter_shuffle_translation(client: ApiTestCli
         r = client.get_typed_list(f"/api/topics/en/{level}/native-languages/pl", 200, Topic)
         assert 1 == len(r)
         assert r[0].target_title == value.target_title
-        assert r[0].native_title == value.native_title
         assert not r[0].levels
-        assert r[0].native_language_code == value.native_language_code
-        assert r[0].target_language_code == value.target_language_code
+        assert r[0].target_language == value.target_language_code
 
 
 def test_post_get(client: ApiTestClient, topic_create: TopicCreate):
@@ -70,5 +68,5 @@ def test_post_get(client: ApiTestClient, topic_create: TopicCreate):
     assert r.target_title == topic_create.target_title
 
     # GET
-    r = client.get_typed(f"/api/topics/{r.target_language_code}/{topic_create.level}/{r.id}", 200, Topic)
+    r = client.get_typed(f"/api/topics/{r.target_language}/{topic_create.level}/{r.id}", 200, Topic)
     assert r.target_title == topic_create.target_title

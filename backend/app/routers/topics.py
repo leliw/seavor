@@ -13,9 +13,9 @@ router = APIRouter(tags=["Topics"])
 ITEM_PATH = "/{target_language}/{level}/{topic_id}"
 
 
-@router.get("/{target_language}/{level}/native-languages/{native_language_code}", response_model=List[Topic])
-async def get_all(service: TopicServiceDep, target_language: str, level: str, native_language_code: str):
-    return JsonStreamingResponse(service.get_list(target_language, level, native_language_code))
+@router.get("/{target_language}/{level}", response_model=List[Topic])
+async def get_all(service: TopicServiceDep, target_language: Language, level: Level):
+    return JsonStreamingResponse(service.get_list(target_language, level))
 
 
 @router.post("")

@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.concurrency import asynccontextmanager
 from features.topics.topic_service import TopicService
+from features.native_topics.native_topic_service import NativeTopicService
 from integrations.gtts.gtts_service import GttsService
 from integrations.image_gen.base_image_gen_service import BaseImageGenService
 from integrations.image_gen.openai_image_gen_service import OpenAIImageGenService
@@ -85,3 +86,9 @@ def get_topic_service(app_state: AppStateDep) -> TopicService:
 
 
 TopicServiceDep = Annotated[TopicService, Depends(get_topic_service)]
+
+def get_topic_translation_service(app_state: AppStateDep) -> NativeTopicService:
+    return NativeTopicService(app_state.factory)
+
+
+NativeTopicServiceDep = Annotated[NativeTopicService, Depends(get_topic_translation_service)]

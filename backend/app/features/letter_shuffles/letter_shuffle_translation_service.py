@@ -10,8 +10,8 @@ from features.letter_shuffles.letter_shuffle_translation_model import (
     LetterShuffleSetTranslationUpdate,
 )
 from features.levels import Level
-from features.topics.topic_model import Topic
 from features.topics.topic_service import TopicService
+from features.native_topics.native_topic_model import NativeTopic
 from shared.audio_files.audio_file_service import AudioFileService
 
 
@@ -55,7 +55,7 @@ class LetterShuffleTranslationService:
 
         await self.storage.create(value)
         calls = [
-            topic_service.save(Topic.from_letter_shuffle_translation(level, value), level)
+            topic_service.save(NativeTopic.from_letter_shuffle_translation(level, value), level)
             for level in value.levels or list(Level)
         ]
         await asyncio.gather(*calls)
@@ -76,7 +76,7 @@ class LetterShuffleTranslationService:
         await self.storage.put(code, value)
         topic_service = TopicService(self.factory)
         calls = [
-            topic_service.save(Topic.from_letter_shuffle_translation(level, value), level)
+            topic_service.save(NativeTopic.from_letter_shuffle_translation(level, value), level)
             for level in value.levels or list(Level)
         ]
         await asyncio.gather(*calls)
