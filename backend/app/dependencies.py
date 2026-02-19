@@ -1,6 +1,8 @@
 import logging
 from typing import Annotated
 
+from haintech.ai import BaseAIModel
+
 from app_config import AppConfig
 from app_state import AppState
 from dotenv import load_dotenv
@@ -92,3 +94,11 @@ def get_topic_translation_service(app_state: AppStateDep) -> NativeTopicService:
 
 
 NativeTopicServiceDep = Annotated[NativeTopicService, Depends(get_topic_translation_service)]
+
+def get_translator_ai_model(app_state: AppStateDep):
+    from haintech.ai.google_generativeai import GoogleAIModel
+
+    return GoogleAIModel(model_name="gemini-2.5-flash-lite", parameters={"temperature": 0.0})
+
+
+TranslatorAIModelDep = Annotated[BaseAIModel, Depends(get_translator_ai_model)]

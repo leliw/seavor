@@ -1,13 +1,11 @@
-from datetime import datetime, timezone
 from typing import Self
-from uuid import uuid4, uuid5
-
-from pydantic import BaseModel
+from uuid import uuid5
 
 from features.languages import Language
 from features.letter_shuffles.letter_shuffle_translation_model import LetterShuffleSetTranslation
 from features.levels import Level
-from features.topics.topic_model import Topic, TopicCreate, TopicHeader
+from features.topics.topic_model import Topic, TopicHeader
+from pydantic import BaseModel
 
 
 class NativeTopicBase(BaseModel):
@@ -15,28 +13,21 @@ class NativeTopicBase(BaseModel):
     native_title: str
     native_description: str
 
-class NativeTopicCreate(TopicCreate, NativeTopicBase):
-    pass
 
 class NativeTopicHeader(TopicHeader, NativeTopicBase):
     pass
+
 
 class NativeTopic(Topic, NativeTopicBase):
     pass
 
     @classmethod
-    def create(cls, value_create: NativeTopicCreate) -> Self:
+    def from_topic(cls, topic: Topic, native_language: Language, native_title: str, native_description: str) -> Self:
         return cls(
-            id=uuid4(),
-            target_language=value_create.target_language,
-            levels=[value_create.level],
-            target_title=value_create.target_title,
-            target_description=value_create.target_description,
-            native_language=value_create.native_language,
-            native_title=value_create.native_title,
-            native_description=value_create.native_description,
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc),
+            native_language=native_language,
+            native_title=native_title,
+            native_description=native_description,
+            **topic.model_dump(),
         )
 
     @classmethod

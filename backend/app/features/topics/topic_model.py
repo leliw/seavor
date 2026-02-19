@@ -13,6 +13,7 @@ class TopicType(StrEnum):
     GRAMMAR = "grammar"
     VOCABULARY = "vocabulary"
 
+
 class TopicHeader(BaseModel):
     target_language: Language
     level: Level
@@ -20,6 +21,7 @@ class TopicHeader(BaseModel):
     target_title: str
     target_description: str
     image_name: Optional[str] = None
+
 
 class TopicCreate(BaseModel):
     target_language: Language
@@ -42,6 +44,14 @@ class Topic(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    @property
+    def level(self) -> Level:
+        if not self.levels:
+            raise ValueError("Level is required")
+        if len(self.levels) > 1:
+            raise ValueError("Level is not unique")
+        return self.levels[0]
+
     @classmethod
     def create(cls, value_create: TopicCreate) -> "Topic":
         return cls(
@@ -53,4 +63,3 @@ class Topic(BaseModel):
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc),
         )
-
