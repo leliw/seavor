@@ -1,34 +1,18 @@
-from typing import Annotated, List
+from typing import List
 from uuid import UUID
 
 from ampf.fastapi import JsonStreamingResponse
-from dependencies import AppStateDep, AudioFileServiceDep
-from fastapi import APIRouter, Depends
-from features.languages import Language
-from features.levels import Level
+from dependencies import PageServiceDep
+from fastapi import APIRouter
 from features.pages.page_model import (
     BasePage,
     GapFillChoiceExerciseCreate,
     GapFillChoiceExercisePatch,
     Page,
 )
-from features.pages.page_service import PageService
 
 router = APIRouter(tags=["Topic pages"])
 ITEM_PATH = "/{id}"
-
-
-def get_page_service(
-    app_state: AppStateDep,
-    audio_file_service: AudioFileServiceDep,
-    target_language: Language,
-    level: Level,
-    topic_id: UUID,
-):
-    return PageService(app_state.factory, audio_file_service, target_language, level, topic_id)
-
-
-PageServiceDep = Annotated[PageService, Depends(get_page_service)]
 
 
 @router.post("")

@@ -15,6 +15,14 @@ class PageType(StrEnum):
     INFO = "info"
 
 
+class PageHeader(BaseModel):
+    id: UUID
+    order: int
+    type: PageType
+    created_at: datetime
+    updated_at: datetime
+
+
 class BasePage(BaseModel):
     """Common fields for ALL page types"""
 
@@ -46,7 +54,6 @@ class GapFillChoiceExerciseCreate(BaseModel):
     target_distractors_explanation_audio_file_name: Optional[Dict[str, str]] = None
     target_hint_audio_file_name: Optional[str] = None
 
-
 class GapFillChoiceExercisePatch(BaseModel):
     level: Optional[Level] = None
     target_sentence: Optional[str] = None
@@ -66,7 +73,7 @@ class GapFillChoiceExercisePatch(BaseModel):
 class GapFillChoiceExercise(BasePage):
     type: Literal[PageType.GAP_FILL_CHOICE] = PageType.GAP_FILL_CHOICE
     target_sentence: str
-    gap_marker: Optional[str] = None
+    gap_marker: str = "[____]"
     options: List[str]
     correct_index: int
     target_explanation: Optional[str] = None
@@ -77,6 +84,11 @@ class GapFillChoiceExercise(BasePage):
     target_explanation_audio_file_name: Optional[str] = None
     target_distractors_explanation_audio_file_name: Optional[Dict[str, str]] = None
     target_hint_audio_file_name: Optional[str] = None
+
+    @property
+    def target_answer(self) -> str:
+        correct_fill = self.options[self.correct_index]
+        return self.target_sentence.replace(self.gap_marker, correct_fill)
 
     @classmethod
     def create(cls, value_create: GapFillChoiceExerciseCreate) -> Self:

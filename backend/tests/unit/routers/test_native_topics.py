@@ -34,7 +34,10 @@ def test_topic_translate_and_get(client: ApiTestClient, topic_endpoint: str, moc
     # POST
     r = client.post_typed(topic_endpoint, 200, NativeTopic)
     assert isinstance(r, NativeTopic)
+    assert r.native_title == "Czasowniki półmodalne"
+
 
     # GET
     r = client.get_typed(topic_endpoint, 200, NativeTopic)
     assert isinstance(r, NativeTopic)
+    assert r.native_title == "Czasowniki półmodalne"

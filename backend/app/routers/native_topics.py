@@ -8,6 +8,7 @@ from features.languages import Language
 from features.levels import Level
 from features.native_topics.native_topic_model import NativeTopic, NativeTopicHeader
 from features.native_topics.native_topic_translator import NativeTopicTranslator
+from routers import native_topics_pages
 
 router = APIRouter(tags=["Topic translations"])
 ITEM_PATH = "/{topic_id}"
@@ -47,4 +48,4 @@ async def get(
     return await service.get(target_language, level, native_language, topic_id)
 
 
-# router.include_router(topics_pages.router, prefix=f"{ITEM_PATH}/pages")
+router.include_router(native_topics_pages.router, prefix=f"{ITEM_PATH}/pages")
