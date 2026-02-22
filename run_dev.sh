@@ -1,6 +1,6 @@
 #!/bin/sh
 
-API_PORT=8080
+API_PORT=8000
 PORT=4200
 
 cd backend
