@@ -28,7 +28,6 @@ def id(client: ApiTestClient) -> UUID:
 def endpoint(client: ApiTestClient, id) -> str:
     return f"/api/target-languages/en/letter-shuffles/{id}/translations"
 
-@pytest.mark.skip("Refactor to page")
 def test_post_get_put_patch_delete_letter_shuffle_translation(client: ApiTestClient, id: UUID, endpoint: str):
     # Given: A set translation
     value = LetterShuffleSetTranslation.create(
@@ -55,7 +54,7 @@ def test_post_get_put_patch_delete_letter_shuffle_translation(client: ApiTestCli
     client.post_typed(endpoint, 200, LetterShuffleSetTranslation, json=value)
     # Then: Topics are stored
     for level in list(Level):
-        r = client.get_typed_list(f"/api/topics/en/{level}/native-languages/pl", 200, Topic)
+        r = client.get_typed_list(f"/api/native-topics/en/{level}/pl", 200, Topic)
         assert 1 == len(r)
         assert r[0].target_title == value.target_title
         assert not r[0].levels

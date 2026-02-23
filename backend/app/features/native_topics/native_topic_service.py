@@ -1,4 +1,4 @@
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Optional
 from uuid import UUID
 
 from ampf.base import BaseAsyncFactory, BaseAsyncStorage
@@ -25,8 +25,12 @@ class NativeTopicService:
         async for topic in storage.get_all():
             yield topic
 
-    async def save(self, value: NativeTopic) -> None:
-        storage = self._get_storage(value.target_language, value.level, value.native_language)
+    async def save(self, value: NativeTopic, level: Optional[Level] = None) -> None:
+        if not level and value.levels and len(value.levels) == 1:
+            level = value.levels[0]
+        elif not level:
+            raise ValueError("Level is required")
+        storage = self._get_storage(value.target_language, level, value.native_language)
         await storage.save(value)
 
     async def create(self, value: NativeTopic) -> NativeTopic:

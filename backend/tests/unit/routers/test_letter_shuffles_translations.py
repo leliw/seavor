@@ -57,7 +57,6 @@ def test_get_all(client: ApiTestClient, endpoint: str):
     r = client.get_typed_list(f"{endpoint}/translations", 200, LetterShuffleSetTranslationHeader)
     assert 0 == len(r)
 
-@pytest.mark.skip("Refactor to page")
 def test_post_get_put_patch_delete(client: ApiTestClient, endpoint: str, letter_shuffle_set_translation: LetterShuffleSetTranslation):
 
     # POST
