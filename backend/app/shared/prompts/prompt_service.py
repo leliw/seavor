@@ -7,8 +7,8 @@ from .prompt_model import PromptSet
 
 
 class PromptService:
-    def __init__(self, root_path: Path) -> None:
-        self.root_path = root_path
+    def __init__(self, root_path: str | Path) -> None:
+        self.root_path = Path(root_path)
         self.env = Environment(
             loader=FileSystemLoader(self.root_path),
             autoescape=False,

@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 
 from features.languages import LANGUAGE_NAMES, Language
 from features.letter_shuffles.letter_shuffle_model import LetterShuffleItem, LetterShuffleSet, LetterShuffleSetCreate
@@ -9,12 +9,16 @@ from features.letter_shuffles.letter_shuffle_translation_model import (
 from haintech.ai import AITaskExecutor
 from haintech.ai.open_ai import OpenAIModel
 
+from features.pages.page_model import GapFillChoiceExerciseCreate
+from shared.prompts.prompt_service import PromptService
+
 
 class TeacherService:
 
-    def __init__(self, target_language_code: Language = Language.EN) -> None:
+    def __init__(self, prompt_service: PromptService, target_language_code: Language = Language.EN) -> None:
         target_language = LANGUAGE_NAMES[target_language_code]
         self.ai_model = OpenAIModel("gpt-4.1-mini", {"temperature": 0})
+        self.prompt_service = prompt_service
         self.target_language_code = target_language_code
         self.target_language = target_language
         self.system_instructions = f"You are a {target_language} teacher."
@@ -74,14 +78,8 @@ class TeacherService:
         return ret
 
     def generate_word_list(self, theme: str, count: int = 30):
-        message = f"Prepare a set of {count} words and short (2-3 words) phrases related to {theme}. "
-        message += "Return the response as a single JSON list."
-        message += "\n\n"
-        message += "Example response:"
-        message += '\n["word1", "word2", "word3"]'
-        message += "\n"
-
-        task = AITaskExecutor(self.ai_model, self.system_instructions, message, "json")
+        s, u = self.prompt_service.render("generate_word_list", target_language = self.target_language, theme=theme, count=count)
+        task = AITaskExecutor(self.ai_model, s, u, "json")
         ret = task.execute()
         if isinstance(ret, dict) and len(ret) == 1:
             ret = list(ret.values())[0]
@@ -92,9 +90,8 @@ class TeacherService:
         return ret
 
     def get_word_definition(self, theme: str, word: str):
-        message = f"Return the definition of the expression **{word}** used in {theme} context in {self.target_language} without using the expression. Return only definion."
-
-        task = AITaskExecutor(self.ai_model, self.system_instructions, message, "text")
+        s, u = self.prompt_service.render("get_word_definition", target_language = self.target_language, theme=theme, word=word)
+        task = AITaskExecutor(self.ai_model, s, u, "text")
         ret = task.execute()
         return ret
 
@@ -116,3 +113,15 @@ class TeacherService:
         if isinstance(ret, dict) and len(ret) == 1:
             ret = list(ret.values())[0]
         return ret  # type: ignore
+
+    def create_gap_fill_choice_excercises(self, theme: str, count: int = 10) -> List[GapFillChoiceExerciseCreate]:
+        json_schema = GapFillChoiceExerciseCreate.model_json_schema()
+        s, u = self.prompt_service.render("create_gap_fill_choice", target_language = self.target_language, theme=theme, count=count, json_schema=json_schema)
+        task = AITaskExecutor(self.ai_model, s, u, "json")
+        response = task.execute()
+        if isinstance(response, dict) and len(response) == 1:
+            response = list(response.values())[0]
+        ret = []
+        for j in response:
+            ret.append(GapFillChoiceExerciseCreate.model_validate(j))
+        return ret
