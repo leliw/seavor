@@ -6,18 +6,19 @@ from uuid import UUID
 from ampf.base import BaseAsyncFactory
 from pydantic import TypeAdapter
 from features.pages.page_model import (
-    BasePage,
     GapFillChoiceExercise,
     GapFillChoiceExerciseCreate,
     GapFillChoiceExercisePatch,
     GapFillChoiceExercisePut,
     Page,
+    PageHeader,
 )
 from features.languages import Language
 from features.levels import Level
 from shared.audio_files.audio_file_service import AudioFileService
 
 PageAdapter = TypeAdapter(Page)
+
 
 class PageService:
     def __init__(
@@ -29,16 +30,18 @@ class PageService:
         topic_id: UUID,
     ):
         self.storage = factory.create_storage(
-            f"target-languages/{target_language}/levels/{level}/topics/{topic_id}/pages", PageAdapter, "id" # type: ignore
+            f"target-languages/{target_language}/levels/{level}/topics/{topic_id}/pages",
+            PageAdapter,  # type: ignore
+            "id",
         )
         self.storage.from_storage = lambda value: PageAdapter.validate_python(value)  # type: ignore
 
         self.audio_file_service = audio_file_service
         self.target_language_code = target_language
 
-    async def get_all(self) -> AsyncGenerator[BasePage]:
+    async def get_all(self) -> AsyncGenerator[PageHeader]:
         async for value in self.storage.get_all():
-            yield BasePage(**value.model_dump())
+            yield PageHeader(**value.model_dump())
 
     async def post(self, value: GapFillChoiceExerciseCreate) -> Page:
         new_exercise = GapFillChoiceExercise.create(value)

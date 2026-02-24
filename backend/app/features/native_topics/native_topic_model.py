@@ -7,7 +7,7 @@ from ampf.base import VersionedBaseModel
 from features.languages import Language
 from features.letter_shuffles.letter_shuffle_translation_model import LetterShuffleSetTranslation
 from features.levels import Level
-from features.topics.topic_model import Topic, TopicHeader
+from features.topics.topic_model import Topic, TopicHeader, TopicType
 from pydantic import BaseModel, ValidationError
 
 
@@ -76,6 +76,7 @@ class NativeTopic_v2(Topic, NativeTopicBase, VersionedBaseModel):
             content_type=v1.content_type,
             target_language=v1.target_language_code,
             levels=v1.levels,
+            type=TopicType.LETTER_SHUFFLE if v1.content_type=="letter-shuffle" else TopicType.GRAMMAR,
             target_title=v1.target_title,
             target_description=v1.target_description,
             native_language=v1.native_language_code,

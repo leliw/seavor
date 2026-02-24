@@ -10,6 +10,7 @@ from features.languages import Language
 from features.levels import Level
 from features.native_topics.native_topic_model import NativeTopic_v1, NativeTopic_v2
 from features.native_topics.native_topic_service import NativeTopicService
+from features.topics.topic_model import TopicType
 
 target_language = Language.EN
 level = Level.A1
@@ -28,6 +29,7 @@ v1 = NativeTopic_v1(
 v2 = NativeTopic_v2(
     id=uuid4(),
     target_language=target_language,
+    type=TopicType.LETTER_SHUFFLE,
     target_title="tt",
     target_description="td",
     native_language=native_language,

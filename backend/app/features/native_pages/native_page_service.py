@@ -4,8 +4,7 @@ from uuid import UUID
 from ampf.base import BaseAsyncFactory
 from features.languages import Language
 from features.levels import Level
-from features.native_pages.native_page_model import NativePage
-from features.pages.page_model import BasePage
+from features.native_pages.native_page_model import NativePage, NativePageHeader
 from pydantic import TypeAdapter
 from shared.audio_files.audio_file_service import AudioFileService
 
@@ -32,9 +31,9 @@ class NativePageService:
         self.audio_file_service = audio_file_service
         self.target_language_code = target_language
 
-    async def get_all(self) -> AsyncGenerator[BasePage]:
+    async def get_all(self) -> AsyncGenerator[NativePageHeader]:
         async for value in self.storage.get_all():
-            yield BasePage(**value.model_dump())
+            yield NativePageHeader(**value.model_dump())
 
     async def get(self, key: UUID) -> NativePage:
         return await self.storage.get(key)

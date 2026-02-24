@@ -38,6 +38,7 @@ class Topic(BaseModel):
     content_type: Optional[str] = None
     target_language: Language
     levels: Optional[List[Level]] = None
+    type: TopicType
     target_title: str
     target_description: str
     image_name: Optional[str] = None
@@ -58,6 +59,7 @@ class Topic(BaseModel):
             id=uuid4(),
             target_language=value_create.target_language,
             levels=[value_create.level],
+            type=value_create.type,
             target_title=value_create.target_title,
             target_description=value_create.target_description,
             created_at=datetime.now(timezone.utc),
