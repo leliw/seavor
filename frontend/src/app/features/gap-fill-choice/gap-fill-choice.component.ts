@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, effect, inject, input, Input, OnInit, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from "@angular/material/icon";
@@ -10,68 +10,78 @@ import { SimpleDialogComponent } from '../../shared/simple-dialog/simple-dialog.
 import { GapFillChoiceExercise, GapFillChoiceService } from './gap-fill-choice.service';
 
 @Component({
-  selector: 'app-gap-fill-choice',
-  imports: [
-    RouterModule,
-    MatRadioModule,
-    FormsModule,
-    MatToolbarModule,
-    MatIconModule,
-    MatListModule
-  ],
-  templateUrl: './gap-fill-choice.component.html',
-  styleUrl: './gap-fill-choice.component.scss',
+    selector: 'app-gap-fill-choice',
+    imports: [
+        RouterModule,
+        MatRadioModule,
+        FormsModule,
+        MatToolbarModule,
+        MatIconModule,
+        MatListModule
+    ],
+    templateUrl: './gap-fill-choice.component.html',
+    styleUrl: './gap-fill-choice.component.scss',
 })
 export class GapFillChoiceComponent implements OnInit {
-  private router = inject(Router);
-  private service = inject(GapFillChoiceService);
-  private route = inject(ActivatedRoute);
+    topicId = input.required<string>();
+    id = input.required<string>();
 
-  id!: string | null;
-  exercise!: GapFillChoiceExercise;
+    previousPage = output<void>();
+    nextPage = output<void>();
+    private router = inject(Router);
+    private service = inject(GapFillChoiceService);
+    private route = inject(ActivatedRoute);
 
-  native = false;
-  showHint = false;
-  disabledAnswer: boolean[] = [];
-  answer: number | null = null;
 
-  ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      this.id = params['id'];
-      if (this.id) {
-        this.service.get(this.id).subscribe(e => {
-          this.exercise = e;
-          this.disabledAnswer = new Array(this.exercise.options.length).fill(false);
+    exercise!: GapFillChoiceExercise;
+
+    native = false;
+    showHint = false;
+    disabledAnswer: boolean[] = [];
+    answer: number | null = null;
+
+    constructor() {
+        effect(() => {
+            const topicId = this.topicId();
+            const id = this.id();
+            this.service.get(topicId, id).subscribe(e => {
+                this.answer = null;
+                this.exercise = e;
+                this.disabledAnswer = new Array(this.exercise.options.length).fill(false);
+            })
         });
-      } else {
-        this.router.navigate(['/topics']);
-      }
-    });
-  }
-
-  private dialog = inject(MatDialog);
-
-  onAnswer(event: MatRadioChange<any>) {
-    if (event.value == this.exercise.correct_index) {
-      const message = this.exercise.target_sentence.replace(this.exercise.gap_marker!, '<b>' + this.exercise.options[event.value] + '</b>');
-      this.dialog.open(SimpleDialogComponent, {
-        data: {
-          title: $localize`Correct`,
-          message: message,
-        }
-      }).afterClosed().subscribe();
-    } else {
-      var message = this.exercise.target_hint;
-      if (this.exercise.target_distractors_explanation)
-        message += "<br />\n<hr />\n" + this.exercise.target_distractors_explanation[event.value];
-      this.dialog.open(SimpleDialogComponent, {
-        data: {
-          title: $localize`Wrong`,
-          message: message,
-        }
-      }).afterClosed().subscribe(() => { this.disabledAnswer[event.value] = true; this.answer = null; });
     }
-  }
+    ngOnInit(): void {
+    }
+
+    private dialog = inject(MatDialog);
+
+    onAnswer(event: MatRadioChange<any>) {
+        if (event.value == this.exercise.correct_index) {
+            const message = this.exercise.target_sentence.replace(this.exercise.gap_marker!, '<b>' + this.exercise.options[event.value] + '</b>');
+            this.dialog.open(SimpleDialogComponent, {
+                data: {
+                    title: $localize`Correct`,
+                    message: message,
+                }
+            }).afterClosed().subscribe(() => {
+                this.nextPage.emit();
+            });
+        } else {
+            var message = this.exercise.target_hint;
+            if (this.exercise.target_distractors_explanation)
+                message += "<br />\n<hr />\n" + this.exercise.target_distractors_explanation[event.value];
+            this.dialog.open(SimpleDialogComponent, {
+                data: {
+                    title: $localize`Wrong`,
+                    message: message,
+                }
+            }).afterClosed().subscribe(() => {
+                this.disabledAnswer[event.value] = true;
+                this.answer = null;
+            });
+        }
+    }
 
 }
 

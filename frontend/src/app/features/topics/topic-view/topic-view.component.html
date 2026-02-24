@@ -1,0 +1,6 @@
+@if (pages) {
+<app-gap-fill-choice [topicId]="topicId" [id]="pages[page_no].id" (previousPage)="onPreviousPage()"
+    (nextPage)="onNextPage()"></app-gap-fill-choice>
+} @else {
+<pre>{{pages | json}}</pre>
+}

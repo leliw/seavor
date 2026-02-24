@@ -33,17 +33,17 @@ export class GapFillChoiceService {
 
   getEndpoint(): string {
     const targetLanguage = this.languageService.getLearningLanguage();
-    return `/api/target-languages/${targetLanguage}/gap-fill-choices`;
+    const nativeLanguage = this.languageService.getInterfaceLanguage();
+    const level = "A1"
+    return `/api/native-topics/${targetLanguage}/${level}/${nativeLanguage}`;
   }
 
   getAll(): Observable<GapFillChoiceExerciseHeader[]> {
     return this.httpClient.get<GapFillChoiceExerciseHeader[]>(this.getEndpoint());
   }
 
-  get(uid: string): Observable<GapFillChoiceExercise> {
-    const nativeLanguage = this.languageService.getInterfaceLanguage();
-    return this.httpClient.get<GapFillChoiceExercise>(`${this.getEndpoint()}/${uid}`);
-    // return this.httpClient.get<GapFillChoiceExercise>(`${this.getEndpoint()}/${uid}/translations/${nativeLanguage}`);
+  get(topicId: string, uid: string): Observable<GapFillChoiceExercise> {
+    return this.httpClient.get<GapFillChoiceExercise>(`${this.getEndpoint()}/${topicId}/pages/${uid}`);
   }
 
 }

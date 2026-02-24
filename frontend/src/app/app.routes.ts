@@ -19,7 +19,12 @@ export const routes: Routes = [
             {
                 path: '',
                 loadComponent: () => import('./features/topics/topic-list/topic-list.component').then(m => m.TopicListComponent)
+            },
+            {
+                path: ':topic_id',
+                loadComponent: () => import('./features/topics/topic-view/topic-view.component').then(m => m.TopicViewComponent)
             }
+
         ]
     },
     {
@@ -56,7 +61,7 @@ export const routes: Routes = [
             {
                 path: 'gap-fill-choices/:id',
                 loadComponent: () => import('./features/gap-fill-choice/gap-fill-choice.component').then(m => m.GapFillChoiceComponent)
-            }
+            },
         ]
     },
 ];
