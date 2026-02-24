@@ -12,7 +12,7 @@ from features.letter_shuffles.letter_shuffle_translation_model import (
     LetterShuffleSetTranslationCreate,
 )
 from features.levels import Level
-from features.topics.topic_model import Topic
+from features.topics.topic_model import Topic, TopicCreate
 
 from tests.unit.routers.test_letter_shuffles import letter_shuffle_set
 
@@ -28,8 +28,7 @@ def id(client: ApiTestClient) -> UUID:
 def endpoint(client: ApiTestClient, id) -> str:
     return f"/api/target-languages/en/letter-shuffles/{id}/translations"
 
-
-def test_post_get_put_patch_delete(client: ApiTestClient, id: UUID, endpoint: str):
+def test_post_get_put_patch_delete_letter_shuffle_translation(client: ApiTestClient, id: UUID, endpoint: str):
     # Given: A set translation
     value = LetterShuffleSetTranslation.create(
         LetterShuffleSetTranslationCreate(
@@ -55,10 +54,18 @@ def test_post_get_put_patch_delete(client: ApiTestClient, id: UUID, endpoint: st
     client.post_typed(endpoint, 200, LetterShuffleSetTranslation, json=value)
     # Then: Topics are stored
     for level in list(Level):
-        r = client.get_typed_list(f"/api/topics/en/{level}/pl", 200, Topic)
+        r = client.get_typed_list(f"/api/native-topics/en/{level}/pl", 200, Topic)
         assert 1 == len(r)
         assert r[0].target_title == value.target_title
-        assert r[0].native_title == value.native_title
-        assert not  r[0].levels
-        assert r[0].native_language_code == value.native_language_code
-        assert r[0].target_language_code == value.target_language_code
+        assert not r[0].levels
+        assert r[0].target_language == value.target_language_code
+
+
+def test_post_get(client: ApiTestClient, topic_create: TopicCreate):
+    # POST
+    r = client.post_typed("/api/topics", 200, Topic, json=topic_create)
+    assert r.target_title == topic_create.target_title
+
+    # GET
+    r = client.get_typed(f"/api/topics/{r.target_language}/{topic_create.level}/{r.id}", 200, Topic)
+    assert r.target_title == topic_create.target_title

@@ -6,6 +6,9 @@ from ampf.base import BaseAsyncFactory, BlobCreate
 from ampf.testing import ApiTestClient
 from app_config import AppConfig
 from dependencies import get_tts_service, lifespan
+from features.languages import Language
+from features.levels import Level
+from features.topics.topic_model import TopicCreate, TopicType
 from integrations.gtts.gtts_service import GttsService
 from integrations.image_gen.base_image_gen_service import BaseImageGenService
 from main import app as main_app
@@ -15,6 +18,8 @@ from main import app as main_app
 def config(tmp_path) -> AppConfig:
     config = AppConfig(
         data_dir=str(tmp_path),
+        gcp_root_storage=None,
+        gcp_bucket_name=None,
         production=False,
     )
     return config
@@ -43,3 +48,14 @@ def client(config: AppConfig) -> ApiTestClient:  # type: ignore
 @pytest.fixture
 def factory(client: ApiTestClient) -> BaseAsyncFactory:
     return client.app.state.app_state.factory  # type: ignore
+
+
+@pytest.fixture()
+def topic_create() -> TopicCreate:
+    return TopicCreate(
+        target_language=Language.EN,
+        level=Level.A1,
+        target_title="Semi-modals",
+        target_description="Semi-modals vs. pure modal verbs",
+        type=TopicType.GRAMMAR,
+    )

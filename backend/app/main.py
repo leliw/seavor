@@ -6,15 +6,16 @@ from dependencies import lifespan
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from shared.localized_static_files import LocalizedStaticFiles
 from log_config import setup_logging
 from routers import (
     audio_files,
     config,
     images,
     letter_shuffles,
+    native_topics,
     topics,
 )
+from shared.localized_static_files import LocalizedStaticFiles
 from version import __version__
 
 _log = logging.getLogger(__name__)
@@ -35,6 +36,7 @@ app = FastAPI(
 # Include the client config router
 app.include_router(config.router, prefix="/api/config")
 app.include_router(topics.router, prefix="/api/topics")
+app.include_router(native_topics.router, prefix="/api/native-topics/{target_language}/{level}/{native_language}")
 app.include_router(letter_shuffles.router, prefix="/api/target-languages/{target_language_code}/letter-shuffles")
 app.include_router(audio_files.router, prefix="/api/audio-files")
 app.include_router(images.router, prefix="/api/images")
