@@ -34,6 +34,22 @@ class PromptExecutor:
             raise ValueError(f"AI model returned empty content for prompt: {prompt_name}")
         return m_resp
 
+    def execute_typed[T: BaseModel](self, prompt_name: str, clazz: Type[T], **kwargs) -> T:
+        json_schema = clazz.model_json_schema()
+        response = self.execute(prompt_name, response_format="json", json_schema=json_schema, **kwargs)
+        return self._prepare_response_typed(clazz, response)
+
+    def _prepare_response_typed[T: BaseModel](self, clazz: Type[T], m_resp: AIChatResponse) -> T:
+        if m_resp.content is None:
+            raise ValueError("AI model returned empty content")
+        try:
+            response = json.loads(m_resp.content)
+            return clazz.model_validate(response)
+        except (json.JSONDecodeError, ValidationError) as e:
+            _log.warning(e)
+            _log.warning("JSON content: %s", m_resp.content)
+            raise e
+
     def execute_typed_list[T: BaseModel](self, prompt_name: str, clazz: Type[T], **kwargs) -> List[T]:
         json_schema = {"type": "array", "items": clazz.model_json_schema()}
         response = self.execute(prompt_name, response_format="json", json_schema=json_schema, **kwargs)

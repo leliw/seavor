@@ -4,7 +4,6 @@ from features.levels import Level
 from features.pages.page_model import GapFillChoiceExerciseCreate, InfoPageCreate
 from features.teacher.teacher_service import TeacherService
 from haintech.testing import MockerAIModel
-
 from shared.prompts.prompt_service import PromptService
 
 
@@ -75,10 +74,13 @@ def test_create_info_pages(teacher_service: TeacherService, mocker_ai_model: Moc
     mocker_ai_model.add(
         message_containing="Verb to be (am / is / are)",
         response="""[  {
-    "type": "info",
-    "title": "To Be or Not To Be?",
-    "content": "Hello there! Today, we learn about 'to be'. It's a very important verb in English!"
-}]""",
+        "target_language": "en",
+        "level": "A1",
+        "order": 1,
+        "type": "info",
+        "title": "To Be or Not To Be?",
+        "content": "Hello there! Today, we learn about 'to be'. It's a very important verb in English!"
+    }]""",
     )
     # Given: A teacher service
     assert teacher_service is not None

@@ -22,6 +22,15 @@ class PageHeader(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+class BasePageCreate(BaseModel):
+    """Common fields for ALL page types"""
+
+    model_config = ConfigDict(extra="forbid")
+
+    target_language: Language
+    level: Level
+    order: int
+    type: PageType  # literal below will override this
 
 class BasePage(BaseModel):
     """Common fields for ALL page types"""
@@ -37,10 +46,9 @@ class BasePage(BaseModel):
     updated_at: datetime
 
 
-class GapFillChoiceExerciseCreate(BaseModel):
-    target_language: Language
-    level: Level
-    order: int
+
+class GapFillChoiceExerciseCreate(BasePageCreate):
+    type: Literal[PageType.GAP_FILL_CHOICE] = PageType.GAP_FILL_CHOICE
     target_sentence: str
     gap_marker: Optional[str] = None
     options: List[str]
@@ -110,14 +118,14 @@ class GapFillChoiceExercisePut(GapFillChoiceExercise):
     pass
 
 
-class InfoPageCreate(BaseModel):
-    type: Literal[PageType.INFO]
+class InfoPageCreate(BasePageCreate):
+    type: Literal[PageType.INFO]= PageType.INFO
     title: str
     content: str  # markdown / HTML / JSON
 
 
 class InfoPage(BasePage):
-    type: Literal[PageType.INFO]
+    type: Literal[PageType.INFO]= PageType.INFO
     title: str
     content: str  # markdown / HTML / JSON
     image_url: str | None = None
@@ -136,6 +144,14 @@ Page = Annotated[
     Union[
         GapFillChoiceExercise,
         InfoPage,
+    ],
+    Field(discriminator="type"),
+]
+
+PageCreate = Annotated[
+    Union[
+        GapFillChoiceExerciseCreate,
+        InfoPageCreate,
     ],
     Field(discriminator="type"),
 ]
