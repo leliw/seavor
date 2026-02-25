@@ -1,5 +1,7 @@
 import pytest
-from features.pages.page_model import GapFillChoiceExerciseCreate
+from features.languages import Language
+from features.levels import Level
+from features.pages.page_model import GapFillChoiceExerciseCreate, InfoPageCreate
 from features.teacher.teacher_service import TeacherService
 from haintech.testing import MockerAIModel
 
@@ -8,7 +10,7 @@ from shared.prompts.prompt_service import PromptService
 
 @pytest.fixture
 def teacher_service() -> TeacherService:
-    return TeacherService(PromptService("./app/prompts"))
+    return TeacherService(PromptService("./app/prompts"), Language.EN, Level.A1)
 
 
 def test_generate_word_list(teacher_service: TeacherService, mocker_ai_model: MockerAIModel):
@@ -39,6 +41,7 @@ def test_get_word_definition(teacher_service: TeacherService, mocker_ai_model: M
     assert len(definition) > 0
     assert isinstance(definition, str)
 
+
 def test_create_gap_fill_choice_exercises(teacher_service: TeacherService, mocker_ai_model: MockerAIModel):
     mocker_ai_model.add(
         message_containing="Semi-modal verbs",
@@ -66,3 +69,22 @@ def test_create_gap_fill_choice_exercises(teacher_service: TeacherService, mocke
     assert len(pages) > 0
     assert isinstance(pages, list)
     assert all(isinstance(page, GapFillChoiceExerciseCreate) for page in pages)
+
+
+def test_create_info_pages(teacher_service: TeacherService, mocker_ai_model: MockerAIModel):
+    mocker_ai_model.add(
+        message_containing="Verb to be (am / is / are)",
+        response="""[  {
+    "type": "info",
+    "title": "To Be or Not To Be?",
+    "content": "Hello there! Today, we learn about 'to be'. It's a very important verb in English!"
+}]""",
+    )
+    # Given: A teacher service
+    assert teacher_service is not None
+    # When: Create excercises
+    pages = teacher_service.create_info_pages("Verb to be (am / is / are)")
+    # Then: Excercises are created
+    assert len(pages) > 0
+    assert isinstance(pages, list)
+    assert all(isinstance(page, InfoPageCreate) for page in pages)

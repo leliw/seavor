@@ -54,6 +54,7 @@ class GapFillChoiceExerciseCreate(BaseModel):
     target_distractors_explanation_audio_file_name: Optional[Dict[str, str]] = None
     target_hint_audio_file_name: Optional[str] = None
 
+
 class GapFillChoiceExercisePatch(BaseModel):
     level: Optional[Level] = None
     target_sentence: Optional[str] = None
@@ -101,7 +102,7 @@ class GapFillChoiceExercise(BasePage):
 
     def patch(self, patch_value: GapFillChoiceExercisePatch) -> None:
         patch_dict = patch_value.model_dump(exclude_unset=True, exclude_none=True)
-        self.__dict__.update(patch_dict)
+        self.__dict__.update(patch_dict) # type: ignore
         self.updated_at = datetime.now(timezone.utc)
 
 
@@ -109,11 +110,26 @@ class GapFillChoiceExercisePut(GapFillChoiceExercise):
     pass
 
 
+class InfoPageCreate(BaseModel):
+    type: Literal[PageType.INFO]
+    title: str
+    content: str  # markdown / HTML / JSON
+
+
 class InfoPage(BasePage):
     type: Literal[PageType.INFO]
     title: str
     content: str  # markdown / HTML / JSON
     image_url: str | None = None
+
+    @classmethod
+    def create(cls, value_create: InfoPageCreate) -> Self:
+        return cls(
+            id=uuid4(),
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc),
+            **value_create.model_dump(),
+        )
 
 
 Page = Annotated[
