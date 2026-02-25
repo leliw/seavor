@@ -88,3 +88,16 @@ def test_create_info_pages(teacher_service: TeacherService, mocker_ai_model: Moc
     assert len(pages) > 0
     assert isinstance(pages, list)
     assert all(isinstance(page, InfoPageCreate) for page in pages)
+
+
+def test_create_topic_description(teacher_service: TeacherService, mocker_ai_model: MockerAIModel):
+    mocker_ai_model.add(
+        message_containing="Verb to be (am / is / are)",
+        response="Master 'am, is, are' \u2013 the heart of English sentences. Easy peasy!",
+    )
+    # Given: A teacher service
+    assert teacher_service is not None
+    # When: Create description
+    ret = teacher_service.create_topic_description("Verb to be (am / is / are)")
+    # Then: Description is created
+    assert isinstance(ret, str)

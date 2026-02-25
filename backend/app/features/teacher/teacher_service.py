@@ -16,7 +16,9 @@ from shared.prompts.prompt_service import PromptService
 
 
 class TeacherService:
-    def __init__(self, prompt_service: PromptService, target_language: Language = Language.EN, level: Optional[Level] = None) -> None:
+    def __init__(
+        self, prompt_service: PromptService, target_language: Language = Language.EN, level: Optional[Level] = None
+    ) -> None:
         self.ai_model = OpenAIModel("gpt-4.1-mini", {"temperature": 0})
         self.prompt_service = prompt_service
         self.target_language = target_language
@@ -145,3 +147,13 @@ class TeacherService:
             level=self.level,
             theme=theme,
         )
+
+    def create_topic_description(self, topic_name: str) -> str:
+        ret = PromptExecutor(self.ai_model, self.prompt_service).execute(
+            "create_topic_description",
+            target_language=self.target_language_name,
+            level=self.level,
+            topic_name=topic_name,
+        )
+        assert ret.content
+        return ret.content.strip()

@@ -4,7 +4,7 @@ from typing import Callable, List, Literal, Type
 
 from haintech.ai import AIChatResponse, AIModelInteractionMessage, BaseAIModel
 from haintech.ai.model import AIModelInteraction
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from .prompt_service import PromptService
 
@@ -35,7 +35,7 @@ class PromptExecutor:
         return m_resp
 
     def execute_typed_list[T: BaseModel](self, prompt_name: str, clazz: Type[T], **kwargs) -> List[T]:
-        json_schema = clazz.model_json_schema()
+        json_schema = {"type": "array", "items": clazz.model_json_schema()}
         response = self.execute(prompt_name, response_format="json", json_schema=json_schema, **kwargs)
         return self._prepare_response_typed_list(clazz, response)
 
@@ -46,11 +46,13 @@ class PromptExecutor:
             response = json.loads(m_resp.content)
             if isinstance(response, dict) and len(response) == 1:
                 response = list(response.values())[0]
+            elif isinstance(response, dict) and len(response) == 2 and "items" in response:
+                response = list(response.values())[1]
             ret = []
             for j in response:
                 ret.append(clazz.model_validate(j))
             return ret
-        except json.JSONDecodeError as e:
+        except (json.JSONDecodeError, ValidationError) as e:
             _log.warning(e)
             _log.warning("JSON content: %s", m_resp.content)
             raise e
