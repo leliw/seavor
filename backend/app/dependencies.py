@@ -18,6 +18,7 @@ from integrations.image_gen.base_image_gen_service import BaseImageGenService
 from integrations.image_gen.openai_image_gen_service import OpenAIImageGenService
 from shared.audio_files.audio_file_service import AudioFileService
 from shared.images.image_service import ImageService
+from shared.prompts.prompt_service import PromptService
 
 load_dotenv()
 
@@ -47,6 +48,13 @@ def get_app_config(app_state: AppStateDep) -> AppConfig:
 
 
 ConfigDep = Annotated[AppConfig, Depends(get_app_config)]
+
+
+def get_prompt_service(app_state: AppStateDep) -> PromptService:
+    return app_state.prompt_service
+
+
+PromptServiceDep = Annotated[PromptService, Depends(get_prompt_service)]
 
 
 def get_tts_service() -> GttsService:

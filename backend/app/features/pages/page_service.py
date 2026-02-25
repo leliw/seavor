@@ -10,8 +10,12 @@ from features.pages.page_model import (
     GapFillChoiceExerciseCreate,
     GapFillChoiceExercisePatch,
     GapFillChoiceExercisePut,
+    InfoPage,
+    InfoPageCreate,
     Page,
+    PageCreate,
     PageHeader,
+    PageType,
 )
 from features.languages import Language
 from features.levels import Level
@@ -43,7 +47,14 @@ class PageService:
         async for value in self.storage.get_all():
             yield PageHeader(**value.model_dump())
 
-    async def post(self, value: GapFillChoiceExerciseCreate) -> Page:
+    async def post(self, value: PageCreate) -> Page:
+        match value.type:
+            case PageType.GAP_FILL_CHOICE:
+                return await self.post_gap_fill_choice(value)
+            case PageType.INFO:
+                return await self.post_info(value)
+
+    async def post_gap_fill_choice(self, value: GapFillChoiceExerciseCreate) -> Page:
         new_exercise = GapFillChoiceExercise.create(value)
 
         texts_to_synthesize = []
@@ -84,6 +95,26 @@ class PageService:
 
         await self.storage.create(new_exercise)
         return new_exercise
+
+    async def post_info(self, value_create: InfoPageCreate) -> Page:
+        value = InfoPage.create(value_create)
+        # texts_to_synthesize = []
+        # texts_to_synthesize.append(value.title)
+        # texts_to_synthesize.append(value.content)
+        # audio_file_names = await asyncio.gather(
+        #     *[
+        #         self.audio_file_service.generate_and_upload(text=text, language=self.target_language_code)
+        #         for text in texts_to_synthesize
+        #     ]
+        # )
+
+        # audio_file_index = 0
+        # value.target_title_audio_file_name = audio_file_names[audio_file_index]
+        # audio_file_index += 1
+        # value.target_definition_audio_file_name = audio_file_names[audio_file_index]
+        await self.storage.create(value)
+        return value
+
 
     async def get(self, key: UUID) -> Page:
         return await self.storage.get(key)

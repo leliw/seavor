@@ -44,6 +44,8 @@ class PromptExecutor:
             raise ValueError("AI model returned empty content")
         try:
             response = json.loads(m_resp.content)
+            if isinstance(response, list)  and len(response) == 1:
+                response = response[0]
             return clazz.model_validate(response)
         except (json.JSONDecodeError, ValidationError) as e:
             _log.warning(e)

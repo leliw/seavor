@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 from ampf.base import BaseAsyncFactory
 from app_config import AppConfig
+from shared.prompts.prompt_service import PromptService
 
 _log = logging.getLogger(__name__)
 
@@ -11,6 +12,7 @@ _log = logging.getLogger(__name__)
 class AppState:
     config: AppConfig
     factory: BaseAsyncFactory
+    prompt_service: PromptService
 
     @classmethod
     def create(cls, config: AppConfig):
@@ -31,4 +33,5 @@ class AppState:
         return cls(
             config=config,
             factory=factory,
+            prompt_service=PromptService(config.prompt_dir),
         )

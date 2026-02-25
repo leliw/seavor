@@ -6,29 +6,48 @@ from features.native_pages.native_page_model import (
     NativeGapFillChoiceExercise,
     NativeGapFillChoiceExerciseBase,
     NativeInfoPage,
+    NativeInfoPageBase,
     NativePage,
 )
-from features.pages.page_model import GapFillChoiceExercise
+from features.pages.page_model import GapFillChoiceExercise, InfoPage
 from features.pages.page_service import PageService
 from haintech.ai import AITaskExecutor, BaseAIModel
 
+from shared.prompts.prompt_executor import PromptExecutor
+from shared.prompts.prompt_service import PromptService
+
 
 class NativePageTranslator:
-    def __init__(self, ai_model: BaseAIModel, service: PageService):
-        self.service = service
+    def __init__(self, ai_model: BaseAIModel, prompt_service: PromptService, service: PageService):
         self.ai_model = ai_model
+        self.prompt_executor = PromptExecutor(ai_model, prompt_service)
+        self.service = service
 
-    async def translate_page_to_native(self, target_language: Language, native_language: Language, page_id: UUID) -> NativePage:
+    async def translate_page_to_native(
+        self, target_language: Language, native_language: Language, page_id: UUID
+    ) -> NativePage:
         page = await self.service.get(page_id)
         match page.type:
             case "gap-fill-choice":
                 native = await self._translate(target_language, native_language, page)
                 return NativeGapFillChoiceExercise.from_page(page, native)
             case "info":
-                raise NotImplementedError()
-                return NativeInfoPage.from_page(page)
+                native = await self._translate_info_page(target_language, native_language, page)
+                return NativeInfoPage.from_page(page, native)
             case _:
                 raise NotImplementedError(f"Unsupported page type: {page.type}")
+
+    async def _translate_info_page(
+        self, src_language: Language, dest_language: Language, page: InfoPage
+    ) -> NativeInfoPageBase:
+        return self.prompt_executor.execute_typed(
+            "translate_info_page",
+            NativeInfoPageBase,
+            src_language=LANGUAGE_NAMES[src_language],
+            dest_language=LANGUAGE_NAMES[dest_language],
+            page_title=page.title,
+            page_content=page.content,
+        )
 
     async def _translate(
         self, src_language: Language, dest_language: Language, page: GapFillChoiceExercise
@@ -47,7 +66,7 @@ class NativePageTranslator:
             message += "\nDistractors explanation:"
             example += ", 'distractors_explanation': {{"
             for distractor in page.target_distractors_explanation.items():
-                message += f"\n{distractor[0]}: **{distractor[1]}**"    
+                message += f"\n{distractor[0]}: **{distractor[1]}**"
                 example += f"'{distractor[0]}': 'translated explanation', "
             example += "}}"
         if page.target_hint:
@@ -58,16 +77,15 @@ class NativePageTranslator:
         message += example
         message += "\n"
 
-
         task = AITaskExecutor(self.ai_model, system_instructions, message, "json")
         ret: Dict[str, Any] = await task.execute_async(
             src_language=LANGUAGE_NAMES[src_language], dest_language=LANGUAGE_NAMES[dest_language], page=page
-        ) # type: ignore
+        )  # type: ignore
         if isinstance(ret, dict) and len(ret) == 1:
             ret = list(ret.values())[0]
 
         n_ret = {}
-        for k,v  in ret.items():
+        for k, v in ret.items():
             if k == "sentence":
                 continue
             n_ret[f"native_{k}"] = v

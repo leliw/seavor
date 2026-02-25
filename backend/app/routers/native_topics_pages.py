@@ -2,7 +2,7 @@ from typing import Annotated, List
 from uuid import UUID
 
 from ampf.fastapi import JsonStreamingResponse
-from dependencies import AppStateDep, AudioFileServiceDep, PageServiceDep, TranslatorAIModelDep
+from dependencies import AppStateDep, AudioFileServiceDep, PageServiceDep, PromptServiceDep, TranslatorAIModelDep
 from fastapi import APIRouter, Depends
 from features.languages import Language
 from features.levels import Level
@@ -32,9 +32,9 @@ NativePageServiceDep = Annotated[NativePageService, Depends(get_native_page_serv
 
 
 def get_native_topic_page_translator(
-    translator_ai_model: TranslatorAIModelDep, page_service: PageServiceDep
+    translator_ai_model: TranslatorAIModelDep, prompt_service: PromptServiceDep, page_service: PageServiceDep
 ) -> NativePageTranslator:
-    return NativePageTranslator(translator_ai_model, page_service)
+    return NativePageTranslator(translator_ai_model, prompt_service, page_service)
 
 
 NativePageTranslatorDep = Annotated[NativePageTranslator, Depends(get_native_topic_page_translator)]
@@ -42,7 +42,11 @@ NativePageTranslatorDep = Annotated[NativePageTranslator, Depends(get_native_top
 
 @router.post(ITEM_PATH)
 async def post(
-    translator: NativePageTranslatorDep, service: NativePageServiceDep, target_language: Language, native_language: Language, id: UUID
+    translator: NativePageTranslatorDep,
+    service: NativePageServiceDep,
+    target_language: Language,
+    native_language: Language,
+    id: UUID,
 ) -> NativePage:
     native_page = await translator.translate_page_to_native(target_language, native_language, id)
     return await service.create(native_page)
