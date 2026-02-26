@@ -9,9 +9,6 @@ from features.levels import Level
 from features.native_pages.native_page_model import NativePage, NativePageHeader
 from features.native_pages.native_page_service import NativePageService
 from features.native_pages.native_page_translator import NativePageTranslator
-from features.pages.page_model import (
-    Page,
-)
 
 router = APIRouter(tags=["Topic pages translations"])
 ITEM_PATH = "/{id}"
@@ -60,7 +57,7 @@ async def get_all(
 
 
 @router.get(ITEM_PATH)
-async def get(service: NativePageServiceDep, id: UUID) -> Page:
+async def get(service: NativePageServiceDep, id: UUID) -> NativePage:
     return await service.get(id)
 
 
