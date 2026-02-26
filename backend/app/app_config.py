@@ -10,6 +10,7 @@ class AppConfig(BaseSettings):
     version: str = __version__
     production: bool = True
     data_dir: str = "./data/"
+    prompt_dir: str = "./app/prompts/"
     
     gcp_root_storage: Optional[str] = None
     gcp_bucket_name: Optional[str] = None

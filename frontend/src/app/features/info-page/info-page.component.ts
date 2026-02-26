@@ -1,66 +1,62 @@
-import { Component, signal } from '@angular/core';
+import { Component, effect, inject, input, output } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from "@angular/material/icon";
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { InfoPage, InfoPageService } from './info-page.service';
+import { CommonModule } from '@angular/common';
+import { MatToolbarModule } from "@angular/material/toolbar";
+import { MatListModule } from "@angular/material/list";
+import { RouterModule } from '@angular/router';
+import { MarkdownPipe } from "../../shared/markdown.pipe";
 
-export interface InfoPageTab {
-  target_title: string;
-  target_content: string;
-}
-
-export interface InfoPage {
-  id: string;
-  target_title: string;
-  target_description: string;
-  tabs: InfoPageTab[];
-  created_at?: string;
-  updated_at?: string;
-}
 
 @Component({
-  selector: 'app-info-page',
-  imports: [
+    selector: 'app-info-page',
+    imports: [
+    CommonModule,
+    RouterModule,
     MatExpansionModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    MatToolbarModule,
+    MatListModule,
+    MarkdownPipe,
+    MatSnackBarModule
 ],
-  templateUrl: './info-page.component.html',
-  styleUrl: './info-page.component.scss',
+    templateUrl: './info-page.component.html',
+    styleUrl: './info-page.component.scss',
 })
 export class InfoPageComponent {
-  public infoPage: InfoPage = {
-    id: 'semi-modal-verbs',
-    target_title: 'Semi-modal verbs',
-    target_description: 'A special group of verbs / expressions in English that behave partly like true modal verbs and partly like ordinary main verbs.',
-    tabs: [
-      {
-        target_title: "Semi-modals",
-        target_content: '**Semi-modals** (also called semi-modal verbs, quasi-modals, marginal modals or lexical modals) are a special group of verbs / expressions in English that behave partly like true modal verbs (can, could, may, might, will, would, shall, should, must) and partly like ordinary main verbs.\n\n' +
-          'They express similar ideas to modals — obligation, necessity, advice, ability, past habits etc. — but they are not pure modals.',
-      },
-      {
-        target_title: "The most important differences compared to pure modal verbs",
-        target_content: "x"
-      },
-      {
-        target_title: "The most common semi-modals in British English",
-        target_content: "x"
-      }
 
-    ]
-  }
+    topicId = input.required<string>();
+    id = input.required<string>();
 
-  step = signal(0);
+    previousPage = output<void>();
+    nextPage = output<void>();
 
-  setStep(index: number) {
-    this.step.set(index);
-  }
+    public page!: InfoPage;
+    public showHint: boolean = false;
+    public native: boolean = false;
+    
+    private service = inject(InfoPageService);
+    private snackBar = inject(MatSnackBar);
 
-  nextStep() {
-    this.step.update(i => i + 1);
-  }
+    constructor() {
+        effect(() => {
+            const topicId = this.topicId();
+            const id = this.id();
+            this.service.get(topicId, id).subscribe({
+                next: p => {
+                    this.page = p;
+                },
+                error: err => {
+                    console.error('Failed to load info page', err);
+                    this.snackBar.open($localize`Failed to load info page. Please try again later.`, $localize`Close`, { duration: 5000 });
+                }
+            });
+        });
+    }
 
-  prevStep() {
-    this.step.update(i => i - 1);
-  }
 }

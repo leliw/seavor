@@ -22,6 +22,15 @@ class PageHeader(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+class BasePageCreate(BaseModel):
+    """Common fields for ALL page types"""
+
+    model_config = ConfigDict(extra="forbid")
+
+    target_language: Language
+    level: Level
+    order: int
+    type: PageType  # literal below will override this
 
 class BasePage(BaseModel):
     """Common fields for ALL page types"""
@@ -37,10 +46,9 @@ class BasePage(BaseModel):
     updated_at: datetime
 
 
-class GapFillChoiceExerciseCreate(BaseModel):
-    target_language: Language
-    level: Level
-    order: int
+
+class GapFillChoiceExerciseCreate(BasePageCreate):
+    type: Literal[PageType.GAP_FILL_CHOICE] = PageType.GAP_FILL_CHOICE
     target_sentence: str
     gap_marker: Optional[str] = None
     options: List[str]
@@ -53,6 +61,7 @@ class GapFillChoiceExerciseCreate(BaseModel):
     target_explanation_audio_file_name: Optional[str] = None
     target_distractors_explanation_audio_file_name: Optional[Dict[str, str]] = None
     target_hint_audio_file_name: Optional[str] = None
+
 
 class GapFillChoiceExercisePatch(BaseModel):
     level: Optional[Level] = None
@@ -101,7 +110,7 @@ class GapFillChoiceExercise(BasePage):
 
     def patch(self, patch_value: GapFillChoiceExercisePatch) -> None:
         patch_dict = patch_value.model_dump(exclude_unset=True, exclude_none=True)
-        self.__dict__.update(patch_dict)
+        self.__dict__.update(patch_dict) # type: ignore
         self.updated_at = datetime.now(timezone.utc)
 
 
@@ -109,17 +118,40 @@ class GapFillChoiceExercisePut(GapFillChoiceExercise):
     pass
 
 
+class InfoPageCreate(BasePageCreate):
+    type: Literal[PageType.INFO]= PageType.INFO
+    title: str
+    content: str  # markdown / HTML / JSON
+
+
 class InfoPage(BasePage):
-    type: Literal[PageType.INFO]
+    type: Literal[PageType.INFO]= PageType.INFO
     title: str
     content: str  # markdown / HTML / JSON
     image_url: str | None = None
+
+    @classmethod
+    def create(cls, value_create: InfoPageCreate) -> Self:
+        return cls(
+            id=uuid4(),
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc),
+            **value_create.model_dump(),
+        )
 
 
 Page = Annotated[
     Union[
         GapFillChoiceExercise,
         InfoPage,
+    ],
+    Field(discriminator="type"),
+]
+
+PageCreate = Annotated[
+    Union[
+        GapFillChoiceExerciseCreate,
+        InfoPageCreate,
     ],
     Field(discriminator="type"),
 ]

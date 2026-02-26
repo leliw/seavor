@@ -6,9 +6,9 @@ from dependencies import PageServiceDep
 from fastapi import APIRouter
 from features.pages.page_model import (
     BasePage,
-    GapFillChoiceExerciseCreate,
     GapFillChoiceExercisePatch,
     Page,
+    PageCreate,
 )
 
 router = APIRouter(tags=["Topic pages"])
@@ -16,7 +16,7 @@ ITEM_PATH = "/{id}"
 
 
 @router.post("")
-async def post(service: PageServiceDep, value_create: GapFillChoiceExerciseCreate) -> Page:
+async def post(service: PageServiceDep, value_create: PageCreate) -> Page:
     return await service.post(value_create)
 
 

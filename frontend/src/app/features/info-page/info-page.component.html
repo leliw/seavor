@@ -1,22 +1,28 @@
-<mat-accordion>
-    @for(tab of infoPage.tabs; track tab.target_title; let i = $index) {
-    <mat-expansion-panel [expanded]="step() === i" (opened)="setStep(i)" hideToggle>
-        <mat-expansion-panel-header>
-            <mat-panel-title>{{tab.target_title}}</mat-panel-title>
-        </mat-expansion-panel-header>
-        {{tab.target_content}}
-        <mat-action-row>
-            @if(i != 0){
-            <button matIconButton (click)="prevStep()">
-                <mat-icon>arrow_back</mat-icon>
-            </button>
-            }
-            @if (i != infoPage.tabs.length - 1) {
-            <button matIconButton (click)="nextStep()">
-                <mat-icon>arrow_forward</mat-icon>
-            </button>
-            }
-        </mat-action-row>
-    </mat-expansion-panel>
+<div class="layout-container-1 full-screen-container">
+    @if (page) {
+    <div class="info-page-content">
+        <h2>@if (!native) { {{page.title}} } @else { {{page.native_title}} }</h2>
+        <div [innerHTML]="!native ? page.content : page.native_content | markdown"></div>
+    </div>
     }
-</mat-accordion>
+    <mat-toolbar color="primary" class="bottom-nav">
+        <mat-nav-list class="horizontal">
+            <a mat-list-item routerLink="/topics">
+                <mat-icon matListItemIcon>home</mat-icon>
+                <span matListItemTitle i18n>Home</span>
+            </a>
+            <a mat-list-item (click)="previousPage.emit()">
+                <mat-icon matListItemIcon>arrow_back</mat-icon>
+                <span matListItemTitle i18n>Previous</span>
+            </a>
+            <a mat-list-item (click)="nextPage.emit()">
+                <mat-icon matListItemIcon>arrow_forward</mat-icon>
+                <span matListItemTitle i18n>Next</span>
+            </a>
+            <a mat-list-item (click)="native = !native" i18n-matTooltip matTooltip="Switch language">
+                <mat-icon matListItemIcon>g_translate</mat-icon>
+                <span matListItemTitle i18n>Translate</span>
+            </a>
+        </mat-nav-list>
+    </mat-toolbar>
+</div>

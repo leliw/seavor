@@ -29,17 +29,17 @@ class NativeGapFillChoiceExercise(GapFillChoiceExercise, NativeGapFillChoiceExer
         return cls(**page.model_dump(), **native.model_dump())
 
 
-class NativeInfoPage(InfoPage):
+class NativeInfoPageBase(BaseModel):
     native_title: str
     native_content: str  # markdown / HTML / JSON
 
+
+class NativeInfoPage(InfoPage, NativeInfoPageBase):
+    pass
+
     @classmethod
-    def from_page(cls, page: InfoPage, native_title: str, native_content: str) -> Self:
-        return cls(
-            native_title=native_title,
-            native_content=native_content,
-            **page.model_dump(),
-        )
+    def from_page(cls, page: InfoPage, native: NativeInfoPageBase) -> Self:
+        return cls(**page.model_dump(), **native.model_dump())
 
 
 NativePage = Annotated[

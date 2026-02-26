@@ -19,12 +19,7 @@ export const routes: Routes = [
             {
                 path: '',
                 loadComponent: () => import('./features/topics/topic-list/topic-list.component').then(m => m.TopicListComponent)
-            },
-            {
-                path: ':topic_id',
-                loadComponent: () => import('./features/topics/topic-view/topic-view.component').then(m => m.TopicViewComponent)
             }
-
         ]
     },
     {
@@ -35,17 +30,6 @@ export const routes: Routes = [
             {
                 path: '',
                 loadComponent: () => import('./features/repetitions/repetitions-page/repetitions-page.component').then(m => m.RepetitionsPageComponent)
-            }
-        ]
-    },
-    {
-        path: 'info/:id',
-        canActivate: [interfaceLanguageSelectedGuard, learningLanguageSelectedGuard],
-        loadComponent: () => import("./core/navigation-bar/navigation-bar.component").then(m => m.NavigationBarComponent),
-        children: [
-            {
-                path: '',
-                loadComponent: () => import('./features/info-page/info-page.component').then(m => m.InfoPageComponent)
             }
         ]
     },
@@ -62,6 +46,11 @@ export const routes: Routes = [
                 path: 'gap-fill-choices/:id',
                 loadComponent: () => import('./features/gap-fill-choice/gap-fill-choice.component').then(m => m.GapFillChoiceComponent)
             },
+            {
+                path: 'topics/:topic_id',
+                loadComponent: () => import('./features/topics/topic-view/topic-view.component').then(m => m.TopicViewComponent)
+            }
+
         ]
     },
 ];

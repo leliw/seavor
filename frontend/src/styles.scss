@@ -10,6 +10,12 @@
     -webkit-overflow-scrolling: touch;
 }
 
+.layout-container-1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .layout-container-2 {
     position: relative;
     display: grid;
@@ -32,6 +38,7 @@
         --app-bar-height: 64px;
     }
 
+    .layout-container-1,
     .layout-container-2 {
         max-height: 800px;
         max-width: 1200px;
