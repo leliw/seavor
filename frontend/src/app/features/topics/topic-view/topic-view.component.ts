@@ -5,10 +5,11 @@ import { CommonModule } from '@angular/common';
 import { GapFillChoiceComponent } from "../../gap-fill-choice/gap-fill-choice.component";
 import { MatDialog } from '@angular/material/dialog';
 import { SimpleDialogComponent } from '../../../shared/simple-dialog/simple-dialog.component';
+import { InfoPageComponent } from "../../info-page/info-page.component";
 
 @Component({
     selector: 'app-topic-view',
-    imports: [CommonModule, GapFillChoiceComponent],
+    imports: [CommonModule, GapFillChoiceComponent, InfoPageComponent],
     templateUrl: './topic-view.component.html',
     styleUrl: './topic-view.component.scss',
 })
