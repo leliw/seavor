@@ -9,6 +9,7 @@ import { SimpleDialogComponent } from '../../shared/simple-dialog/simple-dialog.
 import { LetterShuffleItem, LetterShuffleService, LetterShuffleSet, LetterShuffleSetHeader } from './letter-shuffle.service';
 import { MatToolbarModule } from "@angular/material/toolbar";
 import { MatListModule } from "@angular/material/list";
+import { BottomNavComponent } from "../../core/bottom-nav/bottom-nav.component";
 
 @Component({
     selector: 'app-letter-shuffle',
@@ -21,6 +22,7 @@ import { MatListModule } from "@angular/material/list";
     MatTooltipModule,
     MatToolbarModule,
     MatListModule,
+    BottomNavComponent
 ],
     templateUrl: './letter-shuffle.component.html',
     styleUrl: './letter-shuffle.component.scss'

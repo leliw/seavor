@@ -1,0 +1,52 @@
+<mat-toolbar color="primary" class="bottom-nav">
+    <mat-nav-list class="horizontal">
+        @if (showHome()) {
+        <a mat-list-item routerLink="/topics">
+            <mat-icon matListItemIcon>home</mat-icon>
+            <span matListItemTitle i18n>Home</span>
+        </a>
+        }
+        @if (showRepetitions()) {
+        <a mat-list-item routerLink="/repetitions">
+            <mat-icon matListItemIcon>repeat</mat-icon>
+            <span matListItemTitle i18n>Repetitions</span>
+        </a>
+        }
+        @if (showPreviousPage()) {
+        <a mat-list-item (click)="previousPage.emit()">
+            <mat-icon matListItemIcon>arrow_back</mat-icon>
+            <span matListItemTitle i18n>Previous</span>
+        </a>
+        }
+        @if (showNextPage()) {
+        <a mat-list-item (click)="nextPage.emit()">
+            <mat-icon matListItemIcon>arrow_forward</mat-icon>
+            <span matListItemTitle i18n>Next</span>
+        </a>
+        }
+        @if (showHint()) {
+        <a mat-list-item (click)="hint.emit()" i18n-matTooltip matTooltip="Show hint"  [disabled]="disabledHint()">
+            <mat-icon matListItemIcon>help</mat-icon>
+            <span matListItemTitle i18n>Clue</span>
+        </a>
+        }
+        @if (showTranslate()) {
+        <a mat-list-item (click)="translate.emit()" i18n-matTooltip matTooltip="Switch language" [disabled]="disabledTranslate()">
+            <mat-icon matListItemIcon>g_translate</mat-icon>
+            <span matListItemTitle i18n>Translate</span>
+        </a>
+        }
+        @if (showLearningLanguage()) {
+        <a mat-list-item routerLink="/select-learning-language" i18n-matTooltip matTooltip="Switch learning language">
+            <mat-icon matListItemIcon>language</mat-icon>
+            <span matListItemTitle i18n>Language</span>
+        </a>
+        }
+        @if (showSettings()) {
+        <a mat-list-item routerLink="/select-interface-language" i18n-matTooltip matTooltip="User settings">
+            <mat-icon matListItemIcon>settings</mat-icon>
+            <span matListItemTitle i18n>Settings</span>
+        </a>
+        }
+    </mat-nav-list>
+</mat-toolbar>

@@ -16,19 +16,5 @@
     }
 </div>
 
-<mat-toolbar color="primary" class="bottom-nav">
-    <mat-nav-list class="horizontal">
-        <a mat-list-item routerLink="/topics">
-            <mat-icon matListItemIcon>home</mat-icon>
-            <span matListItemTitle>Home</span>
-        </a>
-        <a mat-list-item (click)="showHint = true" i18n-matTooltip matTooltip="Show hint" [disabled]="showHint">
-            <mat-icon matListItemIcon>help</mat-icon>
-            <span matListItemTitle>Clue</span>
-        </a>
-        <a mat-list-item (click)="native = !native" i18n-matTooltip matTooltip="Switch interface language" [disabled]="true">
-            <mat-icon matListItemIcon>g_translate</mat-icon>
-            <span matListItemTitle>Translate</span>
-        </a>
-    </mat-nav-list>
-</mat-toolbar>
+<app-bottom-nav [showHint]="true" [showTranslate]="true" (hint)="showHint = !showHint" [disabledHint]="showHint"
+    (translate)="native = !native"></app-bottom-nav>

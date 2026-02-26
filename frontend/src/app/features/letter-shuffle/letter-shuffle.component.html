@@ -45,20 +45,5 @@
     </div>
 </div>
 
-<mat-toolbar color="primary" class="bottom-nav">
-    <mat-nav-list class="horizontal">
-        <a mat-list-item routerLink="/topics">
-            <mat-icon matListItemIcon>home</mat-icon>
-            <span matListItemTitle>Home</span>
-        </a>
-        <a mat-list-item (click)="showNextHint()" i18n-matTooltip matTooltip="Show next hint">
-            <mat-icon matListItemIcon>help</mat-icon>
-            <span matListItemTitle>Clue</span>
-        </a>
-        <a mat-list-item (click)="native = !native" i18n-matTooltip matTooltip="Switch language"
-            [disabled]="hintIndex==1">
-            <mat-icon matListItemIcon>{{ native ? 'language' : 'g_translate' }}</mat-icon>
-            <span matListItemTitle>Language</span>
-        </a>
-    </mat-nav-list>
-</mat-toolbar>
+<app-bottom-nav [showHint]="true" [showTranslate]="true" [disabledTranslate]="hintIndex==1" (hint)="showNextHint()"
+    (translate)="native = !native"></app-bottom-nav>

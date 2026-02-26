@@ -5,24 +5,8 @@
         <div [innerHTML]="!native ? page.content : page.native_content | markdown"></div>
     </div>
     }
-    <mat-toolbar color="primary" class="bottom-nav">
-        <mat-nav-list class="horizontal">
-            <a mat-list-item routerLink="/topics">
-                <mat-icon matListItemIcon>home</mat-icon>
-                <span matListItemTitle i18n>Home</span>
-            </a>
-            <a mat-list-item (click)="previousPage.emit()">
-                <mat-icon matListItemIcon>arrow_back</mat-icon>
-                <span matListItemTitle i18n>Previous</span>
-            </a>
-            <a mat-list-item (click)="nextPage.emit()">
-                <mat-icon matListItemIcon>arrow_forward</mat-icon>
-                <span matListItemTitle i18n>Next</span>
-            </a>
-            <a mat-list-item (click)="native = !native" i18n-matTooltip matTooltip="Switch language">
-                <mat-icon matListItemIcon>g_translate</mat-icon>
-                <span matListItemTitle i18n>Translate</span>
-            </a>
-        </mat-nav-list>
-    </mat-toolbar>
+    <app-bottom-nav [showNextPage]="true" [showPreviousPage]="true" [showTranslate]="true"
+    
+    (nextPage)="nextPage.emit()" (previousPage)="previousPage.emit()"
+        (translate)="native = !native"></app-bottom-nav>
 </div>

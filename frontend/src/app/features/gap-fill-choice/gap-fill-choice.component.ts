@@ -1,24 +1,21 @@
 import { Component, effect, inject, input, Input, OnInit, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { MatIconModule } from "@angular/material/icon";
-import { MatListModule } from "@angular/material/list";
 import { MatRadioChange, MatRadioModule } from '@angular/material/radio';
-import { MatToolbarModule } from "@angular/material/toolbar";
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SimpleDialogComponent } from '../../shared/simple-dialog/simple-dialog.component';
 import { GapFillChoiceExercise, GapFillChoiceService } from './gap-fill-choice.service';
+import { BottomNavComponent } from "../../core/bottom-nav/bottom-nav.component";
 
 @Component({
     selector: 'app-gap-fill-choice',
     imports: [
-        RouterModule,
-        MatRadioModule,
-        FormsModule,
-        MatToolbarModule,
-        MatIconModule,
-        MatListModule
-    ],
+    RouterModule,
+    MatRadioModule,
+    FormsModule,
+
+    BottomNavComponent
+],
     templateUrl: './gap-fill-choice.component.html',
     styleUrl: './gap-fill-choice.component.scss',
 })
@@ -65,6 +62,7 @@ export class GapFillChoiceComponent implements OnInit {
                     message: message,
                 }
             }).afterClosed().subscribe(() => {
+                this.showHint = false;
                 this.nextPage.emit();
             });
         } else {

@@ -10,6 +10,7 @@ import { MatToolbarModule } from "@angular/material/toolbar";
 import { MatListModule } from "@angular/material/list";
 import { RouterModule } from '@angular/router';
 import { MarkdownPipe } from "../../shared/markdown.pipe";
+import { BottomNavComponent } from "../../core/bottom-nav/bottom-nav.component";
 
 
 @Component({
@@ -23,7 +24,8 @@ import { MarkdownPipe } from "../../shared/markdown.pipe";
     MatToolbarModule,
     MatListModule,
     MarkdownPipe,
-    MatSnackBarModule
+    MatSnackBarModule,
+    BottomNavComponent
 ],
     templateUrl: './info-page.component.html',
     styleUrl: './info-page.component.scss',
