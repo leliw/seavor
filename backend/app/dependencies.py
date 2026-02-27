@@ -2,6 +2,7 @@ import logging
 from typing import Annotated
 from uuid import UUID
 
+from ampf.base.versioned_base_model import StorageFormatFlags
 from app_config import AppConfig
 from app_state import AppState
 from dotenv import load_dotenv
@@ -11,6 +12,7 @@ from features.languages import Language
 from features.levels import Level
 from features.native_topics.native_topic_service import NativeTopicService
 from features.pages.page_service import PageService
+from features.topics.topic_model import Topic_v2
 from features.topics.topic_service import TopicService
 from haintech.ai import BaseAIModel
 from integrations.gtts.gtts_service import GttsService
@@ -27,6 +29,10 @@ _log = logging.getLogger(__name__)
 
 def lifespan(config: AppConfig = AppConfig()):
     app_state = AppState.create(config)
+    Topic_v2.FORMAT_FLAGS = StorageFormatFlags(
+        save_new_format=config.feature_flags.topic_v2_storage,
+        migrate_legacy_on_read=config.feature_flags.topic_v2_migrate,
+    )
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
