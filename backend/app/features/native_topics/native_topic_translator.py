@@ -14,10 +14,10 @@ class NativeTopicTranslator:
         self.ai_model = ai_model
 
     async def translate_topic_to_native(
-        self, target_language: Language, level: Level, native_language: Language, topic_id: UUID
+        self, language: Language, level: Level, native_language: Language, topic_id: UUID
     ) -> NativeTopic:
-        topic = await self.service.get(target_language, level, topic_id)
-        native = await self._translate(target_language, native_language, topic.target_title, topic.target_description)
+        topic = await self.service.get(language, level, topic_id)
+        native = await self._translate(language, native_language, topic.title, topic.description)
         return NativeTopic.from_topic(topic, native_language, native.get("title", ""), native.get("description", ""))
 
     async def _translate(

@@ -56,16 +56,16 @@ def test_post_get_put_patch_delete_letter_shuffle_translation(client: ApiTestCli
     for level in list(Level):
         r = client.get_typed_list(f"/api/native-topics/en/{level}/pl", 200, Topic)
         assert 1 == len(r)
-        assert r[0].target_title == value.target_title
+        assert r[0].title == value.target_title
         assert not r[0].levels
-        assert r[0].target_language == value.target_language_code
+        assert r[0].language == value.target_language_code
 
 
 def test_post_get(client: ApiTestClient, topic_create: TopicCreate):
     # POST
     r = client.post_typed("/api/topics", 200, Topic, json=topic_create)
-    assert r.target_title == topic_create.target_title
+    assert r.title == topic_create.title
 
     # GET
-    r = client.get_typed(f"/api/topics/{r.target_language}/{topic_create.level}/{r.id}", 200, Topic)
-    assert r.target_title == topic_create.target_title
+    r = client.get_typed(f"/api/topics/{r.language}/{topic_create.level}/{r.id}", 200, Topic)
+    assert r.title == topic_create.title

@@ -12,16 +12,16 @@ class NativeTopicService:
         self.factory = factory
 
     def _get_storage(
-        self, target_language: Language, level: Level, native_language: Language
+        self, language: Language, level: Level, native_language: Language
     ) -> BaseAsyncStorage[NativeTopic]:
         return self.factory.create_storage(
-            f"target-languages/{target_language}/levels/{level}/native-languages/{native_language}/topics", NativeTopic
+            f"target-languages/{language}/levels/{level}/native-languages/{native_language}/topics", NativeTopic
         )
 
     async def get_list(
-        self, target_language: Language, level: Level, native_language: Language
+        self, language: Language, level: Level, native_language: Language
     ) -> AsyncGenerator[NativeTopic]:
-        storage = self._get_storage(target_language, level, native_language)
+        storage = self._get_storage(language, level, native_language)
         async for topic in storage.get_all():
             yield topic
 
@@ -30,14 +30,14 @@ class NativeTopicService:
             level = value.levels[0]
         elif not level:
             raise ValueError("Level is required")
-        storage = self._get_storage(value.target_language, level, value.native_language)
+        storage = self._get_storage(value.language, level, value.native_language)
         await storage.save(value)
 
     async def create(self, value: NativeTopic) -> NativeTopic:
-        storage = self._get_storage(value.target_language, value.level, value.native_language)
+        storage = self._get_storage(value.language, value.level, value.native_language)
         await storage.create(value)
         return value
 
-    async def get(self, target_language: Language, level: Level, native_language: Language, id: UUID) -> NativeTopic:
-        storage = self._get_storage(target_language, level, native_language)
+    async def get(self, language: Language, level: Level, native_language: Language, id: UUID) -> NativeTopic:
+        storage = self._get_storage(language, level, native_language)
         return await storage.get(id)

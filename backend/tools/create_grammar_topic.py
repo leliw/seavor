@@ -24,14 +24,14 @@ class Creator:
         teacher_service = TeacherService(PromptService("./app/prompts"), target_language, level)
         topic_description = teacher_service.create_topic_description(topic_name)
         topic_create = TopicCreate(
-            target_language=target_language,
+            language=target_language,
             level=level,
-            target_title=topic_name,
-            target_description=topic_description,
+            title=topic_name,
+            description=topic_description,
             type=TopicType.GRAMMAR,
         )
         topic = self.client.post_typed("/api/topics", 200, Topic, json=topic_create)
-        target_language = topic.target_language
+        target_language = topic.language
         level = topic.level
         topic_url = f"/api/topics/{target_language}/{level}/{topic.id}"
         _log.warning("Created topic: %s", topic_url)
@@ -39,23 +39,23 @@ class Creator:
 
     def _create_teacher_service_and_topic(self, topic_url: str) -> Tuple[TeacherService, Topic]:
         topic = self.client.get_typed(topic_url, 200, Topic)
-        target_language = topic.target_language
+        target_language = topic.language
         level = topic.level
         return (TeacherService(PromptService("./app/prompts"), target_language, level), topic)
 
     def translate_topic(self, topic_url: str, native_languages: Optional[List[Language]] = None):
         topic = self.client.get_typed(topic_url, 200, Topic)
-        target_language = topic.target_language
+        target_language = topic.language
         level = topic.level
         for native_language in native_languages or [Language.EN, Language.PL]:
-            if native_language == topic.target_language:
+            if native_language == topic.language:
                 continue
             # Create native topic
             self.client.post(f"/api/native-topics/{target_language}/{level}/{native_language}/{topic.id}", 200)
 
     def create_info_pages(self, topic_url: str, native_languages: Optional[List[Language]] = None):
         teacher_service, topic = self._create_teacher_service_and_topic(topic_url)
-        pages = teacher_service.create_info_pages(topic.target_title)
+        pages = teacher_service.create_info_pages(topic.title)
         for page in pages:
             self.client.post_typed(f"{topic_url}/pages", 200, PageHeader, json=page)
             _log.info("Created page: %s", page.title)
@@ -63,11 +63,11 @@ class Creator:
 
     def translate_topic_pages(self, topic_url: str, native_languages: Optional[List[Language]] = None):
         topic = client.get_typed(topic_url, 200, Topic)
-        target_language = topic.target_language
+        target_language = topic.language
         level = topic.level
         pages = client.get_typed_list(f"{topic_url}/pages", 200, PageHeader)
         for native_language in native_languages or [Language.EN, Language.PL]:
-            if native_language == topic.target_language:
+            if native_language == topic.language:
                 continue
             # Create native topic pages
             for page in pages:

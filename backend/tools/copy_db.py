@@ -8,10 +8,6 @@ from ampf.gcp import GcpFactory
 from ampf.local import LocalFactory
 from app_config import AppConfig
 from features.languages import Language
-from features.letter_shuffles.letter_shuffle_model import LetterShuffleSet
-from features.letter_shuffles.letter_shuffle_translation_model import LetterShuffleSetTranslation
-from features.levels import Level
-from features.topics.topic_model import Topic
 from pydantic import BaseModel, ValidationError
 from shared.audio_files.audio_file_model import AudioFileMetadata
 from shared.images.image_model import ImageMetadata
