@@ -34,6 +34,7 @@ def test_post_get_put_patch_delete_letter_shuffle_translation(client: ApiTestCli
         LetterShuffleSetTranslationCreate(
             id=id,
             target_language_code=Language.EN,
+            levels=[Level.ALL],
             target_title="Christmas",
             target_description="Words and phrases related to Christmas",
             native_language_code=Language.PL,
@@ -57,7 +58,7 @@ def test_post_get_put_patch_delete_letter_shuffle_translation(client: ApiTestCli
         r = client.get_typed_list(f"/api/native-topics/en/{level}/pl", 200, Topic)
         assert 1 == len(r)
         assert r[0].title == value.target_title
-        assert not r[0].levels
+        assert r[0].level == Level.ALL
         assert r[0].language == value.target_language_code
 
 

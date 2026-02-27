@@ -26,6 +26,14 @@ class NativeTopic_v1(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    @property
+    def level(self) -> Level:
+        if not self.levels:
+            raise ValueError("Level is required")
+        if len(self.levels) > 1:
+            raise ValueError("Level is not unique")
+        return self.levels[0]
+    
     @classmethod
     def from_letter_shuffle_translation(cls, level: Level, value: LetterShuffleSetTranslation) -> "NativeTopic_v1":
         return cls(
@@ -33,7 +41,7 @@ class NativeTopic_v1(BaseModel):
             content_id=value.id,
             content_type="letter-shuffle",
             target_language_code=value.target_language_code,
-            levels=value.levels,
+            levels=value.levels or [Level.ALL],
             target_title=value.target_title,
             target_description=value.target_description,
             native_language_code=value.native_language_code,
@@ -76,7 +84,7 @@ class NativeTopic_v2(Topic, NativeTopicBase, VersionedBaseModel):
             content_id=v1.content_id,
             content_type=v1.content_type,
             language=v1.target_language_code,
-            levels=v1.levels,
+            level=v1.level,
             type=TopicType.LETTER_SHUFFLE if v1.content_type=="letter-shuffle" else TopicType.GRAMMAR,
             title=v1.target_title,
             description=v1.target_description,
@@ -110,7 +118,7 @@ class NativeTopic_v2(Topic, NativeTopicBase, VersionedBaseModel):
                 content_id=v2.content_id,
                 content_type=v2.content_type,
                 target_language_code=v2.language,
-                levels=v2.levels,
+                levels=[v2.level],
                 target_title=v2.title,
                 target_description=v2.description,
                 native_language_code=v2.native_language,

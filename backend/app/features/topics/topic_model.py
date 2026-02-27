@@ -76,7 +76,7 @@ class Topic_v2(VersionedBaseModel):
     content_id: Optional[UUID] = None
     content_type: Optional[str] = None
     language: Language
-    levels: Optional[List[Level]] = None
+    level: Level
     type: TopicType
     title: str
     description: str
@@ -84,20 +84,13 @@ class Topic_v2(VersionedBaseModel):
     created_at: datetime
     updated_at: datetime
 
-    @property
-    def level(self) -> Level:
-        if not self.levels:
-            raise ValueError("Level is required")
-        if len(self.levels) > 1:
-            raise ValueError("Level is not unique")
-        return self.levels[0]
 
     @classmethod
     def create(cls, value_create: TopicCreate) -> "Topic_v2":
         return cls(
             id=uuid4(),
             language=value_create.language,
-            levels=[value_create.level],
+            level=value_create.level,
             type=value_create.type,
             title=value_create.title,
             description=value_create.description,
@@ -117,7 +110,7 @@ class Topic_v2(VersionedBaseModel):
                 content_id=v1.content_id,
                 content_type=v1.content_type,
                 language=v1.target_language,
-                levels=v1.levels,
+                level=v1.level,
                 type=v1.type,
                 title=v1.target_title,
                 description=v1.target_description,
@@ -135,7 +128,7 @@ class Topic_v2(VersionedBaseModel):
                 content_id=self.content_id,
                 content_type=self.content_type,
                 target_language=self.language,
-                levels=self.levels,
+                levels=[self.level],
                 type=self.type,
                 target_title=self.title,
                 target_description=self.description,
