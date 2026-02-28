@@ -58,7 +58,7 @@ class LetterShuffleTranslationService:
             idx += 2
 
         await self.storage.create(value)
-        levels = list(Level) if value.levels is None or Level.ALL in value.levels else value.levels
+        levels = Level.ALL.to_list() if value.levels is None or Level.ALL in value.levels else value.levels
         calls = [
             topic_service.save(NativeTopic.from_letter_shuffle_translation(level, value), level) for level in levels
         ]

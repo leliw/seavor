@@ -29,7 +29,7 @@ class NativeTopic_v1(BaseModel):
     @property
     def level(self) -> Level:
         if not self.levels:
-            raise ValueError("Level is required")
+            return Level.ALL
         if len(self.levels) > 1:
             raise ValueError("Level is not unique")
         return self.levels[0]

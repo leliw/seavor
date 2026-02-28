@@ -54,7 +54,7 @@ def test_post_get_put_patch_delete_letter_shuffle_translation(client: ApiTestCli
     # When: The set transaltion is saved
     client.post_typed(endpoint, 200, LetterShuffleSetTranslation, json=value)
     # Then: Topics are stored
-    for level in list(Level):
+    for level in Level.ALL.to_list():
         r = client.get_typed_list(f"/api/native-topics/en/{level}/pl", 200, Topic)
         assert 1 == len(r)
         assert r[0].title == value.target_title

@@ -9,3 +9,9 @@ class Level(StrEnum):
     C1 = "C1"
     C2 = "C2"
     ALL = "all"
+
+    def to_list(self) -> list["Level"]:
+        if self != Level.ALL:
+            return [self]
+        else:
+            return [level for level in Level if level != Level.ALL]

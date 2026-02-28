@@ -26,8 +26,8 @@ class NativeTopicService:
             yield topic
 
     async def save(self, value: NativeTopic, level: Optional[Level] = None) -> None:
-        if not level and value.levels and len(value.levels) == 1:
-            level = value.levels[0]
+        if not level and value.level:
+            level = value.level
         elif not level:
             raise ValueError("Level is required")
         storage = self._get_storage(value.language, level, value.native_language)
