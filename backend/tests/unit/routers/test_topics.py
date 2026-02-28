@@ -34,6 +34,7 @@ def test_post_get_put_patch_delete_letter_shuffle_translation(client: ApiTestCli
         LetterShuffleSetTranslationCreate(
             id=id,
             target_language_code=Language.EN,
+            levels=[Level.ALL],
             target_title="Christmas",
             target_description="Words and phrases related to Christmas",
             native_language_code=Language.PL,
@@ -53,19 +54,19 @@ def test_post_get_put_patch_delete_letter_shuffle_translation(client: ApiTestCli
     # When: The set transaltion is saved
     client.post_typed(endpoint, 200, LetterShuffleSetTranslation, json=value)
     # Then: Topics are stored
-    for level in list(Level):
+    for level in Level.ALL.to_list():
         r = client.get_typed_list(f"/api/native-topics/en/{level}/pl", 200, Topic)
         assert 1 == len(r)
-        assert r[0].target_title == value.target_title
-        assert not r[0].levels
-        assert r[0].target_language == value.target_language_code
+        assert r[0].title == value.target_title
+        assert r[0].level == Level.ALL
+        assert r[0].language == value.target_language_code
 
 
 def test_post_get(client: ApiTestClient, topic_create: TopicCreate):
     # POST
     r = client.post_typed("/api/topics", 200, Topic, json=topic_create)
-    assert r.target_title == topic_create.target_title
+    assert r.title == topic_create.title
 
     # GET
-    r = client.get_typed(f"/api/topics/{r.target_language}/{topic_create.level}/{r.id}", 200, Topic)
-    assert r.target_title == topic_create.target_title
+    r = client.get_typed(f"/api/topics/{r.language}/{topic_create.level}/{r.id}", 200, Topic)
+    assert r.title == topic_create.title

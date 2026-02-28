@@ -8,11 +8,11 @@ export interface Topic {
     id: string;
     content_id: string;
     content_type: string;
-    target_language_code: string;
+    language: string;
     levels: string[];
     type: string;
-    target_title: string;
-    target_description: string;
+    title: string;
+    description: string;
     native_language_code: string;
     native_title: string;
     native_description: string;

@@ -1,12 +1,14 @@
 from typing import Optional
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from core.feature_flags import FeatureFlags
 from version import __version__
 
 
 class AppConfig(BaseSettings):
     model_config = SettingsConfigDict(env_nested_delimiter="__")
 
+    feature_flags: FeatureFlags = FeatureFlags()
     version: str = __version__
     production: bool = True
     data_dir: str = "./data/"

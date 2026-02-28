@@ -35,7 +35,10 @@ class LetterShuffleTranslationService:
             yield LetterShuffleSetTranslationHeader(**set.model_dump())
 
     async def post(
-        self, topic_service: TopicService, native_topic_service: NativeTopicService, value_create: LetterShuffleSetTranslationCreate
+        self,
+        topic_service: TopicService,
+        native_topic_service: NativeTopicService,
+        value_create: LetterShuffleSetTranslationCreate,
     ) -> LetterShuffleSetTranslation:
         value = LetterShuffleSetTranslation.create(value_create)
 
@@ -55,13 +58,13 @@ class LetterShuffleTranslationService:
             idx += 2
 
         await self.storage.create(value)
+        levels = Level.ALL.to_list() if value.levels is None or Level.ALL in value.levels else value.levels
         calls = [
-            topic_service.save(NativeTopic.from_letter_shuffle_translation(level, value), level)
-            for level in value.levels or list(Level)
+            topic_service.save(NativeTopic.from_letter_shuffle_translation(level, value), level) for level in levels
         ]
         native_calls = [
             native_topic_service.save(NativeTopic.from_letter_shuffle_translation(level, value), level)
-            for level in value.levels or list(Level)
+            for level in levels
         ]
         await asyncio.gather(*calls, *native_calls)
         return value

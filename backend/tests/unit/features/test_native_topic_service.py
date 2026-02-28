@@ -18,6 +18,7 @@ native_language = Language.PL
 v1 = NativeTopic_v1(
     id=uuid4(),
     target_language_code=target_language,
+    levels=[level],
     target_title="tt",
     target_description="td",
     native_language_code=native_language,
@@ -28,10 +29,11 @@ v1 = NativeTopic_v1(
 )
 v2 = NativeTopic_v2(
     id=uuid4(),
-    target_language=target_language,
+    language=target_language,
+    level=level,
     type=TopicType.LETTER_SHUFFLE,
-    target_title="tt",
-    target_description="td",
+    title="tt",
+    description="td",
     native_language=native_language,
     native_title="nt",
     native_description="nd",
@@ -67,7 +69,7 @@ async def test_save_old_read_new(service: NativeTopicService, storage_v1: BaseAs
     # Then: A new format is returned
     assert isinstance(new, NativeTopic_v2)
     # And: The previous version is returned
-    assert new.CURRENT_VERSION == 1
+    assert new.v == 1
     # And: The old format is sill stored
     saved = await storage_v1.get(old.id)
     assert isinstance(saved, NativeTopic_v1)

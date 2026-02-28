@@ -26,6 +26,14 @@ class NativeTopic_v1(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    @property
+    def level(self) -> Level:
+        if not self.levels:
+            return Level.ALL
+        if len(self.levels) > 1:
+            raise ValueError("Level is not unique")
+        return self.levels[0]
+    
     @classmethod
     def from_letter_shuffle_translation(cls, level: Level, value: LetterShuffleSetTranslation) -> "NativeTopic_v1":
         return cls(
@@ -33,7 +41,7 @@ class NativeTopic_v1(BaseModel):
             content_id=value.id,
             content_type="letter-shuffle",
             target_language_code=value.target_language_code,
-            levels=value.levels,
+            levels=value.levels or [Level.ALL],
             target_title=value.target_title,
             target_description=value.target_description,
             native_language_code=value.native_language_code,
@@ -56,7 +64,7 @@ class NativeTopicHeader(TopicHeader, NativeTopicBase):
 
 
 class NativeTopic_v2(Topic, NativeTopicBase, VersionedBaseModel):
-    v: int = 2
+    CURRENT_VERSION = 2
     pass
 
     @classmethod
@@ -71,14 +79,15 @@ class NativeTopic_v2(Topic, NativeTopicBase, VersionedBaseModel):
     @classmethod
     def from_v1(cls, v1: NativeTopic_v1) -> Self:
         return cls(
+            v=1,
             id=v1.id,
             content_id=v1.content_id,
             content_type=v1.content_type,
-            target_language=v1.target_language_code,
-            levels=v1.levels,
+            language=v1.target_language_code,
+            level=v1.level,
             type=TopicType.LETTER_SHUFFLE if v1.content_type=="letter-shuffle" else TopicType.GRAMMAR,
-            target_title=v1.target_title,
-            target_description=v1.target_description,
+            title=v1.target_title,
+            description=v1.target_description,
             native_language=v1.native_language_code,
             native_title=v1.native_title,
             native_description=v1.native_description,
@@ -108,10 +117,10 @@ class NativeTopic_v2(Topic, NativeTopicBase, VersionedBaseModel):
                 id=v2.id,
                 content_id=v2.content_id,
                 content_type=v2.content_type,
-                target_language_code=v2.target_language,
-                levels=v2.levels,
-                target_title=v2.target_title,
-                target_description=v2.target_description,
+                target_language_code=v2.language,
+                levels=[v2.level],
+                target_title=v2.title,
+                target_description=v2.description,
                 native_language_code=v2.native_language,
                 native_title=v2.native_title,
                 native_description=v2.native_description,

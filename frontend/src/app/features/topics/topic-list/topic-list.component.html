@@ -15,15 +15,15 @@
     <mat-card>
         <mat-card-header>
             <mat-card-title>@if(topic.type=="grammar"){ Grammar} @else { Quiz }</mat-card-title>
-            <mat-card-subtitle>{{topic.target_title}}</mat-card-subtitle>
+            <mat-card-subtitle>{{topic.title}}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content [routerLink]="topic.content_id ? ['/', topic.content_type, topic.content_id] : [topic.id]">
             <div>
                 @if (topic.image_name) {
                 <img [ngSrc]="`/api/images/${topic.image_name}`" fill [ngSrcset]="'400w, 600w, 800w, 1024w'" priority
-                    [matTooltip]="topic.target_description" [matTooltipTouchGestures]="'off'" />
+                    [matTooltip]="topic.description" [matTooltipTouchGestures]="'off'" />
                 } @else {
-                {{topic.target_description}}
+                {{topic.description}}
                 }
             </div>
         </mat-card-content>
