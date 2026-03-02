@@ -6,10 +6,15 @@ import { GapFillChoiceComponent } from "../../gap-fill-choice/gap-fill-choice.co
 import { MatDialog } from '@angular/material/dialog';
 import { SimpleDialogComponent } from '../../../shared/simple-dialog/simple-dialog.component';
 import { InfoPageComponent } from "../../info-page/info-page.component";
+import { DefinitionGuessComponent } from "../../definition-guess/definition-guess.component";
 
 @Component({
     selector: 'app-topic-view',
-    imports: [CommonModule, GapFillChoiceComponent, InfoPageComponent],
+    imports: [
+        CommonModule,
+        GapFillChoiceComponent,
+        InfoPageComponent,
+        DefinitionGuessComponent,],
     templateUrl: './topic-view.component.html',
     styleUrl: './topic-view.component.scss',
 })

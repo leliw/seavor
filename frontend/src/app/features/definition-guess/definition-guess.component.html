@@ -1,0 +1,20 @@
+<div class="layout-container-2 full-screen-container">
+    @if (exercise) {
+
+    <div class="part left vertically-centered">
+        <div id="description">{{ exercise.description }}</div>
+        @if (showHint) {
+        <div id="hint">({{ exercise.hint}})</div>
+        }
+    </div>
+    <div class="part right vertically-centered">
+        <div id="sentence" [innerHTML]="!showAnswer ? sentence.text_with_gap : answer"></div>
+    </div>
+    }
+</div>
+@if (!showAnswer) {
+<app-bottom-nav [showCheck]="true" [showHint]="true" [showTranslate]="true" (check)="check()"
+    (hint)="showHint = !showHint" [disabledHint]="showHint" (translate)="native = !native"></app-bottom-nav>
+} @else {
+<app-evaluation-bar (evaluation)="onEvaluation($event)"></app-evaluation-bar>
+}

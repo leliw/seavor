@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { LanguageService } from '../../core/language.service';
 
 
@@ -46,6 +46,15 @@ export class TopicService {
         return this.httpClient.get<Topic[]>(this.getEndpoint());
     }
     getPages(topic_id: string): Observable<PageHeader[]> {
+        if (topic_id == "definition-guess") {
+            return of([
+                {
+                    id: "id",
+                    order: 1,
+                    type: "definition-guess"
+                }
+            ]);
+        }
         return this.httpClient.get<PageHeader[]>(`${this.getEndpoint()}/${topic_id}/pages`);
     }
 }
