@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from uuid import UUID
 
 from ampf.base import BaseAsyncFactory
@@ -15,12 +16,15 @@ from features.topics.topic_service import TopicService
 from features.native_topics.native_topic_model import NativeTopic
 from shared.audio_files.audio_file_service import AudioFileService
 
+_log = logging.getLogger(__name__)
+
 
 class LetterShuffleTranslationService:
     def __init__(
         self, factory: BaseAsyncFactory, audio_file_service: AudioFileService, target_language_code: str, id: UUID
     ):
         self.factory = factory
+        _log.debug(f"target-languages/{target_language_code}/letter-shuffles/{id}/native-languages")
         self.storage = factory.create_storage(
             f"target-languages/{target_language_code}/letter-shuffles/{id}/native-languages",
             LetterShuffleSetTranslation,
