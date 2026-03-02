@@ -18,14 +18,14 @@ def gap_fill_choice_exercise_create() -> GapFillChoiceExerciseCreate:
     return GapFillChoiceExerciseCreate(
         level=Level.A1,
         order=1,
-        target_language=Language.EN,
-        target_sentence="Hello [___]!",
+        language=Language.EN,
+        sentence="Hello [___]!",
         gap_marker="[___]",
         options=["World", "Earth", "Moon"],
         correct_index=0,
-        target_explanation="The common greeting.",
-        target_distractors_explanation={"1": "Not a planet.", "2": "Also not a planet."},
-        target_hint="Starts with W",
+        explanation="The common greeting.",
+        distractors_explanation={"1": "Not a planet.", "2": "Also not a planet."},
+        hint="Starts with W",
     )
 
 
@@ -54,19 +54,19 @@ def test_post_get_put_delete(client: ApiTestClient, endpoint: str, gap_fill_choi
     # GET
     r = client.get_typed(f"{endpoint}/{exercise_id}", 200, GapFillChoiceExercise)
     assert r.id == exercise_id
-    assert r.target_sentence == "Hello [___]!"
+    assert r.sentence == "Hello [___]!"
     assert r.correct_index == 0
 
     # PATCH
     updated_sentence = "Hi [___]!"
     gfce_patch = GapFillChoiceExercisePatch(
         level=Level.A1,
-        target_sentence=updated_sentence,
+        sentence=updated_sentence,
         correct_index=1,  # Change correct answer
     )
     r = client.patch_typed(f"{endpoint}/{exercise_id}", 200, GapFillChoiceExercise, json=gfce_patch.model_dump())
     r = client.get_typed(f"{endpoint}/{exercise_id}", 200, GapFillChoiceExercise)
-    assert r.target_sentence == updated_sentence
+    assert r.sentence == updated_sentence
     assert r.correct_index == 1
 
     # DELETE

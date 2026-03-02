@@ -29,19 +29,19 @@ class PageService:
         self,
         factory: BaseAsyncFactory,
         audio_file_service: AudioFileService,
-        target_language: Language,
+        language: Language,
         level: Level,
         topic_id: UUID,
     ):
         self.storage = factory.create_storage(
-            f"target-languages/{target_language}/levels/{level}/topics/{topic_id}/pages",
-            PageAdapter,  # type: ignore
+            f"target-languages/{language}/levels/{level}/topics/{topic_id}/pages",
+            Page,  # type: ignore
             "id",
         )
-        self.storage.from_storage = lambda value: PageAdapter.validate_python(value)  # type: ignore
+        # self.storage.from_storage = lambda value: PageAdapter.validate_python(value)  # type: ignore
 
         self.audio_file_service = audio_file_service
-        self.target_language_code = target_language
+        self.language_code = language
 
     async def get_all(self) -> AsyncGenerator[PageHeader]:
         async for value in self.storage.get_all():
@@ -58,37 +58,37 @@ class PageService:
         new_exercise = GapFillChoiceExercise.create(value)
 
         texts_to_synthesize = []
-        if new_exercise.target_sentence:
-            texts_to_synthesize.append(new_exercise.target_sentence)
-        if new_exercise.target_explanation:
-            texts_to_synthesize.append(new_exercise.target_explanation)
-        if new_exercise.target_hint:
-            texts_to_synthesize.append(new_exercise.target_hint)
-        if new_exercise.target_distractors_explanation:
-            for distractor in new_exercise.target_distractors_explanation.items():
+        if new_exercise.sentence:
+            texts_to_synthesize.append(new_exercise.sentence)
+        if new_exercise.explanation:
+            texts_to_synthesize.append(new_exercise.explanation)
+        if new_exercise.hint:
+            texts_to_synthesize.append(new_exercise.hint)
+        if new_exercise.distractors_explanation:
+            for distractor in new_exercise.distractors_explanation.items():
                 texts_to_synthesize.append(distractor[1])
 
         audio_file_names = await asyncio.gather(
             *[
-                self.audio_file_service.generate_and_upload(text=text, language=self.target_language_code)
+                self.audio_file_service.generate_and_upload(text=text, language=self.language_code)
                 for text in texts_to_synthesize
             ]
         )
 
         audio_file_index = 0
-        if new_exercise.target_sentence:
-            new_exercise.target_sentence_audio_file_name = audio_file_names[audio_file_index]
+        if new_exercise.sentence:
+            new_exercise.sentence_audio_file_name = audio_file_names[audio_file_index]
             audio_file_index += 1
-        if new_exercise.target_explanation:
-            new_exercise.target_explanation_audio_file_name = audio_file_names[audio_file_index]
+        if new_exercise.explanation:
+            new_exercise.explanation_audio_file_name = audio_file_names[audio_file_index]
             audio_file_index += 1
-        if new_exercise.target_hint:
-            new_exercise.target_hint_audio_file_name = audio_file_names[audio_file_index]
+        if new_exercise.hint:
+            new_exercise.hint_audio_file_name = audio_file_names[audio_file_index]
             audio_file_index += 1
-        if new_exercise.target_distractors_explanation:
-            new_exercise.target_distractors_explanation_audio_file_name = {}
-            for distractor in new_exercise.target_distractors_explanation.items():
-                new_exercise.target_distractors_explanation_audio_file_name[distractor[0]] = audio_file_names[
+        if new_exercise.distractors_explanation:
+            new_exercise.distractors_explanation_audio_file_name = {}
+            for distractor in new_exercise.distractors_explanation.items():
+                new_exercise.distractors_explanation_audio_file_name[distractor[0]] = audio_file_names[
                     audio_file_index
                 ]
                 audio_file_index += 1
@@ -103,15 +103,15 @@ class PageService:
         # texts_to_synthesize.append(value.content)
         # audio_file_names = await asyncio.gather(
         #     *[
-        #         self.audio_file_service.generate_and_upload(text=text, language=self.target_language_code)
+        #         self.audio_file_service.generate_and_upload(text=text, language=self.language_code)
         #         for text in texts_to_synthesize
         #     ]
         # )
 
         # audio_file_index = 0
-        # value.target_title_audio_file_name = audio_file_names[audio_file_index]
+        # value.title_audio_file_name = audio_file_names[audio_file_index]
         # audio_file_index += 1
-        # value.target_definition_audio_file_name = audio_file_names[audio_file_index]
+        # value.definition_audio_file_name = audio_file_names[audio_file_index]
         await self.storage.create(value)
         return value
 
@@ -142,14 +142,14 @@ class PageService:
         exercise_to_delete = await self.storage.get(key)
 
         audio_files_to_delete = []
-        if exercise_to_delete.target_sentence_audio_file_name:
-            audio_files_to_delete.append(exercise_to_delete.target_sentence_audio_file_name)
-        if exercise_to_delete.target_explanation_audio_file_name:
-            audio_files_to_delete.append(exercise_to_delete.target_explanation_audio_file_name)
-        if exercise_to_delete.target_hint_audio_file_name:
-            audio_files_to_delete.append(exercise_to_delete.target_hint_audio_file_name)
-        if exercise_to_delete.target_distractors_explanation_audio_file_name:
-            for distractor in exercise_to_delete.target_distractors_explanation_audio_file_name.items():
+        if exercise_to_delete.sentence_audio_file_name:
+            audio_files_to_delete.append(exercise_to_delete.sentence_audio_file_name)
+        if exercise_to_delete.explanation_audio_file_name:
+            audio_files_to_delete.append(exercise_to_delete.explanation_audio_file_name)
+        if exercise_to_delete.hint_audio_file_name:
+            audio_files_to_delete.append(exercise_to_delete.hint_audio_file_name)
+        if exercise_to_delete.distractors_explanation_audio_file_name:
+            for distractor in exercise_to_delete.distractors_explanation_audio_file_name.items():
                 if distractor[1]:
                     audio_files_to_delete.append(distractor[1])
 

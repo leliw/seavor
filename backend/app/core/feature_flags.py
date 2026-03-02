@@ -8,6 +8,9 @@ _log = logging.getLogger(__name__)
 class FeatureFlags(BaseModel):
     topic_v2_storage: bool = False
     topic_v2_migrate: bool = False
+    
+    page_v2_storage: bool = False
+    page_v2_migrate: bool = False
 
     def model_post_init(self, _) -> None:
         for k, v in self.model_dump().items():
