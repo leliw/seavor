@@ -1,4 +1,4 @@
-<mat-toolbar color="primary" class="bottom-nav">
+<mat-toolbar color="primary" class="navigation-bar">
     <mat-nav-list class="horizontal">
         @if (showHome()) {
         <a mat-list-item routerLink="/topics">
@@ -22,6 +22,12 @@
         <a mat-list-item (click)="nextPage.emit()">
             <mat-icon matListItemIcon>arrow_forward</mat-icon>
             <span matListItemTitle i18n>Next</span>
+        </a>
+        }
+        @if (showCheck()) {
+        <a mat-list-item (click)="check.emit()" i18n-matTooltip matTooltip="Check answer">
+            <mat-icon matListItemIcon>fact_check</mat-icon>
+            <span matListItemTitle i18n>Check</span>
         </a>
         }
         @if (showHint()) {
