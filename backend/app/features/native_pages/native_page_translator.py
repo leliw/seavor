@@ -24,15 +24,15 @@ class NativePageTranslator:
         self.service = service
 
     async def translate_page_to_native(
-        self, target_language: Language, native_language: Language, page_id: UUID
+        self, language: Language, native_language: Language, page_id: UUID
     ) -> NativePage:
         page = await self.service.get(page_id)
         match page.type:
             case "gap-fill-choice":
-                native = await self._translate(target_language, native_language, page)
+                native = await self._translate(language, native_language, page)
                 return NativeGapFillChoiceExercise.from_page(page, native)
             case "info":
-                native = await self._translate_info_page(target_language, native_language, page)
+                native = await self._translate_info_page(language, native_language, page)
                 return NativeInfoPage.from_page(page, native)
             case _:
                 raise NotImplementedError(f"Unsupported page type: {page.type}")
@@ -56,21 +56,21 @@ class NativePageTranslator:
 
         message = "Translate the page exercise from {src_language} to {dest_language}. "
         message += "Return the response as a single JSON dictionary."
-        message += "\nSentence: **{page.target_sentence}**"
-        message += "\nCorrect answer: **{page.target_answer}**"
+        message += "\nSentence: **{page.sentence}**"
+        message += "\nCorrect answer: **{page.answer}**"
         example = "Example response:\n{{'sentence': 'translated sentence', 'answer': 'translated correct answer'"
-        if page.target_explanation:
-            message += "\nExplanation: **{page.target_explanation}**"
+        if page.explanation:
+            message += "\nExplanation: **{page.explanation}**"
             example += ", 'explanation': 'translated explanation'"
-        if page.target_distractors_explanation:
+        if page.distractors_explanation:
             message += "\nDistractors explanation:"
             example += ", 'distractors_explanation': {{"
-            for distractor in page.target_distractors_explanation.items():
+            for distractor in page.distractors_explanation.items():
                 message += f"\n{distractor[0]}: **{distractor[1]}**"
                 example += f"'{distractor[0]}': 'translated explanation', "
             example += "}}"
-        if page.target_hint:
-            message += "\nHint: **{page.target_hint}**"
+        if page.hint:
+            message += "\nHint: **{page.hint}**"
             example += ", 'hint': 'translated hint'"
         example += "}}"
         message += "\n\n"

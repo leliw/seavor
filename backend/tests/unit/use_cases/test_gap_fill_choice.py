@@ -19,14 +19,14 @@ def test_gap_fill_choice(client: ApiTestClient, topic_create: TopicCreate, mocke
     topic_page = GapFillChoiceExerciseCreate(
         level=t.level,
         order=1,
-        target_language=t.language,
-        target_sentence="Hello [___]!",
+        language=t.language,
+        sentence="Hello [___]!",
         gap_marker="[___]",
         options=["World", "Earth", "Moon"],
         correct_index=0,
-        target_explanation="The common greeting.",
-        target_distractors_explanation={"1": "Not a planet.", "2": "Also not a planet."},
-        target_hint="Starts with W",
+        explanation="The common greeting.",
+        distractors_explanation={"1": "Not a planet.", "2": "Also not a planet."},
+        hint="Starts with W",
     )
     p = client.post_typed(
         f"/api/topics/{t.language}/{t.level}/{t.id}/pages", 200, GapFillChoiceExercise, json=topic_page

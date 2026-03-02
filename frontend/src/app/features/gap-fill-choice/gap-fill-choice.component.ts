@@ -55,7 +55,7 @@ export class GapFillChoiceComponent implements OnInit {
 
     onAnswer(event: MatRadioChange<any>) {
         if (event.value == this.exercise.correct_index) {
-            const message = this.exercise.target_sentence.replace(this.exercise.gap_marker!, '<b>' + this.exercise.options[event.value] + '</b>');
+            const message = this.exercise.sentence.replace(this.exercise.gap_marker!, '<b>' + this.exercise.options[event.value] + '</b>');
             this.dialog.open(SimpleDialogComponent, {
                 data: {
                     title: $localize`Correct`,
@@ -66,9 +66,9 @@ export class GapFillChoiceComponent implements OnInit {
                 this.nextPage.emit();
             });
         } else {
-            var message = this.exercise.target_hint;
-            if (this.exercise.target_distractors_explanation)
-                message += "<br />\n<hr />\n" + this.exercise.target_distractors_explanation[event.value];
+            var message = this.exercise.hint;
+            if (this.exercise.distractors_explanation)
+                message += "<br />\n<hr />\n" + this.exercise.distractors_explanation[event.value];
             this.dialog.open(SimpleDialogComponent, {
                 data: {
                     title: $localize`Wrong`,

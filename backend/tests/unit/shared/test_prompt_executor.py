@@ -26,7 +26,7 @@ def test_prepare_response_typed(prompt_executor: PromptExecutor):
     m_resp = AIChatResponse(
         content="""
     {
-        "target_language": "en",
+        "language": "en",
         "level": "A1",
         "order": 1,
         "type": "info",
@@ -47,7 +47,7 @@ def test_prepare_response_typed_list(prompt_executor: PromptExecutor):
   "type": "array",
   "items": [
     {
-        "target_language": "en",
+        "language": "en",
         "level": "A1",
         "order": 1,
         "type": "info",
@@ -55,7 +55,7 @@ def test_prepare_response_typed_list(prompt_executor: PromptExecutor):
         "content": "The verb 'to be' is very important in English. It means 'am', 'is', or 'are'. We use it to talk about people, things, and places."
     },
     {
-        "target_language": "en",
+        "language": "en",
         "level": "A1",
         "order": 1,
         "type": "info",

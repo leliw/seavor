@@ -25,7 +25,7 @@ async def test_translate_info_page(native_page_translator: NativePageTranslator,
     # Given: an info page
     page = InfoPage.create(
         InfoPageCreate(
-            target_language=Language.EN,
+            language=Language.EN,
             level=Level.A1,
             order=1,
             type=PageType.INFO,
@@ -34,7 +34,7 @@ async def test_translate_info_page(native_page_translator: NativePageTranslator,
         )
     )
     # When: Translate page
-    ret = await native_page_translator._translate_info_page(page.target_language, Language.PL, page)
+    ret = await native_page_translator._translate_info_page(page.language, Language.PL, page)
     # Then: A translated page is returned
     assert isinstance(ret, NativeInfoPageBase)
     assert ret.native_title

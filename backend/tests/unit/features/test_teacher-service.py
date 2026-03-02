@@ -45,15 +45,15 @@ def test_create_gap_fill_choice_exercises(teacher_service: TeacherService, mocke
     mocker_ai_model.add(
         message_containing="Semi-modal verbs",
         response="""[{
-        "target_language": "en",
+        "language": "en",
         "level": "A2",
         "order": 1,
-        "target_sentence": "When in Britain, visitors _____ remember to drive on the left-hand side of the road, come rain or shine.",
+        "sentence": "When in Britain, visitors _____ remember to drive on the left-hand side of the road, come rain or shine.",
         "gap_marker": "_____",
         "options": ["have to", "used to", "ought to"],
         "correct_index": 0,
-        "target_explanation": "The semi-modal verb 'have to' expresses a strong obligation or necessity, which is certainly the case when driving in a country with different road rules. It's a legal requirement, not merely a suggestion.",
-        "target_distractors_explanation": {
+        "explanation": "The semi-modal verb 'have to' expresses a strong obligation or necessity, which is certainly the case when driving in a country with different road rules. It's a legal requirement, not merely a suggestion.",
+        "distractors_explanation": {
             "used to": "This refers to a past habit or state that no longer exists, which isn't applicable here as driving on the left is a current rule.",
             "ought to": "This suggests a recommendation or moral duty, but driving on the left is a legal requirement, not just a suggestion or a matter of good manners."
         }
@@ -74,7 +74,7 @@ def test_create_info_pages(teacher_service: TeacherService, mocker_ai_model: Moc
     mocker_ai_model.add(
         message_containing="Verb to be (am / is / are)",
         response="""[  {
-        "target_language": "en",
+        "language": "en",
         "level": "A1",
         "order": 1,
         "type": "info",
