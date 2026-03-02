@@ -5,10 +5,7 @@ from ampf.base import BaseAsyncFactory
 from features.languages import Language
 from features.levels import Level
 from features.native_pages.native_page_model import NativePage, NativePageHeader
-from pydantic import TypeAdapter
 from shared.audio_files.audio_file_service import AudioFileService
-
-NativePageAdapter = TypeAdapter(NativePage)
 
 
 class NativePageService:
@@ -23,10 +20,9 @@ class NativePageService:
     ):
         self.storage = factory.create_storage(
             f"target-languages/{target_language}/levels/{level}/native-languages/{native_language}/topics/{topic_id}/pages",
-            NativePageAdapter,  # type: ignore
+            NativePage,  # type: ignore
             "id",
         )
-        self.storage.from_storage = lambda value: NativePageAdapter.validate_python(value)  # type: ignore
 
         self.audio_file_service = audio_file_service
         self.target_language_code = target_language
