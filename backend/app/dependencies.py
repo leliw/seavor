@@ -10,7 +10,9 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.concurrency import asynccontextmanager
 from features.languages import Language
 from features.levels import Level
+from features.native_pages.native_page_model import NativeGapFillChoiceExercise_v2, NativeInfoPage_v2
 from features.native_topics.native_topic_service import NativeTopicService
+from features.pages.page_model import GapFillChoiceExercise_v2, InfoPage_v2
 from features.pages.page_service import PageService
 from features.topics.topic_model import Topic_v2
 from features.topics.topic_service import TopicService
@@ -33,6 +35,14 @@ def lifespan(config: AppConfig = AppConfig()):
         save_new_format=config.feature_flags.topic_v2_storage,
         migrate_legacy_on_read=config.feature_flags.topic_v2_migrate,
     )
+    page_sff = StorageFormatFlags(
+        save_new_format=config.feature_flags.page_v2_storage,
+        migrate_legacy_on_read=config.feature_flags.page_v2_migrate,
+    )
+    InfoPage_v2.FORMAT_FLAGS = page_sff
+    NativeInfoPage_v2.FORMAT_FLAGS = page_sff
+    GapFillChoiceExercise_v2.FORMAT_FLAGS = page_sff
+    NativeGapFillChoiceExercise_v2.FORMAT_FLAGS = page_sff
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
