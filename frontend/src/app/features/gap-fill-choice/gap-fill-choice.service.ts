@@ -11,15 +11,15 @@ export interface GapFillChoiceExerciseHeader {
 export interface GapFillChoiceExercise {
   id: string;
   level: string;
-  target_sentence: string;
+  sentence: string;
   gap_marker: string | null;
   options: string[];
   correct_index: number;
-  target_explanation?: string;
+  explanation?: string;
   native_explanation?: string;
-  target_distractors_explanation?: Record<number, string>;
+  distractors_explanation?: Record<number, string>;
   native_distractors_explanation?: Record<number, string>;
-  target_hint?: string;
+  hint?: string;
   native_hint?: string;
 }
 
@@ -32,10 +32,10 @@ export class GapFillChoiceService {
   constructor(private httpClient: HttpClient, private languageService: LanguageService) { }
 
   getEndpoint(): string {
-    const targetLanguage = this.languageService.getLearningLanguage();
+    const language = this.languageService.getLearningLanguage();
     const nativeLanguage = this.languageService.getInterfaceLanguage();
     const level = "A1"
-    return `/api/native-topics/${targetLanguage}/${level}/${nativeLanguage}`;
+    return `/api/native-topics/${language}/${level}/${nativeLanguage}`;
   }
 
   getAll(): Observable<GapFillChoiceExerciseHeader[]> {

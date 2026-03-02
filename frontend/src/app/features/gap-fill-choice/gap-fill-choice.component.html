@@ -1,9 +1,9 @@
 <div class="layout-container-2 full-screen-container">
     @if (exercise) {
     <div class="part left vertically-centered">
-        <div id="sentence">{{ exercise.target_sentence}}</div>
+        <div id="sentence">{{ exercise.sentence}}</div>
         @if (showHint) {
-        <div id="hint">({{ exercise.target_hint}})</div>
+        <div id="hint">({{ exercise.hint}})</div>
         }
     </div>
     <div class="part right vertically-centered">
