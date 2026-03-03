@@ -4,8 +4,10 @@ import pytest
 from ampf.testing import ApiTestClient
 from features.languages import Language
 from features.levels import Level
+from features.pages.definition_guess_model import AnswerOption, DefinitionGuess, DefinitionGuessCreate, DefinitionGuessPatch, Sentence
+from features.pages.page_base_model import BasePage
 from features.pages.page_model import (
-    BasePage,
+
     GapFillChoiceExercise,
     GapFillChoiceExerciseCreate,
     GapFillChoiceExercisePatch,
@@ -68,6 +70,73 @@ def test_post_get_put_delete(client: ApiTestClient, endpoint: str, gap_fill_choi
     r = client.get_typed(f"{endpoint}/{exercise_id}", 200, GapFillChoiceExercise)
     assert r.sentence == updated_sentence
     assert r.correct_index == 1
+
+    # DELETE
+    client.delete(f"{endpoint}/{exercise_id}", 200)
+    client.get(f"{endpoint}/{exercise_id}", 404)
+
+
+@pytest.fixture
+def definition_guess_create() -> DefinitionGuessCreate:
+    return DefinitionGuessCreate(
+        level=Level.A1,
+        order=1,
+        language=Language.EN,
+        phrase="Hello",
+        description="The common greeting.",
+        sentences=[
+            Sentence(
+                text_with_gap="Hello [___]!",
+                gap_filler_form="World",
+                audio_file_name="xxx",
+            ),
+        ],
+        alternatives=[
+            AnswerOption(
+                value="World",
+                explanation="The common greeting.",
+                audio_file_name="xxx",
+            ),
+        ],
+        distractors=[
+            AnswerOption(
+                value="Earth",
+                explanation="Not a planet.",
+                audio_file_name="xxx",
+            ),
+            AnswerOption(
+                value="Moon",
+                explanation="Also not a planet.",
+                audio_file_name="xxx",
+            ),
+        ],
+        hint="Starts with W",
+        explanation="The common greeting.",
+    )
+
+
+def test_post_get_put_delete_definition_guess(
+    client: ApiTestClient, endpoint: str, definition_guess_create: DefinitionGuessCreate
+):
+    # POST
+    posted_exercise = client.post_typed(endpoint, 200, DefinitionGuess, json=definition_guess_create)
+    exercise_id = posted_exercise.id
+
+    # GET
+    r = client.get_typed(f"{endpoint}/{exercise_id}", 200, DefinitionGuess)
+    assert r.id == exercise_id
+    assert r.phrase == "Hello"
+    assert r.description == "The common greeting."
+
+
+    # PATCH
+    updated_phrase = "Hi"
+    value_patch = DefinitionGuessPatch(
+        phrase=updated_phrase,
+    )
+    r = client.patch_typed(f"{endpoint}/{exercise_id}", 200, DefinitionGuess, json=value_patch)
+    r = client.get_typed(f"{endpoint}/{exercise_id}", 200, DefinitionGuess)
+    assert r.phrase == updated_phrase
 
     # DELETE
     client.delete(f"{endpoint}/{exercise_id}", 200)

@@ -4,11 +4,11 @@ from uuid import UUID
 from ampf.fastapi import JsonStreamingResponse
 from dependencies import PageServiceDep
 from fastapi import APIRouter
+from features.pages.page_base_model import BasePage
 from features.pages.page_model import (
-    BasePage,
-    GapFillChoiceExercisePatch,
     Page,
     PageCreate,
+    PagePatch,
 )
 
 router = APIRouter(tags=["Topic pages"])
@@ -33,7 +33,7 @@ async def get(service: PageServiceDep, id: UUID) -> Page:
 
 
 @router.patch(ITEM_PATH)
-async def patch(service: PageServiceDep, id: UUID, value_patch: GapFillChoiceExercisePatch) -> Page:
+async def patch(service: PageServiceDep, id: UUID, value_patch: PagePatch) -> Page:
     return await service.patch(id, value_patch)
 
 

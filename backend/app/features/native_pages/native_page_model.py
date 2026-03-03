@@ -1,11 +1,11 @@
 from typing import Dict, Optional, Self, Union
 
+from features.pages.page_base_model import PageHeader
 from features.pages.page_model import (
     GapFillChoiceExercise_v1,
     GapFillChoiceExercise_v2,
     InfoPage_v1,
     InfoPage_v2,
-    PageHeader,
 )
 from pydantic import BaseModel, Field, ValidationError
 from typing_extensions import Annotated

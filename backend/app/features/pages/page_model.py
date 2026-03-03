@@ -1,70 +1,12 @@
 from datetime import datetime, timezone
-from enum import StrEnum
 from typing import Dict, List, Literal, Optional, Self, Union
-from uuid import UUID, uuid4
+from uuid import uuid4
 
-from ampf.base import VersionedBaseModel
-
-from features.languages import Language
 from features.levels import Level
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from features.pages.definition_guess_model import DefinitionGuess_v2, DefinitionGuessCreate, DefinitionGuessPatch
+from features.pages.page_base_model import BasePage_v1, BasePage_v2, BasePageCreate, PageType
+from pydantic import BaseModel, Field, ValidationError
 from typing_extensions import Annotated
-
-
-class PageType(StrEnum):
-    LETTER_SHUFFLE = "letter-shuffle"
-    GAP_FILL_CHOICE = "gap-fill-choice"
-    INFO = "info"
-
-
-class PageHeader(BaseModel):
-    id: UUID
-    order: int
-    type: PageType
-    created_at: datetime
-    updated_at: datetime
-
-
-class BasePageCreate(BaseModel):
-    """Common fields for ALL page types"""
-
-    model_config = ConfigDict(extra="forbid")
-
-    language: Language
-    level: Level
-    order: int
-    type: PageType  # literal below will override this
-
-
-class BasePage_v1(BaseModel):
-    """Common fields for ALL page types"""
-
-    model_config = ConfigDict(extra="forbid")
-
-    id: UUID
-    target_language: Language
-    level: Level
-    order: int
-    type: PageType  # literal below will override this
-    created_at: datetime
-    updated_at: datetime
-
-
-class BasePage_v2(VersionedBaseModel):
-    """Common fields for ALL page types"""
-
-    model_config = ConfigDict(extra="forbid")
-
-    id: UUID
-    language: Language
-    level: Level
-    order: int
-    type: PageType  # literal below will override this
-    created_at: datetime
-    updated_at: datetime
-
-
-BasePage = BasePage_v2
 
 
 class GapFillChoiceExerciseCreate(BasePageCreate):
@@ -315,6 +257,7 @@ Page_v2 = Annotated[
     Union[
         GapFillChoiceExercise_v2,
         InfoPage_v2,
+        DefinitionGuess_v2,
     ],
     Field(discriminator="type"),
 ]
@@ -325,6 +268,13 @@ PageCreate = Annotated[
     Union[
         GapFillChoiceExerciseCreate,
         InfoPageCreate,
+        DefinitionGuessCreate,
     ],
     Field(discriminator="type"),
+]
+
+PagePatch = Union[
+    GapFillChoiceExercisePatch,
+    # InfoPagePatch,
+    DefinitionGuessPatch,
 ]

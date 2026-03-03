@@ -4,21 +4,21 @@ from typing import AsyncGenerator
 from uuid import UUID
 
 from ampf.base import BaseAsyncFactory
-from pydantic import TypeAdapter
+from features.languages import Language
+from features.levels import Level
+from features.pages.definition_guess_model import DefinitionGuess, DefinitionGuessCreate
+from features.pages.page_base_model import PageHeader, PageType
 from features.pages.page_model import (
     GapFillChoiceExercise,
     GapFillChoiceExerciseCreate,
-    GapFillChoiceExercisePatch,
     GapFillChoiceExercisePut,
     InfoPage,
     InfoPageCreate,
     Page,
     PageCreate,
-    PageHeader,
-    PageType,
+    PagePatch,
 )
-from features.languages import Language
-from features.levels import Level
+from pydantic import TypeAdapter
 from shared.audio_files.audio_file_service import AudioFileService
 
 PageAdapter = TypeAdapter(Page)
@@ -53,6 +53,8 @@ class PageService:
                 return await self.post_gap_fill_choice(value)
             case PageType.INFO:
                 return await self.post_info(value)
+            case PageType.DEFINITION_GUESS:
+                return await self.post_definition_guess(value)
 
     async def post_gap_fill_choice(self, value: GapFillChoiceExerciseCreate) -> Page:
         new_exercise = GapFillChoiceExercise.create(value)
@@ -88,9 +90,7 @@ class PageService:
         if new_exercise.distractors_explanation:
             new_exercise.distractors_explanation_audio_file_name = {}
             for distractor in new_exercise.distractors_explanation.items():
-                new_exercise.distractors_explanation_audio_file_name[distractor[0]] = audio_file_names[
-                    audio_file_index
-                ]
+                new_exercise.distractors_explanation_audio_file_name[distractor[0]] = audio_file_names[audio_file_index]
                 audio_file_index += 1
 
         await self.storage.create(new_exercise)
@@ -115,6 +115,24 @@ class PageService:
         await self.storage.create(value)
         return value
 
+    async def post_definition_guess(self, value_create: DefinitionGuessCreate) -> Page:
+        value = DefinitionGuess.create(value_create)
+        # texts_to_synthesize = []
+        # texts_to_synthesize.append(value.title)
+        # texts_to_synthesize.append(value.content)
+        # audio_file_names = await asyncio.gather(
+        #     *[
+        #         self.audio_file_service.generate_and_upload(text=text, language=self.language_code)
+        #         for text in texts_to_synthesize
+        #     ]
+        # )
+
+        # audio_file_index = 0
+        # value.title_audio_file_name = audio_file_names[audio_file_index]
+        # audio_file_index += 1
+        # value.definition_audio_file_name = audio_file_names[audio_file_index]
+        await self.storage.create(value)
+        return value
 
     async def get(self, key: UUID) -> Page:
         return await self.storage.get(key)
@@ -132,7 +150,7 @@ class PageService:
 
         await self.storage.put(key, updated_exercise)
 
-    async def patch(self, uid: UUID, value_patch: GapFillChoiceExercisePatch) -> Page:
+    async def patch(self, uid: UUID, value_patch: PagePatch) -> Page:
         value = await self.storage.get(uid)
         value.patch(value_patch)
         await self.storage.put(uid, value)
@@ -140,22 +158,23 @@ class PageService:
 
     async def delete(self, key: UUID) -> None:
         exercise_to_delete = await self.storage.get(key)
+        match exercise_to_delete.type:
+            case PageType.GAP_FILL_CHOICE:
+                audio_files_to_delete = []
+                if exercise_to_delete.sentence_audio_file_name:
+                    audio_files_to_delete.append(exercise_to_delete.sentence_audio_file_name)
+                if exercise_to_delete.explanation_audio_file_name:
+                    audio_files_to_delete.append(exercise_to_delete.explanation_audio_file_name)
+                if exercise_to_delete.hint_audio_file_name:
+                    audio_files_to_delete.append(exercise_to_delete.hint_audio_file_name)
+                if exercise_to_delete.distractors_explanation_audio_file_name:
+                    for distractor in exercise_to_delete.distractors_explanation_audio_file_name.items():
+                        if distractor[1]:
+                            audio_files_to_delete.append(distractor[1])
 
-        audio_files_to_delete = []
-        if exercise_to_delete.sentence_audio_file_name:
-            audio_files_to_delete.append(exercise_to_delete.sentence_audio_file_name)
-        if exercise_to_delete.explanation_audio_file_name:
-            audio_files_to_delete.append(exercise_to_delete.explanation_audio_file_name)
-        if exercise_to_delete.hint_audio_file_name:
-            audio_files_to_delete.append(exercise_to_delete.hint_audio_file_name)
-        if exercise_to_delete.distractors_explanation_audio_file_name:
-            for distractor in exercise_to_delete.distractors_explanation_audio_file_name.items():
-                if distractor[1]:
-                    audio_files_to_delete.append(distractor[1])
-
-        for file_name in audio_files_to_delete:
-            self.audio_file_service.delete(name=file_name)
-        # await asyncio.gather(
-        #     *[self.audio_file_service.delete(name=file_name) for file_name in audio_files_to_delete]
-        # )
+                for file_name in audio_files_to_delete:
+                    self.audio_file_service.delete(name=file_name)
+                # await asyncio.gather(
+                #     *[self.audio_file_service.delete(name=file_name) for file_name in audio_files_to_delete]
+                # )
         await self.storage.delete(key)
