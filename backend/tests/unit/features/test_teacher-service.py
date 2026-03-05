@@ -4,12 +4,13 @@ from features.levels import Level
 from features.pages.page_model import GapFillChoiceExerciseCreate, InfoPageCreate
 from features.teacher.teacher_service import TeacherService
 from haintech.testing import MockerAIModel
+from features.topics.topic_model import TopicType
 from shared.prompts.prompt_service import PromptService
 
 
 @pytest.fixture
 def teacher_service() -> TeacherService:
-    return TeacherService(PromptService("./app/prompts"), Language.EN, Level.A1)
+    return TeacherService(PromptService("./app/prompts"), language=Language.EN, level=Level.A1)
 
 
 def test_generate_word_list(teacher_service: TeacherService, mocker_ai_model: MockerAIModel):
@@ -100,6 +101,6 @@ def test_create_topic_description(teacher_service: TeacherService, mocker_ai_mod
     # Given: A teacher service
     assert teacher_service is not None
     # When: Create description
-    ret = teacher_service.create_topic_description("Verb to be (am / is / are)")
+    ret = teacher_service.create_topic_description(Level.A1, TopicType.GRAMMAR, "Verb to be (am / is / are)")
     # Then: Description is created
     assert isinstance(ret, str)
