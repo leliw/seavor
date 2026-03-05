@@ -3,10 +3,12 @@ from pathlib import Path
 from haintech.ai import AIChatResponse
 import pytest
 
+from features.languages import Language
+from features.levels import Level
 from shared.prompts.prompt_executor import PromptExecutor
 from shared.prompts.prompt_service import PromptService
 from haintech.ai.google_generativeai import GoogleAIModel
-
+from haintech.testing import MockerAIModel
 from features.pages.page_model import InfoPageCreate
 
 
@@ -37,6 +39,28 @@ def test_prepare_response_typed(prompt_executor: PromptExecutor):
     )
     ret = prompt_executor._prepare_response_typed(InfoPageCreate, m_resp)
     # Then: A InfoPageCreate objects is returned
+    assert isinstance(ret, InfoPageCreate)
+
+
+def test_prepare_response_typed_output(prompt_service: PromptService, prompt_executor: PromptExecutor):
+    m_resp = AIChatResponse(
+        content="""{"content": "The verb 'to be' is very important in English. It means 'am', 'is', or 'are'. We use it to talk about people, things, and places."}"""
+    )
+    ret = prompt_executor._prepare_response_typed(prompt_service.get_output_class("test_output"), m_resp)  # type: ignore
+    # Then: A InfoPageCreate objects is returned after conversion
+    assert isinstance(ret.convert(language=Language.EN, level=Level.A1, title="Verb to be - Introduction"), InfoPageCreate)
+
+
+def test_execute_typed_output(prompt_executor: PromptExecutor, mocker_ai_model: MockerAIModel):
+    mocker_ai_model.add(
+        message_containing="{'properties': {'content': {'title': 'Content', 'type': 'string'}}, 'required': ['content'], 'title': 'Output', 'type': 'object'}",
+        response="{\"content\": \"Welcome to the fascinating world of English verbs! Today, we're diving into one of the most fundamental and frequently used verbs: 'to be'.\" }"
+    )
+    # When:
+    ret = prompt_executor.execute_typed(
+        "test_output", InfoPageCreate, title="Verb to be - Introduction", language=Language.EN, level=Level.A1
+    )
+    # Then: A InfoPageCreate objects is returned after conversion
     assert isinstance(ret, InfoPageCreate)
 
 
