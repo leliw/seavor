@@ -65,12 +65,18 @@ class PromptExecutor:
             json_schema = output_class.model_json_schema()
         else:
             json_schema = clazz.model_json_schema()
-        response = self.execute(prompt_name, response_format="json", json_schema=json_schema, **kwargs)
-        if output_class:
-            ret = self._prepare_response_typed(output_class, response)
-            return ret.convert(**kwargs)
-        else:
-            return self._prepare_response_typed(clazz, response)
+        for attempt in range(3):
+            try:
+                response = self.execute(prompt_name, response_format="json", json_schema=json_schema, **kwargs)
+                if output_class:
+                    ret = self._prepare_response_typed(output_class, response)
+                    return ret.convert(**kwargs)
+                else:
+                    return self._prepare_response_typed(clazz, response)
+            except json.JSONDecodeError as e:
+                if attempt == 2:
+                    raise e
+        return self._prepare_response_typed(clazz, response)
 
     def _prepare_response_typed[T: BaseModel](self, clazz: Type[T], m_resp: AIChatResponse) -> T:
         if m_resp.content is None:
