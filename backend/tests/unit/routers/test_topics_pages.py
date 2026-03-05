@@ -83,7 +83,7 @@ def definition_guess_create() -> DefinitionGuessCreate:
         order=1,
         language=Language.EN,
         phrase="Hello",
-        description="The common greeting.",
+        definition="The common greeting.",
         sentences=[
             Sentence(
                 text_with_gap="Hello [___]!",
@@ -126,7 +126,7 @@ def test_post_get_put_delete_definition_guess(
     r = client.get_typed(f"{endpoint}/{exercise_id}", 200, DefinitionGuess)
     assert r.id == exercise_id
     assert r.phrase == "Hello"
-    assert r.description == "The common greeting."
+    assert r.definition == "The common greeting."
 
 
     # PATCH

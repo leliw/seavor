@@ -22,7 +22,7 @@ class DefinitionGuessCreate(BasePageCreate):
     type: Literal[PageType.DEFINITION_GUESS] = PageType.DEFINITION_GUESS
 
     phrase: str
-    description: str
+    definition: str
 
     sentences: list[Sentence]
     alternatives: list[AnswerOption]
@@ -40,7 +40,7 @@ class DefinitionGuessCreate(BasePageCreate):
 
 class DefinitionGuessPatch(BaseModel):
     phrase: Optional[str] = None
-    description: Optional[str] = None
+    definition: Optional[str] = None
 
     sentences: Optional[list[Sentence]] = None
     alternatives: Optional[list[AnswerOption]] = None
@@ -61,7 +61,7 @@ class DefinitionGuess_v2(BasePage_v2):
 
     type: Literal[PageType.DEFINITION_GUESS] = PageType.DEFINITION_GUESS
     phrase: str
-    description: str
+    definition: str
 
     sentences: list[Sentence]
     alternatives: list[AnswerOption]

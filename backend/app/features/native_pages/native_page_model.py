@@ -1,5 +1,6 @@
 from typing import Dict, Optional, Self, Union
 
+from features.pages.definition_guess_model import DefinitionGuess_v2
 from features.pages.page_base_model import PageHeader
 from features.pages.page_model import (
     GapFillChoiceExercise_v1,
@@ -147,6 +148,40 @@ class NativeInfoPage_v2(InfoPage_v2, NativeInfoPageBase):
 
 NativeInfoPage = NativeInfoPage_v2
 
+class NativeSentence(BaseModel):
+    text: str
+
+class NativeAnswerOption(BaseModel):
+    value: str
+    explanation: Optional[str] = None
+
+class NativeDefinitionGuessBase(BaseModel):
+    native_phrase: str
+    native_definition: str  # markdown / HTML / JSON
+
+    native_sentences: list[NativeSentence]
+    native_alternatives: list[NativeAnswerOption]
+    native_distractors: list[NativeAnswerOption]
+
+    native_hint: Optional[str] = None
+    native_explanation: Optional[str] = None
+
+class NativeDefinitionGuess_v2(DefinitionGuess_v2, NativeDefinitionGuessBase):
+    pass
+
+    @classmethod
+    def from_page(cls, page: DefinitionGuess_v2, native: NativeDefinitionGuessBase) -> Self:
+        return cls(**page.model_dump(), **native.model_dump())
+
+    @classmethod
+    def from_storage(cls, data: dict):
+            return cls.model_validate(data)
+
+    def to_storage(self):
+        return self.model_dump(by_alias=True, exclude_none=True)
+
+NativeDefinitionGuess = NativeDefinitionGuess_v2
+
 NativePage_v1 = Annotated[
     Union[
         NativeGapFillChoiceExercise_v1,
@@ -159,6 +194,7 @@ NativePage_v2 = Annotated[
     Union[
         NativeGapFillChoiceExercise_v2,
         NativeInfoPage_v2,
+        NativeDefinitionGuess_v2,
     ],
     Field(discriminator="type"),
 ]

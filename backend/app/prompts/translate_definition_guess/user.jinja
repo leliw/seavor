@@ -1,0 +1,25 @@
+Translate definition guess exercise to student's native language: {{ native_language_name }}:
+
+Phrase: {{ definition_guess.phrase }}
+Definition: {{ definition_guess.definition }}
+Sentences:
+{% for s in definition_guess.sentences %}
+ - {{ s.text_with_gap.replace('______', s.gap_filler_form) }}
+{% endfor %}
+Alternatives:
+{% for s in definition_guess.alternatives %}
+ - value: {{ s.value }}; explanation: {{ s.explanation }}
+{% endfor %}
+Distractors:
+{% for s in definition_guess.distractors %}
+ - value: {{ s.value }}; explanation: {{ s.explanation }}
+{% endfor %}
+
+Hint: {{ definition_guess.hint }}
+Explanation: {{ definition_guess.explanation }}
+
+
+Each page should adhere strictly to the json schema provided below.
+
+The output should be a JSON object:
+{{json_schema}}
