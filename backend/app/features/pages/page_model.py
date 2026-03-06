@@ -24,6 +24,32 @@ class GapFillChoiceExerciseCreate(BasePageCreate):
     distractors_explanation_audio_file_name: Optional[Dict[str, str]] = None
     hint_audio_file_name: Optional[str] = None
 
+    def get_texts_to_synthesize(self) -> set[str]:
+        ret = set()
+        if self.sentence:
+            ret.add(self.sentence)
+        if self.explanation:
+            ret.add(self.explanation)
+        if self.hint:
+            ret.add(self.hint)
+        if self.distractors_explanation:
+            for distractor in self.distractors_explanation.items():
+                ret.add(distractor[1])
+        return ret
+
+    def set_audio_file_names(self, audio_file_names: dict[str, str]) -> None:
+        if self.sentence:
+            self.sentence_audio_file_name = audio_file_names[self.sentence]
+        if self.explanation:
+            self.explanation_audio_file_name = audio_file_names[self.explanation]
+        if self.hint:
+            self.hint_audio_file_name = audio_file_names[self.hint]
+        if self.distractors_explanation:
+            self.distractors_explanation_audio_file_name = {
+                k: audio_file_names[v] for k, v in self.distractors_explanation.items()
+            }
+            
+
 
 class GapFillChoiceExercisePatch(BaseModel):
     level: Optional[Level] = None

@@ -56,45 +56,20 @@ class PageService:
             case PageType.DEFINITION_GUESS:
                 return await self.post_definition_guess(value)
 
-    async def post_gap_fill_choice(self, value: GapFillChoiceExerciseCreate) -> Page:
-        new_exercise = GapFillChoiceExercise.create(value)
-
-        texts_to_synthesize = []
-        if new_exercise.sentence:
-            texts_to_synthesize.append(new_exercise.sentence)
-        if new_exercise.explanation:
-            texts_to_synthesize.append(new_exercise.explanation)
-        if new_exercise.hint:
-            texts_to_synthesize.append(new_exercise.hint)
-        if new_exercise.distractors_explanation:
-            for distractor in new_exercise.distractors_explanation.items():
-                texts_to_synthesize.append(distractor[1])
-
+    async def post_gap_fill_choice(self, value_create: GapFillChoiceExerciseCreate) -> Page:
+        texts_to_synthesize = value_create.get_texts_to_synthesize()
         audio_file_names = await asyncio.gather(
             *[
                 self.audio_file_service.generate_and_upload(text=text, language=self.language_code)
                 for text in texts_to_synthesize
             ]
         )
+        text_to_audio = dict(zip(texts_to_synthesize, audio_file_names))
+        value_create.set_audio_file_names(text_to_audio)
 
-        audio_file_index = 0
-        if new_exercise.sentence:
-            new_exercise.sentence_audio_file_name = audio_file_names[audio_file_index]
-            audio_file_index += 1
-        if new_exercise.explanation:
-            new_exercise.explanation_audio_file_name = audio_file_names[audio_file_index]
-            audio_file_index += 1
-        if new_exercise.hint:
-            new_exercise.hint_audio_file_name = audio_file_names[audio_file_index]
-            audio_file_index += 1
-        if new_exercise.distractors_explanation:
-            new_exercise.distractors_explanation_audio_file_name = {}
-            for distractor in new_exercise.distractors_explanation.items():
-                new_exercise.distractors_explanation_audio_file_name[distractor[0]] = audio_file_names[audio_file_index]
-                audio_file_index += 1
-
-        await self.storage.create(new_exercise)
-        return new_exercise
+        value = GapFillChoiceExercise.create(value_create)
+        await self.storage.create(value)
+        return value
 
     async def post_info(self, value_create: InfoPageCreate) -> Page:
         value = InfoPage.create(value_create)
@@ -116,21 +91,17 @@ class PageService:
         return value
 
     async def post_definition_guess(self, value_create: DefinitionGuessCreate) -> Page:
-        value = DefinitionGuess.create(value_create)
-        # texts_to_synthesize = []
-        # texts_to_synthesize.append(value.title)
-        # texts_to_synthesize.append(value.content)
-        # audio_file_names = await asyncio.gather(
-        #     *[
-        #         self.audio_file_service.generate_and_upload(text=text, language=self.language_code)
-        #         for text in texts_to_synthesize
-        #     ]
-        # )
+        texts_to_synthesize = value_create.get_texts_to_synthesize()
+        audio_file_names = await asyncio.gather(
+            *[
+                self.audio_file_service.generate_and_upload(text=text, language=self.language_code)
+                for text in texts_to_synthesize
+            ]
+        )
+        text_to_audio = dict(zip(texts_to_synthesize, audio_file_names))
+        value_create.set_audio_file_names(text_to_audio)
 
-        # audio_file_index = 0
-        # value.title_audio_file_name = audio_file_names[audio_file_index]
-        # audio_file_index += 1
-        # value.definition_audio_file_name = audio_file_names[audio_file_index]
+        value = DefinitionGuess.create(value_create)
         await self.storage.create(value)
         return value
 

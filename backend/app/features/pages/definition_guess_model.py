@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+import re
 from typing import Any, Literal, Optional, Self
 from uuid import uuid4
 
@@ -9,13 +10,17 @@ from pydantic import BaseModel
 class Sentence(BaseModel):
     text_with_gap: str
     gap_filler_form: str
-    audio_file_name: Optional[str] = None
+    audio_file_name: str | None = None
+
+    @property
+    def answer(self) -> str:
+        return re.sub(r"_{3,}", self.gap_filler_form, self.text_with_gap)
 
 
 class AnswerOption(BaseModel):
     value: str
-    explanation: Optional[str] = None
-    audio_file_name: Optional[str] = None
+    explanation: str | None = None
+    audio_file_name: str | None = None
 
 
 class DefinitionGuessCreate(BasePageCreate):
@@ -28,15 +33,55 @@ class DefinitionGuessCreate(BasePageCreate):
     alternatives: list[AnswerOption]
     distractors: list[AnswerOption]
 
-    hint: Optional[str] = None
-    explanation: Optional[str] = None
+    hint: str | None = None
+    explanation: str | None = None
 
-    image_names: Optional[list[str]] = None
-    phrase_audio_file_name: Optional[str] = None
-    description_audio_file_name: Optional[str] = None
-    hint_audio_file_name: Optional[str] = None
-    explanation_audio_file_name: Optional[str] = None
+    phrase_audio_file_name: str | None = None
+    definition_audio_file_name: str | None = None
+    hint_audio_file_name: str | None= None
+    explanation_audio_file_name: str | None = None
 
+    image_names: list[str] | None = None
+
+    def get_texts_to_synthesize(self) -> set[str]:
+        ret = set()
+        if self.phrase:
+            ret.add(self.phrase)
+        if self.definition:
+            ret.add(self.definition)
+        if self.explanation:
+            ret.add(self.explanation)
+        if self.hint:
+            ret.add(self.hint)
+        if self.sentences:
+            for sentence in self.sentences:
+                ret.add(sentence.answer)
+        if self.alternatives:
+            for alternative in self.alternatives:
+                ret.add(alternative.value)
+        if self.distractors:
+            for distractor in self.distractors:
+                ret.add(distractor.value)
+        return ret
+
+    def set_audio_file_names(self, audio_file_names: dict[str, str]) -> None:
+        if self.phrase:
+            self.phrase_audio_file_name = audio_file_names[self.phrase]
+        if self.definition:
+            self.definition_audio_file_name = audio_file_names[self.definition]
+        if self.sentences:
+            for sentence in self.sentences:
+                sentence.audio_file_name = audio_file_names[sentence.answer]
+        if self.alternatives:
+            for alternative in self.alternatives:
+                alternative.audio_file_name = audio_file_names[alternative.value]
+        if self.distractors:
+            for distractor in self.distractors:
+                distractor.audio_file_name = audio_file_names[distractor.value]
+        if self.explanation:
+            self.explanation_audio_file_name = audio_file_names[self.explanation]
+        if self.hint:
+            self.hint_audio_file_name = audio_file_names[self.hint]
 
 class DefinitionGuessPatch(BaseModel):
     phrase: Optional[str] = None
@@ -51,7 +96,7 @@ class DefinitionGuessPatch(BaseModel):
 
     image_names: Optional[list[str]] = None
     phrase_audio_file_name: Optional[str] = None
-    description_audio_file_name: Optional[str] = None
+    definition_audio_file_name: Optional[str] = None
     hint_audio_file_name: Optional[str] = None
     explanation_audio_file_name: Optional[str] = None
 
@@ -72,7 +117,7 @@ class DefinitionGuess_v2(BasePage_v2):
 
     image_names: Optional[list[str]] = None
     phrase_audio_file_name: Optional[str] = None
-    description_audio_file_name: Optional[str] = None
+    definition_audio_file_name: Optional[str] = None
     hint_audio_file_name: Optional[str] = None
     explanation_audio_file_name: Optional[str] = None
 
