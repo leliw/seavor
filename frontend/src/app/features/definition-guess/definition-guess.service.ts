@@ -36,7 +36,7 @@ export interface DefinitionGuessExercise {
     explanation?: string;
 
     phrase_audio_file_name?: string;
-    description_audio_file_name?: string;
+    definition_audio_file_name?: string;
     hint_audio_file_name?: string;
     explanation_audio_file_name?: string;
 

@@ -28,7 +28,7 @@
 </div>
 @if (!showAnswer) {
 <app-bottom-nav [showCheck]="true" [showHint]="true" [showTranslate]="true" (check)="check()"
-    (hint)="showHint = !showHint" [disabledHint]="showHint" (translate)="native = !native"></app-bottom-nav>
+    (hint)="onShowHint()" [disabledHint]="showHint" (translate)="native = !native"></app-bottom-nav>
 } @else {
 <app-evaluation-bar (evaluation)="onEvaluation($event)"></app-evaluation-bar>
 }
