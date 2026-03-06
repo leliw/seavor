@@ -2,10 +2,12 @@ import { Component, effect, inject, input, OnDestroy, output } from '@angular/co
 import { DefinitionGuessExercise, DefinitionGuessService, NativeSentence, Sentence } from './definition-guess.service';
 import { BottomNavComponent } from "../../core/bottom-nav/bottom-nav.component";
 import { EvaluationBarComponent } from "../../core/evaluation-bar/evaluation-bar.component";
+import { NgOptimizedImage } from '@angular/common';
 
 @Component({
     selector: 'app-definition-guess',
     imports: [
+        NgOptimizedImage,
         BottomNavComponent,
         EvaluationBarComponent
     ],
@@ -28,6 +30,7 @@ export class DefinitionGuessComponent implements OnDestroy {
     public native: boolean = false;
     public showAnswer: boolean = false;
     public answer: string | null = null;
+    public image_src!: string;
 
     phrase_audio: HTMLAudioElement = new Audio();
     definition_audio: HTMLAudioElement = new Audio();
@@ -53,6 +56,12 @@ export class DefinitionGuessComponent implements OnDestroy {
                 this.definition_audio.play().catch(err => console.error('Audio play error:', err));
                 this.hint_audio.src = '/api/audio-files/' + this.exercise.hint_audio_file_name;
                 this.hint_audio.load();
+                if (this.exercise.image_names) {
+                    const imageIndex = Math.floor(Math.random() * this.exercise.image_names.length)
+                    this.image_src = '/api/images/' + this.exercise.image_names?.[imageIndex];
+                } else {
+                    this.image_src = '';
+                }
                 setTimeout(() => {
                     this.phrase_audio.src = '/api/audio-files/' + this.exercise.phrase_audio_file_name;
                     this.phrase_audio.load();

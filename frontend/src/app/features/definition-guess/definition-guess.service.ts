@@ -44,6 +44,8 @@ export interface DefinitionGuessExercise {
     native_hint?: string;
     native_explanation?: string;
     native_sentences?: NativeSentence[];
+
+    image_names?: string[];
 }
 
 @Injectable({
