@@ -9,6 +9,11 @@ export interface Sentence {
     audio_file_name?: string;
 }
 
+export interface NativeSentence {
+    text: string;
+    audio_file_name?: string;
+}
+
 export interface AnswerOption {
     value: string;
     explanation?: string;
@@ -21,7 +26,7 @@ export interface DefinitionGuessExercise {
     level: string;
 
     phrase: string;
-    description: string;
+    definition: string;
     sentences: Sentence[];
 
     alternatives: AnswerOption[];
@@ -34,6 +39,11 @@ export interface DefinitionGuessExercise {
     description_audio_file_name?: string;
     hint_audio_file_name?: string;
     explanation_audio_file_name?: string;
+
+    native_definition?: string;
+    native_hint?: string;
+    native_explanation?: string;
+    native_sentences?: NativeSentence[];
 }
 
 @Injectable({
@@ -45,7 +55,7 @@ export class DefinitionGuessService {
     getEndpoint(): string {
         const language = this.languageService.getLearningLanguage();
         const nativeLanguage = this.languageService.getInterfaceLanguage();
-        const level = "A1"
+        const level = "B1"
         return `/api/native-topics/${language}/${level}/${nativeLanguage}`;
     }
 
@@ -56,7 +66,7 @@ export class DefinitionGuessService {
                 language: "en",
                 level: "A1",
                 phrase: "plain sailing",
-                description: "to be easy and without problems",
+                definition: "to be easy and without problems",
                 sentences: [
                     { text_with_gap: "Once we had finished all the legal paperwork, setting up the new business was ________.", gap_filler_form: "plain sailing" },
                     { text_with_gap: "The first half of the match was very difficult, but after they scored the second goal it was just ________.", gap_filler_form: "plain sailing" },

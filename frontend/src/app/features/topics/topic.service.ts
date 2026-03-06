@@ -38,7 +38,7 @@ export class TopicService {
     getEndpoint(): string {
         const targetLanguage = this.languageService.getLearningLanguage();
         const nativeLanguage = this.languageService.getInterfaceLanguage();
-        const level = "A1"
+        const level = "B1"
         return `/api/native-topics/${targetLanguage}/${level}/${nativeLanguage}`;
     }
 

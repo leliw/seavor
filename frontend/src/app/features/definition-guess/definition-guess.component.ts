@@ -1,5 +1,5 @@
 import { Component, effect, inject, input, output } from '@angular/core';
-import { DefinitionGuessExercise, DefinitionGuessService, Sentence } from './definition-guess.service';
+import { DefinitionGuessExercise, DefinitionGuessService, NativeSentence, Sentence } from './definition-guess.service';
 import { BottomNavComponent } from "../../core/bottom-nav/bottom-nav.component";
 import { EvaluationBarComponent } from "../../core/evaluation-bar/evaluation-bar.component";
 
@@ -23,6 +23,7 @@ export class DefinitionGuessComponent {
     public exercise!: DefinitionGuessExercise;
 
     public sentence!: Sentence;
+    public nativeSentence?: NativeSentence;
     public showHint: boolean = false;
     public native: boolean = false;
     public showAnswer: boolean = false;
@@ -37,6 +38,7 @@ export class DefinitionGuessComponent {
                 this.exercise = e;
                 const sentenceIndex = Math.floor(Math.random() * this.exercise.sentences.length)
                 this.sentence = this.exercise.sentences[sentenceIndex];
+                this.nativeSentence = this.exercise.native_sentences ? this.exercise.native_sentences[sentenceIndex] : undefined;
                 this.showHint = false;
                 this.native = false;
             })
@@ -44,7 +46,7 @@ export class DefinitionGuessComponent {
     }
 
     check(): void {
-        this.answer = this.sentence.text_with_gap.replace("________", '<b>' + this.sentence.gap_filler_form + '</b>');
+        this.answer = this.sentence.text_with_gap.replace(/_{3,}/g, '<b>' + this.sentence.gap_filler_form + '</b>');
         this.showAnswer = true;
     }
 
