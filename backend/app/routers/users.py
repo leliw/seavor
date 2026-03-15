@@ -1,12 +1,12 @@
 from typing import List
 
-from dependencies import UserServiceDep
-from fastapi import APIRouter
+from core.roles import Role
+from core.users.user_model import User, UserHeader, UserPatch
+from dependencies import Authorize, UserServiceDep
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from core.users.user_model import User, UserHeader, UserPatch
-
-router = APIRouter(tags=["Users"])
+router = APIRouter(tags=["Users"], dependencies=[Depends(Authorize(Role.ADMIN))])
 
 
 @router.post("")

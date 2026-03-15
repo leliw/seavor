@@ -3,7 +3,7 @@ from typing import AsyncGenerator
 
 import pytest
 import pytest_asyncio
-from ampf.auth import AuthConfig, DefaultUser, TokenExp
+from ampf.auth import AuthConfig, DefaultUser, TokenExp, Tokens
 from ampf.base import BaseAsyncFactory, BlobCreate
 from ampf.testing import ApiTestClient
 from app_config import AppConfig
@@ -72,13 +72,13 @@ def topic_create() -> TopicCreate:
 
 
 @pytest_asyncio.fixture
-async def tokens(factory: BaseAsyncFactory, client: ApiTestClient):
+async def tokens(factory: BaseAsyncFactory, client: ApiTestClient) -> Tokens:
     # Clear token_black_list
     await factory.create_compact_storage("token_black_list", TokenExp, "token").drop()
     # Login
-    response = client.post(
-        "/api/login",
-        data={"username": "test", "password": "test"},
-    )
-    r = response.json()
-    return r
+    return client.post_typed("/api/login", 200, Tokens, data={"username": "test", "password": "test"})
+
+
+@pytest.fixture
+def headers(tokens: Tokens) -> dict[str, str]:
+    return {"Authorization": f"Bearer {tokens.access_token}"}

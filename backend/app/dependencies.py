@@ -2,12 +2,13 @@ import logging
 from typing import Annotated
 from uuid import UUID
 
-from ampf.auth import AuthService, TokenPayload
+from ampf.auth import AuthService, InsufficientPermissionsError, TokenPayload
 from ampf.base import BaseEmailSender, EmailTemplate, SmtpEmailSender
 from ampf.base.versioned_base_model import StorageFormatFlags
 from fastapi.security import OAuth2PasswordBearer
 from app_config import AppConfig
 from app_state import AppState
+from core.roles import Role
 from core.users.user_service import UserService
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Request
@@ -156,6 +157,7 @@ def get_page_service(
 
 PageServiceDep = Annotated[PageService, Depends(get_page_service)]
 
+
 def get_email_sender(app_state: AppStateDep) -> BaseEmailSender:
     return SmtpEmailSender(
         host=app_state.config.smtp.host,
@@ -167,6 +169,7 @@ def get_email_sender(app_state: AppStateDep) -> BaseEmailSender:
 
 
 EmailSenderDep = Annotated[BaseEmailSender, Depends(get_email_sender)]
+
 
 def get_auth_service(app_state: AppStateDep) -> AuthService:
     reset_mail_template = EmailTemplate(
@@ -194,3 +197,16 @@ async def decode_token(auth_service: AuthServiceDep, token: AuthTokenDep) -> Tok
 
 
 TokenPayloadDep = Annotated[TokenPayload, Depends(decode_token)]
+
+
+class Authorize:
+    """Dependency for authorizing users based on their role."""
+
+    def __init__(self, required_role: Role | None = None):
+        self.required_role = required_role
+
+    def __call__(self, token_payload: TokenPayloadDep) -> bool:
+        if not self.required_role or self.required_role in token_payload.roles:
+            return True
+        else:
+            raise InsufficientPermissionsError()
