@@ -24,7 +24,6 @@ class Output(BaseOutput[DefinitionGuessCreate]):
     distractors: list[AnswerOption]
 
     hint: str
-    explanation: str
 
     def convert(self, **kwargs) -> DefinitionGuessCreate:
         clean_kwargs = {k: v for k, v in kwargs.items() if k in DefinitionGuessCreate.model_fields}

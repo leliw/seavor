@@ -45,7 +45,14 @@ class TeacherService:
         )
         return ret
 
-    def create_definition_guess(self, theme: str, phrase: str) -> DefinitionGuessCreate:
+    def filter_word_set(self, theme: str, word_set: list[str]) -> list[str]:
+        ret = PromptExecutor(self.ai_model, self.prompt_service).execute_list(
+            "filter_word_set", target_language=self.language_name, theme=theme, word_set=word_set
+        )
+        return ret
+
+
+    def create_definition_guess(self, theme: str, phrase: str, order: int) -> DefinitionGuessCreate:
         return PromptExecutor(self.ai_model, self.prompt_service).execute_typed(
             "create_definition_guess",
             DefinitionGuessCreate,
@@ -53,6 +60,7 @@ class TeacherService:
             language_name=self.language_name,
             theme=theme,
             phrase=phrase,
+            order=order,
         )
 
     def create_letter_shuffle_set(self, theme_en: str, number_of_words: int = 10) -> LetterShuffleSetCreate:
