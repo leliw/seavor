@@ -9,6 +9,10 @@ export const routes: Routes = [
         loadComponent: () => import('./core/auth/reset-password-request-form/reset-password-request-form.component').then(mod => mod.ResetPasswordRequestFormComponent)
     },
     {
+        path: 'reset-password', title: "Reset password",
+        loadComponent: () => import('./core/auth/reset-password-form/reset-password-form.component').then(mod => mod.ResetPasswordFormComponent)
+    },    
+    {
         path: 'select-interface-language',
         loadComponent: () => import('./core/interface-language-selector/interface-language-selector.component').then(m => m.InterfaceLanguageSelectorComponent)
     },
