@@ -1,0 +1,30 @@
+<form class="center-content" (ngSubmit)="onSubmit()" #loginForm="ngForm">
+    <mat-card>
+        <mat-card-header>
+            <mat-card-title i18n>Login</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <mat-form-field class="full-width">
+                <mat-label i18n>Username</mat-label>
+                <input matInput type="text" name="username" [(ngModel)]="credentials.username" required
+                    autocomplete="username" autofocus>
+            </mat-form-field>
+            <mat-form-field class="full-width">
+                <mat-label i18n>Password</mat-label>
+                <input matInput type="password" name="password" [(ngModel)]="credentials.password" required
+                    autocomplete="current-password">
+            </mat-form-field>
+            <div class="row">
+                <div class="col">
+                    <div class="full-width">
+                        <mat-checkbox name="store_token" [(ngModel)]="store_token" i18n>Remember me</mat-checkbox>
+                    </div>
+                </div>
+            </div>
+        </mat-card-content>
+        <mat-card-actions align="end">
+            <button mat-raised-button type="button" routerLink="/reset-password-request" i18n>Password reset</button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="!loginForm.form.valid" i18n>Login</button>
+        </mat-card-actions>
+    </mat-card>
+</form>
