@@ -5,6 +5,7 @@ from uuid import UUID
 from ampf.base.versioned_base_model import StorageFormatFlags
 from app_config import AppConfig
 from app_state import AppState
+from core.users.user_service import UserService
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.concurrency import asynccontextmanager
@@ -16,15 +17,13 @@ from features.pages.page_model import GapFillChoiceExercise_v2, InfoPage_v2
 from features.pages.page_service import PageService
 from features.topics.topic_model import Topic_v2
 from features.topics.topic_service import TopicService
-from haintech.ai import BaseAIModel
+from haintech.ai import BaseAIModel, BaseImageGenerator
+from haintech.ai.google_genai import GenAIImageGenerator
 from integrations.gtts.gtts_service import GttsService
 from shared.audio_files.audio_file_service import AudioFileService
 from shared.images.image_service import ImageService
 from shared.prompts.prompt_service import PromptService
 
-
-from haintech.ai import BaseImageGenerator
-from haintech.ai.google_genai import GenAIImageGenerator
 load_dotenv()
 
 _log = logging.getLogger(__name__)
@@ -48,7 +47,8 @@ def lifespan(config: AppConfig = AppConfig()):
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         app.state.app_state = app_state
-        yield
+        async with app_state:
+            yield
 
     return lifespan
 
@@ -65,6 +65,13 @@ def get_app_config(app_state: AppStateDep) -> AppConfig:
 
 
 ConfigDep = Annotated[AppConfig, Depends(get_app_config)]
+
+
+def get_user_service(app_state: AppStateDep) -> UserService:
+    return app_state.user_service
+
+
+UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 
 
 def get_prompt_service(app_state: AppStateDep) -> PromptService:
