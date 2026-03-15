@@ -2,7 +2,9 @@ import logging
 from typing import Annotated
 from uuid import UUID
 
+from ampf.auth import AuthService, TokenPayload
 from ampf.base.versioned_base_model import StorageFormatFlags
+from fastapi.security import OAuth2PasswordBearer
 from app_config import AppConfig
 from app_state import AppState
 from core.users.user_service import UserService
@@ -29,7 +31,7 @@ load_dotenv()
 _log = logging.getLogger(__name__)
 
 
-def lifespan(config: AppConfig = AppConfig()):
+def lifespan(config: AppConfig):
     app_state = AppState.create(config)
     Topic_v2.FORMAT_FLAGS = StorageFormatFlags(
         save_new_format=config.feature_flags.topic_v2_storage,
@@ -152,3 +154,25 @@ def get_page_service(
 
 
 PageServiceDep = Annotated[PageService, Depends(get_page_service)]
+
+
+
+async def auth_service_dep(app_state: AppStateDep) -> AuthService:
+    return AuthService(
+        storage_factory=app_state.factory,
+        user_service=app_state.user_service,
+        auth_config=app_state.config.auth,
+    )
+
+
+AuthServiceDep = Annotated[AuthService, Depends(auth_service_dep)]
+
+
+AuthTokenDep = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="api/login"))]
+
+
+async def decode_token(auth_service: AuthServiceDep, token: AuthTokenDep) -> TokenPayload:
+    return await auth_service.decode_token(token)
+
+
+TokenPayloadDep = Annotated[TokenPayload, Depends(decode_token)]

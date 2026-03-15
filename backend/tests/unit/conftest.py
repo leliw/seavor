@@ -1,8 +1,9 @@
 from io import BytesIO
 from typing import AsyncGenerator
 
-from haintech.ai import BaseImageGenerator
 import pytest
+import pytest_asyncio
+from ampf.auth import AuthConfig, DefaultUser, TokenExp
 from ampf.base import BaseAsyncFactory, BlobCreate
 from ampf.testing import ApiTestClient
 from app_config import AppConfig
@@ -10,8 +11,8 @@ from dependencies import get_tts_service, lifespan
 from features.languages import Language
 from features.levels import Level
 from features.topics.topic_model import TopicCreate, TopicType
+from haintech.ai import BaseImageGenerator
 from integrations.gtts.gtts_service import GttsService
-
 from main import app as main_app
 
 
@@ -22,6 +23,8 @@ def config(tmp_path) -> AppConfig:
         gcp_root_storage=None,
         gcp_bucket_name=None,
         production=False,
+        default_user=DefaultUser(username="test", password="test"),
+        auth=AuthConfig(jwt_secret_key="test"),
     )
     return config
 
@@ -60,3 +63,16 @@ def topic_create() -> TopicCreate:
         description="Semi-modals vs. pure modal verbs",
         type=TopicType.GRAMMAR,
     )
+
+
+@pytest_asyncio.fixture
+async def tokens(factory: BaseAsyncFactory, client: ApiTestClient):
+    # Clear token_black_list
+    await factory.create_compact_storage("token_black_list", TokenExp, "token").drop()
+    # Login
+    response = client.post(
+        "/api/login",
+        data={"username": "test", "password": "test"},
+    )
+    r = response.json()
+    return r
