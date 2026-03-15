@@ -51,7 +51,6 @@ class TeacherService:
         )
         return ret
 
-
     def create_definition_guess(self, theme: str, phrase: str, order: int) -> DefinitionGuessCreate:
         return PromptExecutor(self.ai_model, self.prompt_service).execute_typed(
             "create_definition_guess",
@@ -152,22 +151,13 @@ class TeacherService:
         )
 
     def create_gap_fill_choice_excercises(self, theme: str, count: int = 10) -> List[GapFillChoiceExerciseCreate]:
-        json_schema = GapFillChoiceExerciseCreate.model_json_schema()
-        s, u = self.prompt_service.render(
+        return PromptExecutor(self.ai_model, self.prompt_service).execute_typed_list(
             "create_gap_fill_choice",
+            GapFillChoiceExerciseCreate,
             target_language=self.language_name,
             theme=theme,
             count=count,
-            json_schema=json_schema,
         )
-        task = AITaskExecutor(self.ai_model, s, u, "json")
-        response = task.execute()
-        if isinstance(response, dict) and len(response) == 1:
-            response = list(response.values())[0]
-        ret = []
-        for j in response:
-            ret.append(GapFillChoiceExerciseCreate.model_validate(j))
-        return ret
 
     def create_info_pages(self, theme: str) -> List[InfoPageCreate]:
         return PromptExecutor(self.ai_model, self.prompt_service).execute_typed_list(

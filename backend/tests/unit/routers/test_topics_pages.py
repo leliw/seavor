@@ -48,9 +48,9 @@ def test_get_all(client: ApiTestClient, endpoint: str):
     assert 0 == len(r)
 
 
-def test_post_get_put_delete(client: ApiTestClient, endpoint: str, gap_fill_choice_exercise_create):
+def test_post_get_put_delete(client: ApiTestClient, endpoint: str, gap_fill_choice_exercise_create: GapFillChoiceExerciseCreate):
     # POST
-    posted_exercise = client.post_typed(endpoint, 200, GapFillChoiceExercise, json=gap_fill_choice_exercise_create)
+    posted_exercise = client.post_typed(endpoint, 200, GapFillChoiceExercise, json=gap_fill_choice_exercise_create.model_dump())
     exercise_id = posted_exercise.id
 
     # GET
@@ -119,7 +119,7 @@ def test_post_get_put_delete_definition_guess(
     client: ApiTestClient, endpoint: str, definition_guess_create: DefinitionGuessCreate
 ):
     # POST
-    posted_exercise = client.post_typed(endpoint, 200, DefinitionGuess, json=definition_guess_create)
+    posted_exercise = client.post_typed(endpoint, 200, DefinitionGuess, json=definition_guess_create.model_dump(mode="json"))
     exercise_id = posted_exercise.id
 
     # GET
