@@ -18,12 +18,13 @@ from features.topics.topic_model import Topic_v2
 from features.topics.topic_service import TopicService
 from haintech.ai import BaseAIModel
 from integrations.gtts.gtts_service import GttsService
-from integrations.image_gen.base_image_gen_service import BaseImageGenService
-from integrations.image_gen.openai_image_gen_service import OpenAIImageGenService
 from shared.audio_files.audio_file_service import AudioFileService
 from shared.images.image_service import ImageService
 from shared.prompts.prompt_service import PromptService
 
+
+from haintech.ai import BaseImageGenerator
+from haintech.ai.google_genai import GenAIImageGenerator
 load_dotenv()
 
 _log = logging.getLogger(__name__)
@@ -87,18 +88,18 @@ def get_audio_file_service(app_state: AppStateDep, tts_service: GttsServiceDep) 
 AudioFileServiceDep = Annotated[AudioFileService, Depends(get_audio_file_service)]
 
 
-def get_image_gen_service() -> BaseImageGenService | None:
+def get_image_generator() -> BaseImageGenerator | None:
     try:
-        return OpenAIImageGenService()
+        return GenAIImageGenerator()
     except Exception:
         return None
 
 
-ImageGenServiceDep = Annotated[BaseImageGenService | None, Depends(get_image_gen_service)]
+ImageGeneratorDep = Annotated[BaseImageGenerator | None, Depends(get_image_generator)]
 
 
-def get_image_service(app_state: AppStateDep, image_gen_service: ImageGenServiceDep) -> ImageService:
-    return ImageService(app_state.factory, image_gen_service)
+def get_image_service(app_state: AppStateDep, image_generator: ImageGeneratorDep) -> ImageService:
+    return ImageService(app_state.factory, image_generator)
 
 
 ImageServiceDep = Annotated[ImageService, Depends(get_image_service)]
