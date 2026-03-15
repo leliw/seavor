@@ -5,6 +5,10 @@ export const routes: Routes = [
     { path: '', redirectTo: 'topics', pathMatch: 'full' },
     { path: 'login', title: "Login", loadComponent: () => import('./core/auth/login-form/login-form.component').then(m => m.LoginFormComponent) },
     {
+        path: 'reset-password-request', title: "Reset password request",
+        loadComponent: () => import('./core/auth/reset-password-request-form/reset-password-request-form.component').then(mod => mod.ResetPasswordRequestFormComponent)
+    },
+    {
         path: 'select-interface-language',
         loadComponent: () => import('./core/interface-language-selector/interface-language-selector.component').then(m => m.InterfaceLanguageSelectorComponent)
     },

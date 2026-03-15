@@ -90,3 +90,21 @@ app-root {
 .full-width {
     width: 100%;
 }
+
+form.center-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: auto;
+
+    .mat-mdc-card-header {
+        padding-bottom: 8px;
+    }
+    .mat-mdc-card-content {
+        width: 40rem;
+    }
+    .mat-mdc-card-actions {
+        gap: 1em;
+    }
+}

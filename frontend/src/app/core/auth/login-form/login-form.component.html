@@ -14,17 +14,14 @@
                 <input matInput type="password" name="password" [(ngModel)]="credentials.password" required
                     autocomplete="current-password">
             </mat-form-field>
-            <div class="row">
-                <div class="col">
-                    <div class="full-width">
-                        <mat-checkbox name="store_token" [(ngModel)]="store_token" i18n>Remember me</mat-checkbox>
-                    </div>
-                </div>
+            <div class="full-width">
+                <mat-checkbox name="store_token" [(ngModel)]="store_token" i18n>Remember me</mat-checkbox>
             </div>
         </mat-card-content>
         <mat-card-actions align="end">
             <button mat-raised-button type="button" routerLink="/reset-password-request" i18n>Password reset</button>
-            <button mat-raised-button color="primary" type="submit" [disabled]="!loginForm.form.valid" i18n>Login</button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="!loginForm.form.valid"
+                i18n>Login</button>
         </mat-card-actions>
     </mat-card>
 </form>
