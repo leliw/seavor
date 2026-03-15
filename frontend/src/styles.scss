@@ -1,3 +1,5 @@
+@use 'styles/components/navigation-bar' as *;
+
 /* mobile default */
 :root {
     --app-bar-height: 56px;
@@ -19,8 +21,8 @@
 .layout-container-2 {
     position: relative;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
     gap: 0.5em;
     padding: 0.5em;
     box-sizing: border-box;
@@ -36,6 +38,11 @@
 @media (min-width: 600px) {
     :root {
         --app-bar-height: 64px;
+    }
+
+    .layout-container-2 {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr;
     }
 
     .layout-container-1,

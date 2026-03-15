@@ -34,9 +34,48 @@ class PromptExecutor:
             raise ValueError(f"AI model returned empty content for prompt: {prompt_name}")
         return m_resp
 
+    def execute_list(self, prompt_name: str, **kwargs) -> list[str]:
+        response = self.execute(prompt_name, response_format="json", **kwargs)
+        return self._prepare_response_list(response)
+
+
+
+    def _prepare_response_list(self, m_resp: AIChatResponse) -> list[str]:
+        if m_resp.content is None:
+            raise ValueError("AI model returned empty content")
+
+        try:
+            ret = json.loads(m_resp.content)
+            if isinstance(ret, dict) and len(ret) == 1:
+                ret = list(ret.values())[0]
+            if isinstance(ret, dict) and all([isinstance(v, list) for v in ret.values()]):
+                return sum(ret.values(), [])
+            if isinstance(ret, list):
+                return ret
+            else:
+                raise ValueError("Invalid response format: %s", m_resp.content)
+        except (json.JSONDecodeError, ValidationError) as e:
+            _log.warning(e)
+            _log.warning("JSON content: %s", m_resp.content)
+            raise e
+
     def execute_typed[T: BaseModel](self, prompt_name: str, clazz: Type[T], **kwargs) -> T:
-        json_schema = clazz.model_json_schema()
-        response = self.execute(prompt_name, response_format="json", json_schema=json_schema, **kwargs)
+        output_class = self.prompt_service.get_output_class(prompt_name)
+        if output_class:
+            json_schema = output_class.model_json_schema()
+        else:
+            json_schema = clazz.model_json_schema()
+        for attempt in range(3):
+            try:
+                response = self.execute(prompt_name, response_format="json", json_schema=json_schema, **kwargs)
+                if output_class:
+                    ret = self._prepare_response_typed(output_class, response)
+                    return ret.convert(**kwargs)
+                else:
+                    return self._prepare_response_typed(clazz, response)
+            except json.JSONDecodeError as e:
+                if attempt == 2:
+                    raise e
         return self._prepare_response_typed(clazz, response)
 
     def _prepare_response_typed[T: BaseModel](self, clazz: Type[T], m_resp: AIChatResponse) -> T:

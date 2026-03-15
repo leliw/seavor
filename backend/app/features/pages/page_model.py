@@ -1,70 +1,12 @@
 from datetime import datetime, timezone
-from enum import StrEnum
 from typing import Dict, List, Literal, Optional, Self, Union
-from uuid import UUID, uuid4
+from uuid import uuid4
 
-from ampf.base import VersionedBaseModel
-
-from features.languages import Language
 from features.levels import Level
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from features.pages.definition_guess_model import DefinitionGuess_v2, DefinitionGuessCreate, DefinitionGuessPatch
+from features.pages.page_base_model import BasePage_v1, BasePage_v2, BasePageCreate, PageType
+from pydantic import BaseModel, Field, ValidationError
 from typing_extensions import Annotated
-
-
-class PageType(StrEnum):
-    LETTER_SHUFFLE = "letter-shuffle"
-    GAP_FILL_CHOICE = "gap-fill-choice"
-    INFO = "info"
-
-
-class PageHeader(BaseModel):
-    id: UUID
-    order: int
-    type: PageType
-    created_at: datetime
-    updated_at: datetime
-
-
-class BasePageCreate(BaseModel):
-    """Common fields for ALL page types"""
-
-    model_config = ConfigDict(extra="forbid")
-
-    language: Language
-    level: Level
-    order: int
-    type: PageType  # literal below will override this
-
-
-class BasePage_v1(BaseModel):
-    """Common fields for ALL page types"""
-
-    model_config = ConfigDict(extra="forbid")
-
-    id: UUID
-    target_language: Language
-    level: Level
-    order: int
-    type: PageType  # literal below will override this
-    created_at: datetime
-    updated_at: datetime
-
-
-class BasePage_v2(VersionedBaseModel):
-    """Common fields for ALL page types"""
-
-    model_config = ConfigDict(extra="forbid")
-
-    id: UUID
-    language: Language
-    level: Level
-    order: int
-    type: PageType  # literal below will override this
-    created_at: datetime
-    updated_at: datetime
-
-
-BasePage = BasePage_v2
 
 
 class GapFillChoiceExerciseCreate(BasePageCreate):
@@ -81,6 +23,32 @@ class GapFillChoiceExerciseCreate(BasePageCreate):
     explanation_audio_file_name: Optional[str] = None
     distractors_explanation_audio_file_name: Optional[Dict[str, str]] = None
     hint_audio_file_name: Optional[str] = None
+
+    def get_texts_to_synthesize(self) -> set[str]:
+        ret = set()
+        if self.sentence:
+            ret.add(self.sentence)
+        if self.explanation:
+            ret.add(self.explanation)
+        if self.hint:
+            ret.add(self.hint)
+        if self.distractors_explanation:
+            for distractor in self.distractors_explanation.items():
+                ret.add(distractor[1])
+        return ret
+
+    def set_audio_file_names(self, audio_file_names: dict[str, str]) -> None:
+        if self.sentence:
+            self.sentence_audio_file_name = audio_file_names[self.sentence]
+        if self.explanation:
+            self.explanation_audio_file_name = audio_file_names[self.explanation]
+        if self.hint:
+            self.hint_audio_file_name = audio_file_names[self.hint]
+        if self.distractors_explanation:
+            self.distractors_explanation_audio_file_name = {
+                k: audio_file_names[v] for k, v in self.distractors_explanation.items()
+            }
+            
 
 
 class GapFillChoiceExercisePatch(BaseModel):
@@ -315,6 +283,7 @@ Page_v2 = Annotated[
     Union[
         GapFillChoiceExercise_v2,
         InfoPage_v2,
+        DefinitionGuess_v2,
     ],
     Field(discriminator="type"),
 ]
@@ -325,6 +294,13 @@ PageCreate = Annotated[
     Union[
         GapFillChoiceExerciseCreate,
         InfoPageCreate,
+        DefinitionGuessCreate,
     ],
     Field(discriminator="type"),
+]
+
+PagePatch = Union[
+    GapFillChoiceExercisePatch,
+    # InfoPagePatch,
+    DefinitionGuessPatch,
 ]

@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from features.languages import LANGUAGE_NAMES, Language
 from features.letter_shuffles.letter_shuffle_model import LetterShuffleItem, LetterShuffleSet, LetterShuffleSetCreate
@@ -6,40 +6,74 @@ from features.letter_shuffles.letter_shuffle_translation_model import (
     LetterShuffleItemTranslation,
     LetterShuffleSetTranslationCreate,
 )
-from haintech.ai import AITaskExecutor
-from haintech.ai.open_ai import OpenAIModel
-
 from features.levels import Level
+from features.pages.definition_guess_model import DefinitionGuessCreate
 from features.pages.page_model import GapFillChoiceExerciseCreate, InfoPageCreate
+from features.topics.topic_model import TopicCreate, TopicType
+from haintech.ai import AITaskExecutor, BaseAIModel
+from haintech.ai.open_ai import OpenAIModel
+from pydantic import BaseModel
 from shared.prompts.prompt_executor import PromptExecutor
 from shared.prompts.prompt_service import PromptService
 
 
+class ExpressionAndDefintion(BaseModel):
+    expression: str
+    definition: str
+
+
 class TeacherService:
     def __init__(
-        self, prompt_service: PromptService, target_language: Language = Language.EN, level: Optional[Level] = None
+        self,
+        prompt_service: PromptService,
+        ai_model: Optional[BaseAIModel] = None,
+        language: Language = Language.EN,
+        level: Optional[Level] = None,
     ) -> None:
-        self.ai_model = OpenAIModel("gpt-4.1-mini", {"temperature": 0})
         self.prompt_service = prompt_service
-        self.target_language = target_language
+        self.ai_model = ai_model or OpenAIModel("gpt-4.1-mini", {"temperature": 0})
+        self.language = language
         self.level = level
-        self.target_language_name = LANGUAGE_NAMES[target_language]
-        self.system_instructions = f"You are a {target_language} teacher."
-        self.system_instructions += f"\nUse phrases and expressions that are natural to the {self.target_language_name} language and related to {self.target_language_name} tradition."
-        self.system_instructions += f"\nAlways respond in {self.target_language_name}."
+        self.language_name = LANGUAGE_NAMES[language]
+        self.system_instructions = f"You are a {language} teacher."
+        self.system_instructions += f"\nUse phrases and expressions that are natural to the {self.language_name} language and related to {self.language_name} tradition."
+        self.system_instructions += f"\nAlways respond in {self.language_name}."
+
+    def generate_word_set(self, theme: str, max_count: int = 10) -> list[str]:
+        ret = PromptExecutor(self.ai_model, self.prompt_service).execute_list(
+            "generate_word_set", target_language=self.language_name, theme=theme, max_count=max_count
+        )
+        return ret
+
+    def filter_word_set(self, theme: str, word_set: list[str]) -> list[str]:
+        ret = PromptExecutor(self.ai_model, self.prompt_service).execute_list(
+            "filter_word_set", target_language=self.language_name, theme=theme, word_set=word_set
+        )
+        return ret
+
+    def create_definition_guess(self, theme: str, phrase: str, order: int) -> DefinitionGuessCreate:
+        return PromptExecutor(self.ai_model, self.prompt_service).execute_typed(
+            "create_definition_guess",
+            DefinitionGuessCreate,
+            language=self.language,
+            language_name=self.language_name,
+            theme=theme,
+            phrase=phrase,
+            order=order,
+        )
 
     def create_letter_shuffle_set(self, theme_en: str, number_of_words: int = 10) -> LetterShuffleSetCreate:
         description_en = f"Words and phrases related to {theme_en}"
         words = self.generate_word_list(theme_en, number_of_words)
-        if self.target_language != Language.EN:
-            translation = self.translate_expression_and_definition(self.target_language, theme_en, description_en)
-            theme = translation["expression"]
-            description = translation["definition"]
+        if self.language != Language.EN:
+            translation = self.translate_expression_and_definition(self.language, theme_en, description_en)
+            theme = translation.expression
+            description = translation.definition
         else:
             theme = theme_en
             description = description_en
         ret = LetterShuffleSetCreate(
-            target_language_code=self.target_language, target_title=theme, target_description=description, items=[]
+            target_language_code=self.language, target_title=theme, target_description=description, items=[]
         )
         for word in words:
             definition = self.get_word_definition(theme, word)
@@ -59,8 +93,8 @@ class TeacherService:
             target_title=letter_shuffle_set.target_title,
             target_description=letter_shuffle_set.target_description,
             native_language_code=native_language_code,
-            native_title=translation["expression"],
-            native_description=translation["definition"],
+            native_title=translation.expression,
+            native_description=translation.definition,
             items=[],
             image_name=letter_shuffle_set.image_name,
         )
@@ -74,15 +108,15 @@ class TeacherService:
                 target_phrase_audio_file_name=item.target_phrase_audio_file_name,
                 target_description_audio_file_name=item.target_description_audio_file_name,
                 phrase_image_name=item.phrase_image_name,
-                native_phrase=translation["expression"],
-                native_description=translation["definition"],
+                native_phrase=translation.expression,
+                native_description=translation.definition,
             )
             ret.items.append(item_translation)
         return ret
 
     def generate_word_list(self, theme: str, count: int = 30):
         s, u = self.prompt_service.render(
-            "generate_word_list", target_language=self.target_language_name, theme=theme, count=count
+            "generate_word_list", target_language=self.language_name, theme=theme, count=count
         )
         task = AITaskExecutor(self.ai_model, s, u, "json")
         ret = task.execute()
@@ -96,64 +130,62 @@ class TeacherService:
 
     def get_word_definition(self, theme: str, word: str):
         s, u = self.prompt_service.render(
-            "get_word_definition", target_language=self.target_language_name, theme=theme, word=word
+            "get_word_definition", target_language=self.language_name, theme=theme, word=word
         )
         task = AITaskExecutor(self.ai_model, s, u, "text")
         ret = task.execute()
         return ret
 
     def translate_expression_and_definition(
-        self, language_code: Language, expression: str, definition: str
-    ) -> Dict[str, str]:
-        language = LANGUAGE_NAMES[language_code]
-        message = f"Translate the expression and its definition from {self.target_language_name} to {language}. "
-        message += "Return the response as a single JSON dictionary."
-        message += f"\nExpression: **{expression}**"
-        message += f"\nDefinition: **{definition}**"
-        message += "\n\n"
-        message += "Example response:"
-        message += "\n{example}"
-        message += "\n"
+        self, native_language: Language, expression: str, definition: str
+    ) -> ExpressionAndDefintion:
 
-        task = AITaskExecutor(self.ai_model, self.system_instructions, message, "json")
-        ret = task.execute(example="{'expression': 'translated expression', 'definition': 'translated definition'}")
-        if isinstance(ret, dict) and len(ret) == 1:
-            ret = list(ret.values())[0]
-        return ret  # type: ignore
+        return PromptExecutor(self.ai_model, self.prompt_service).execute_typed(
+            "translate_expression_and_definition",
+            ExpressionAndDefintion,
+            language_name=self.language_name,
+            level=self.level,
+            native_language_name=LANGUAGE_NAMES[native_language],
+            expression=expression,
+            definition=definition,
+        )
 
     def create_gap_fill_choice_excercises(self, theme: str, count: int = 10) -> List[GapFillChoiceExerciseCreate]:
-        json_schema = GapFillChoiceExerciseCreate.model_json_schema()
-        s, u = self.prompt_service.render(
+        return PromptExecutor(self.ai_model, self.prompt_service).execute_typed_list(
             "create_gap_fill_choice",
-            target_language=self.target_language_name,
+            GapFillChoiceExerciseCreate,
+            target_language=self.language_name,
             theme=theme,
             count=count,
-            json_schema=json_schema,
         )
-        task = AITaskExecutor(self.ai_model, s, u, "json")
-        response = task.execute()
-        if isinstance(response, dict) and len(response) == 1:
-            response = list(response.values())[0]
-        ret = []
-        for j in response:
-            ret.append(GapFillChoiceExerciseCreate.model_validate(j))
-        return ret
 
     def create_info_pages(self, theme: str) -> List[InfoPageCreate]:
         return PromptExecutor(self.ai_model, self.prompt_service).execute_typed_list(
             "create_info_page",
             InfoPageCreate,
-            target_language=self.target_language_name,
+            target_language=self.language_name,
             level=self.level,
             theme=theme,
         )
 
-    def create_topic_description(self, topic_name: str) -> str:
+    def create_topic_description(self, level: Level, type: TopicType, topic_name: str) -> str:
         ret = PromptExecutor(self.ai_model, self.prompt_service).execute(
             "create_topic_description",
-            target_language=self.target_language_name,
-            level=self.level,
+            language=self.language,
+            language_name=LANGUAGE_NAMES[self.language],
+            level=level,
+            topic_type=type,
             topic_name=topic_name,
         )
         assert ret.content
         return ret.content.strip()
+
+    def create_topic_create(self, level: Level, type: TopicType, topic_name: str) -> TopicCreate:
+        topic_description = self.create_topic_description(level, type, topic_name)
+        return TopicCreate(
+            language=self.language,
+            level=level,
+            title=topic_name,
+            description=topic_description,
+            type=type,
+        )

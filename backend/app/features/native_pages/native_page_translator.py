@@ -3,12 +3,16 @@ from uuid import UUID
 
 from features.languages import LANGUAGE_NAMES, Language
 from features.native_pages.native_page_model import (
+    NativeDefinitionGuess,
+    NativeDefinitionGuessBase,
     NativeGapFillChoiceExercise,
     NativeGapFillChoiceExerciseBase,
     NativeInfoPage,
     NativeInfoPageBase,
     NativePage,
 )
+from features.pages.definition_guess_model import DefinitionGuess
+from features.pages.page_base_model import PageType
 from features.pages.page_model import GapFillChoiceExercise, InfoPage
 from features.pages.page_service import PageService
 from haintech.ai import AITaskExecutor, BaseAIModel
@@ -28,12 +32,15 @@ class NativePageTranslator:
     ) -> NativePage:
         page = await self.service.get(page_id)
         match page.type:
-            case "gap-fill-choice":
+            case PageType.GAP_FILL_CHOICE:
                 native = await self._translate(language, native_language, page)
                 return NativeGapFillChoiceExercise.from_page(page, native)
-            case "info":
+            case PageType.INFO:
                 native = await self._translate_info_page(language, native_language, page)
                 return NativeInfoPage.from_page(page, native)
+            case PageType.DEFINITION_GUESS:
+                native = await self._translate_definition_guess(language, native_language, page)
+                return NativeDefinitionGuess.from_page(page, native)
             case _:
                 raise NotImplementedError(f"Unsupported page type: {page.type}")
 
@@ -90,3 +97,16 @@ class NativePageTranslator:
                 continue
             n_ret[f"native_{k}"] = v
         return NativeGapFillChoiceExerciseBase.model_validate(n_ret)
+
+    async def _translate_definition_guess(
+        self, language: Language, native_language: Language, definition_guess: DefinitionGuess
+    ) -> NativeDefinitionGuessBase:
+        return self.prompt_executor.execute_typed(
+            "translate_definition_guess",
+            NativeDefinitionGuessBase,
+            language=language,
+            language_name=LANGUAGE_NAMES[language],
+            native_language=native_language,
+            native_language_name=LANGUAGE_NAMES[native_language],
+            definition_guess=definition_guess,
+        )

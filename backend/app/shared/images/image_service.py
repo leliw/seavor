@@ -2,14 +2,14 @@ from typing import Optional
 from uuid import NAMESPACE_DNS, uuid5
 
 from ampf.base import BaseAsyncFactory
+from haintech.ai import BaseImageGenerator
 from features.languages import Language
-from integrations.image_gen.base_image_gen_service import BaseImageGenService
 
 from .image_model import ImageBlob, ImageMetadata
 
 
 class ImageService:
-    def __init__(self, factory: BaseAsyncFactory, image_gen_service: Optional[BaseImageGenService] = None):
+    def __init__(self, factory: BaseAsyncFactory, image_gen_service: Optional[BaseImageGenerator] = None):
         self.storage = factory.create_blob_storage("images", clazz=ImageMetadata)
         self.image_gen_service = image_gen_service
 

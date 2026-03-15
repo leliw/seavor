@@ -5,8 +5,6 @@
         <div [innerHTML]="!native ? page.content : page.native_content | markdown"></div>
     </div>
     }
-    <app-bottom-nav [showNextPage]="true" [showPreviousPage]="true" [showTranslate]="true"
-    
-    (nextPage)="nextPage.emit()" (previousPage)="previousPage.emit()"
-        (translate)="native = !native"></app-bottom-nav>
+    <app-bottom-nav [showNextPage]="true" [showPreviousPage]="true" [showTranslate]="true" (nextPage)="nextPage.emit()"
+        (previousPage)="previousPage.emit()" (translate)="native = !native"></app-bottom-nav>
 </div>

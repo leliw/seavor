@@ -1,6 +1,7 @@
 from io import BytesIO
 from typing import AsyncGenerator
 
+from haintech.ai import BaseImageGenerator
 import pytest
 from ampf.base import BaseAsyncFactory, BlobCreate
 from ampf.testing import ApiTestClient
@@ -10,7 +11,7 @@ from features.languages import Language
 from features.levels import Level
 from features.topics.topic_model import TopicCreate, TopicType
 from integrations.gtts.gtts_service import GttsService
-from integrations.image_gen.base_image_gen_service import BaseImageGenService
+
 from main import app as main_app
 
 
@@ -30,7 +31,7 @@ class TtsServiceMock(GttsService):
         return BytesIO(b"xxx")
 
 
-class ImageGenServiceMock(BaseImageGenService):
+class ImageGenServiceMock(BaseImageGenerator):
     async def generate_async(self, text: str) -> AsyncGenerator[BlobCreate]:
         yield BlobCreate.from_content(b"yyy", "image/png")
 

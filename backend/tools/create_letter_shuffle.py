@@ -3,7 +3,7 @@ import asyncio
 import _set_path as _set_path
 from ampf.testing import ApiTestClient
 from app_state import AppState
-from dependencies import get_image_gen_service, get_image_service
+from dependencies import get_image_generator, get_image_service
 from features.languages import Language
 from features.letter_shuffles.letter_shuffle_model import LetterShuffleSet, LetterShuffleSetPatch
 from features.letter_shuffles.letter_shuffle_translation_model import (
@@ -41,7 +41,7 @@ class Generator:
 
     async def generate_images(self, target_language_code: Language, letter_shuffle_set_id: str):
         # Generate images for the letter shuffle set
-        image_gen_service = get_image_gen_service()
+        image_gen_service = get_image_generator()
         image_service = get_image_service(self.app_state, image_gen_service)
         letter_shuffle_set = self.client.get_typed(
             f"/api/target-languages/{target_language_code.value}/letter-shuffles/{letter_shuffle_set_id}",

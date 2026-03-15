@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from pydantic import BaseModel
 import pytest
 
 from shared.prompts.prompt_service import PromptService
@@ -36,3 +37,14 @@ def test_render_error(prompt_service: PromptService):
         s, u = prompt_service.render("not_existing", a="a", b="b")
         # Then: Error is raised
         assert e
+
+
+def test_get_output_class(prompt_service: PromptService):
+    # Given:A prompt service
+    assert prompt_service is not None
+    # When: Render test prompt
+    oc = prompt_service.get_output_class("test_output")
+    # Then: Output class is returned
+    assert oc
+    assert oc.__name__ == "Output"
+    assert issubclass(oc, BaseModel)

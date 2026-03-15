@@ -23,6 +23,7 @@ export class BottomNavComponent {
 
   showNextPage = input(false);
   showPreviousPage = input(false);
+  showCheck = input(false);
   showHint = input(false);
   showTranslate = input(false);
 
@@ -32,6 +33,7 @@ export class BottomNavComponent {
 
   nextPage = output();
   previousPage = output();
+  check = output();
   hint = output();
   translate = output();
 }

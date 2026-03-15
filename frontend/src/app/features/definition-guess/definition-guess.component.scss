@@ -1,0 +1,29 @@
+#sentence,
+#description,
+#native-sentence {
+    margin: 1em 0;
+    font-size: larger;
+    text-align: center;
+}
+
+#hint {
+    margin-top: 1em;
+    font-size: larger;
+    font-style: italic;
+    text-align: center;
+}
+
+
+.image-container {
+    position: relative;
+    height: 66%;
+    width: 100%;
+
+
+    img[fill] {
+        object-fit: cover;
+        object-position: center;
+        width: auto;
+        height: auto;
+    }
+}
