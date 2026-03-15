@@ -3,6 +3,7 @@ from typing import Annotated
 from uuid import UUID
 
 from ampf.auth import AuthService, TokenPayload
+from ampf.base import BaseEmailSender, EmailTemplate, SmtpEmailSender
 from ampf.base.versioned_base_model import StorageFormatFlags
 from fastapi.security import OAuth2PasswordBearer
 from app_config import AppConfig
@@ -155,17 +156,34 @@ def get_page_service(
 
 PageServiceDep = Annotated[PageService, Depends(get_page_service)]
 
+def get_email_sender(app_state: AppStateDep) -> BaseEmailSender:
+    return SmtpEmailSender(
+        host=app_state.config.smtp.host,
+        port=app_state.config.smtp.port,
+        username=app_state.config.smtp.username,
+        password=app_state.config.smtp.password,
+        use_ssl=app_state.config.smtp.use_ssl,
+    )
 
 
-async def auth_service_dep(app_state: AppStateDep) -> AuthService:
+EmailSenderDep = Annotated[BaseEmailSender, Depends(get_email_sender)]
+
+def get_auth_service(app_state: AppStateDep) -> AuthService:
+    reset_mail_template = EmailTemplate(
+        sender=app_state.config.reset_password_mail.sender,
+        subject=app_state.config.reset_password_mail.subject,
+        body_template=app_state.config.reset_password_mail.body_template,
+    )
     return AuthService(
         storage_factory=app_state.factory,
         user_service=app_state.user_service,
         auth_config=app_state.config.auth,
+        email_sender_service=get_email_sender(app_state),
+        reset_mail_template=reset_mail_template,
     )
 
 
-AuthServiceDep = Annotated[AuthService, Depends(auth_service_dep)]
+AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 
 
 AuthTokenDep = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="api/login"))]

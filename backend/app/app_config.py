@@ -1,6 +1,6 @@
 from typing import Optional
 
-from ampf.auth import AuthConfig, DefaultUser
+from ampf.auth import AuthConfig, DefaultUser, ResetPasswordMailConfig, SmtpConfig
 from core.feature_flags import FeatureFlags
 from pydantic import BaseModel, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -21,7 +21,9 @@ class AppConfig(BaseSettings):
 
     auth: AuthConfig = AuthConfig(jwt_secret_key="")
     default_user: DefaultUser = DefaultUser(username="admin", password="")
-
+    smtp: SmtpConfig = SmtpConfig()
+    reset_password_mail: ResetPasswordMailConfig = ResetPasswordMailConfig()
+    
     @field_validator("auth", mode="after")
     @classmethod
     def validate_jwt_secret_key(cls, v: AuthConfig) -> AuthConfig:
