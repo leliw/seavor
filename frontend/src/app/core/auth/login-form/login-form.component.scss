@@ -1,0 +1,32 @@
+mat-card {
+    position: relative;
+}
+
+.forgot-password {
+    text-align: right;
+    margin: 0 0 24px;
+}
+
+.divider {
+    text-align: center;
+    margin: 32px 0;
+    color: var(--mat-sys-outline);
+    position: relative;
+
+    span {
+        background: var(--mat-sys-surface-container-low);
+        padding: 0 16px;
+        position: relative;
+        z-index: 1;
+    }
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: var(--mat-sys-outline);
+    }
+}

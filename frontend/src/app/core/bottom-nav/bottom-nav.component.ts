@@ -1,8 +1,9 @@
-import { Component, input, output } from '@angular/core';
+import { Component, inject, input, output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from "@angular/material/list";
 import { MatToolbarModule } from "@angular/material/toolbar";
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-bottom-nav',
@@ -36,4 +37,10 @@ export class BottomNavComponent {
   check = output();
   hint = output();
   translate = output();
+
+  authService = inject(AuthService);
+  
+  logout() {
+    this.authService.logout().subscribe();
+  }
 }

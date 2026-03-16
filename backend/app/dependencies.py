@@ -2,9 +2,14 @@ import logging
 from typing import Annotated
 from uuid import UUID
 
+from ampf.auth import AuthService, InsufficientPermissionsError, TokenPayload
+from ampf.base import BaseEmailSender, EmailTemplate, SmtpEmailSender
 from ampf.base.versioned_base_model import StorageFormatFlags
+from fastapi.security import OAuth2PasswordBearer
 from app_config import AppConfig
 from app_state import AppState
+from core.roles import Role
+from core.users.user_service import UserService
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.concurrency import asynccontextmanager
@@ -16,21 +21,19 @@ from features.pages.page_model import GapFillChoiceExercise_v2, InfoPage_v2
 from features.pages.page_service import PageService
 from features.topics.topic_model import Topic_v2
 from features.topics.topic_service import TopicService
-from haintech.ai import BaseAIModel
+from haintech.ai import BaseAIModel, BaseImageGenerator
+from haintech.ai.google_genai import GenAIImageGenerator
 from integrations.gtts.gtts_service import GttsService
 from shared.audio_files.audio_file_service import AudioFileService
 from shared.images.image_service import ImageService
 from shared.prompts.prompt_service import PromptService
 
-
-from haintech.ai import BaseImageGenerator
-from haintech.ai.google_genai import GenAIImageGenerator
 load_dotenv()
 
 _log = logging.getLogger(__name__)
 
 
-def lifespan(config: AppConfig = AppConfig()):
+def lifespan(config: AppConfig):
     app_state = AppState.create(config)
     Topic_v2.FORMAT_FLAGS = StorageFormatFlags(
         save_new_format=config.feature_flags.topic_v2_storage,
@@ -48,7 +51,8 @@ def lifespan(config: AppConfig = AppConfig()):
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         app.state.app_state = app_state
-        yield
+        async with app_state:
+            yield
 
     return lifespan
 
@@ -65,6 +69,13 @@ def get_app_config(app_state: AppStateDep) -> AppConfig:
 
 
 ConfigDep = Annotated[AppConfig, Depends(get_app_config)]
+
+
+def get_user_service(app_state: AppStateDep) -> UserService:
+    return app_state.user_service
+
+
+UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 
 
 def get_prompt_service(app_state: AppStateDep) -> PromptService:
@@ -145,3 +156,57 @@ def get_page_service(
 
 
 PageServiceDep = Annotated[PageService, Depends(get_page_service)]
+
+
+def get_email_sender(app_state: AppStateDep) -> BaseEmailSender:
+    return SmtpEmailSender(
+        host=app_state.config.smtp.host,
+        port=app_state.config.smtp.port,
+        username=app_state.config.smtp.username,
+        password=app_state.config.smtp.password,
+        use_ssl=app_state.config.smtp.use_ssl,
+    )
+
+
+EmailSenderDep = Annotated[BaseEmailSender, Depends(get_email_sender)]
+
+
+def get_auth_service(app_state: AppStateDep) -> AuthService:
+    reset_mail_template = EmailTemplate(
+        sender=app_state.config.reset_password_mail.sender,
+        subject=app_state.config.reset_password_mail.subject,
+        body_template=app_state.config.reset_password_mail.body_template,
+    )
+    return AuthService(
+        storage_factory=app_state.factory,
+        user_service=app_state.user_service,
+        auth_config=app_state.config.auth,
+        email_sender_service=get_email_sender(app_state),
+        reset_mail_template=reset_mail_template,
+    )
+
+
+AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
+
+
+AuthTokenDep = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="api/login"))]
+
+
+async def decode_token(auth_service: AuthServiceDep, token: AuthTokenDep) -> TokenPayload:
+    return await auth_service.decode_token(token)
+
+
+TokenPayloadDep = Annotated[TokenPayload, Depends(decode_token)]
+
+
+class Authorize:
+    """Dependency for authorizing users based on their role."""
+
+    def __init__(self, required_role: Role | None = None):
+        self.required_role = required_role
+
+    def __call__(self, token_payload: TokenPayloadDep) -> bool:
+        if not self.required_role or self.required_role in token_payload.roles:
+            return True
+        else:
+            raise InsufficientPermissionsError()

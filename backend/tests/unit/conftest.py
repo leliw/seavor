@@ -1,17 +1,19 @@
 from io import BytesIO
 from typing import AsyncGenerator
 
-from haintech.ai import BaseImageGenerator
 import pytest
+import pytest_asyncio
+from ampf.auth import AuthConfig, DefaultUser, TokenExp, Tokens
 from ampf.base import BaseAsyncFactory, BlobCreate
 from ampf.testing import ApiTestClient
 from app_config import AppConfig
 from dependencies import get_tts_service, lifespan
+from fastapi import FastAPI
 from features.languages import Language
 from features.levels import Level
 from features.topics.topic_model import TopicCreate, TopicType
+from haintech.ai import BaseImageGenerator
 from integrations.gtts.gtts_service import GttsService
-
 from main import app as main_app
 
 
@@ -22,6 +24,8 @@ def config(tmp_path) -> AppConfig:
         gcp_root_storage=None,
         gcp_bucket_name=None,
         production=False,
+        default_user=DefaultUser(username="test", email="test@test.com", password="test"),
+        auth=AuthConfig(jwt_secret_key="test"),
     )
     return config
 
@@ -37,11 +41,16 @@ class ImageGenServiceMock(BaseImageGenerator):
 
 
 @pytest.fixture
-def client(config: AppConfig) -> ApiTestClient:  # type: ignore
+def app(config: AppConfig) -> FastAPI:
     app = main_app
     # Reconfigure the lifespan to use the test server config
     app.router.lifespan_context = lifespan(config)
     app.dependency_overrides[get_tts_service] = lambda: TtsServiceMock()
+    return app
+
+
+@pytest.fixture
+def client(app: FastAPI) -> ApiTestClient:  # type: ignore
     with ApiTestClient(app) as client:
         yield client  # type: ignore
 
@@ -60,3 +69,16 @@ def topic_create() -> TopicCreate:
         description="Semi-modals vs. pure modal verbs",
         type=TopicType.GRAMMAR,
     )
+
+
+@pytest_asyncio.fixture
+async def tokens(factory: BaseAsyncFactory, client: ApiTestClient) -> Tokens:
+    # Clear token_black_list
+    await factory.create_compact_storage("token_black_list", TokenExp, "token").drop()
+    # Login
+    return client.post_typed("/api/login", 200, Tokens, data={"username": "test", "password": "test"})
+
+
+@pytest.fixture
+def headers(tokens: Tokens) -> dict[str, str]:
+    return {"Authorization": f"Bearer {tokens.access_token}"}

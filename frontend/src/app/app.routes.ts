@@ -3,6 +3,15 @@ import { interfaceLanguageSelectedGuard, learningLanguageSelectedGuard } from '.
 
 export const routes: Routes = [
     { path: '', redirectTo: 'topics', pathMatch: 'full' },
+    { path: 'login', title: "Login", loadComponent: () => import('./core/auth/login-form/login-form.component').then(m => m.LoginFormComponent) },
+    {
+        path: 'reset-password-request', title: "Reset password request",
+        loadComponent: () => import('./core/auth/reset-password-request-form/reset-password-request-form.component').then(mod => mod.ResetPasswordRequestFormComponent)
+    },
+    {
+        path: 'reset-password', title: "Reset password",
+        loadComponent: () => import('./core/auth/reset-password-form/reset-password-form.component').then(mod => mod.ResetPasswordFormComponent)
+    },    
     {
         path: 'select-interface-language',
         loadComponent: () => import('./core/interface-language-selector/interface-language-selector.component').then(m => m.InterfaceLanguageSelectorComponent)

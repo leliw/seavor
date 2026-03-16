@@ -9,11 +9,13 @@ from fastapi.responses import JSONResponse
 from log_config import setup_logging
 from routers import (
     audio_files,
+    auth,
     config,
     images,
     letter_shuffles,
     native_topics,
     topics,
+    users,
 )
 from shared.localized_static_files import LocalizedStaticFiles
 from version import __version__
@@ -33,8 +35,9 @@ app = FastAPI(
 )
 
 
-# Include the client config router
+app.include_router(auth.router, prefix="/api")
 app.include_router(config.router, prefix="/api/config")
+app.include_router(users.router, prefix="/api/users")
 app.include_router(topics.router, prefix="/api/topics")
 app.include_router(native_topics.router, prefix="/api/native-topics/{target_language}/{level}/{native_language}")
 app.include_router(letter_shuffles.router, prefix="/api/target-languages/{target_language_code}/letter-shuffles")
