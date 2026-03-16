@@ -89,6 +89,7 @@ export class DefinitionGuessComponent implements OnDestroy {
 
     onEvaluation(evaluation: number): void {
         console.log(evaluation);
+        this.service.evaluate(this.topicId(), this.id(), evaluation).subscribe();
         this.showAnswer = false;
         this.showHint = false;
         this.phrase_audio.pause();
