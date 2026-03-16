@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../auth.service';
 import { MatCardModule } from "@angular/material/card";
 import { MatInputModule } from "@angular/material/input";
@@ -11,6 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 @Component({
   selector: 'app-reset-password-form',
   imports: [
+    RouterModule,
     ReactiveFormsModule,
     MatCardModule, 
     MatFormFieldModule,

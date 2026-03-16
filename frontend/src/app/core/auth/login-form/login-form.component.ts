@@ -9,6 +9,8 @@ import { CommonModule } from '@angular/common';
 import { MatButton } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Observable } from 'rxjs';
+import { ConfigService } from '../../config.service';
 
 @Component({
     selector: 'app-login-form',
@@ -29,7 +31,10 @@ export class LoginFormComponent {
     credentials = { username: '', password: '' };
     store_token = false;
 
-    constructor(private authService: AuthService, private router: Router, private snackBar: MatSnackBar) {
+    version$: Observable<string>;
+
+    constructor(private configService: ConfigService, private authService: AuthService, private router: Router, private snackBar: MatSnackBar) {
+        this.version$ = this.configService.getConfigValue$("version");
         if (authService.isAuthenticated())
             this.router.navigate(['/']);
     }

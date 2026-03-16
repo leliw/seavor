@@ -11,10 +11,4 @@ import { CommonModule } from '@angular/common';
     styleUrl: './app.component.scss'
 })
 export class AppComponent {
-    title = 'Seavor';
-    version$: Observable<string>;
-
-    constructor(private configService: ConfigService) {
-        this.version$ = this.configService.getConfigValue$("version");
-    }
 }

@@ -1,5 +1,5 @@
 @use 'styles/components/navigation-bar' as *;
-
+@use 'styles/components/centered-form' as *;
 /* mobile default */
 :root {
     --app-bar-height: 56px;
@@ -91,20 +91,17 @@ app-root {
     width: 100%;
 }
 
-form.center-content {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin: auto;
 
-    .mat-mdc-card-header {
-        padding-bottom: 8px;
-    }
-    .mat-mdc-card-content {
-        width: 40rem;
-    }
-    .mat-mdc-card-actions {
-        gap: 1em;
-    }
+.footer-version {
+    position: absolute;
+    right: 1em;
+    bottom: 0.6em;
+    font-size: small;
+    color: rgba(0, 0, 0, 0.54);
+    z-index: 200;
+    pointer-events: none;
+}
+
+.mat-mdc-card-actions {
+    gap: 0.5rem;
 }
