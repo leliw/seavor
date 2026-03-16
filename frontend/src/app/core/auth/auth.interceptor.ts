@@ -22,6 +22,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     }    
     const authService = inject(AuthService);
     const router = inject(Router);
+    if (authService.continueWithoutLogin)
+        return next(req);
     if (authService.isAuthenticated()) {
         const headers = req.headers.set('Authorization', `Bearer ${authService.access_token}`);
         req = req.clone({ headers });

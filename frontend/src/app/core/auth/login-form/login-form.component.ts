@@ -51,4 +51,9 @@ export class LoginFormComponent {
             }
         });
     }
+
+    continueWithoutAccount() {
+        this.authService.continueWithoutLogin = true;
+        this.router.navigate(['/']);
+    }
 }

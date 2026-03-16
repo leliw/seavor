@@ -26,6 +26,8 @@ export class AuthService {
     user_photo_url?: string;
     store_token = false;
     redirectUrl: string | undefined;
+    continueWithoutLogin = false;
+
 
     constructor(private http: HttpClient, private router: Router) { }
 

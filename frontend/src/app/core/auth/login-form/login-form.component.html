@@ -24,9 +24,10 @@
                 </div>
                 <button class="full-width" mat-flat-button color="primary" type="submit"
                     [disabled]="!loginForm.form.valid" i18n>Sign in</button>
-                <!-- <div class="divider">
+                <div class="divider">
                     <span>or</span>
-                </div> -->
+                </div>
+                <button class="full-width" mat-flat-button type="button" (click)="continueWithoutAccount()" i18n>Continue without account</button>
                 <div class="footer-version">v. {{version$ | async}}</div>
             </mat-card-content>
             <mat-card-actions align="end">

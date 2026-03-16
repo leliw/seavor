@@ -31,13 +31,14 @@
         </a>
         }
         @if (showHint()) {
-        <a mat-list-item (click)="hint.emit()" i18n-matTooltip matTooltip="Show hint"  [disabled]="disabledHint()">
+        <a mat-list-item (click)="hint.emit()" i18n-matTooltip matTooltip="Show hint" [disabled]="disabledHint()">
             <mat-icon matListItemIcon>help</mat-icon>
             <span matListItemTitle i18n>Clue</span>
         </a>
         }
         @if (showTranslate()) {
-        <a mat-list-item (click)="translate.emit()" i18n-matTooltip matTooltip="Switch language" [disabled]="disabledTranslate()">
+        <a mat-list-item (click)="translate.emit()" i18n-matTooltip matTooltip="Switch language"
+            [disabled]="disabledTranslate()">
             <mat-icon matListItemIcon>g_translate</mat-icon>
             <span matListItemTitle i18n>Translate</span>
         </a>
@@ -54,9 +55,16 @@
             <span matListItemTitle i18n>Settings</span>
         </a>
         }
+        @if (authService.isAuthenticated()) {
         <a mat-list-item (click)="logout()">
             <mat-icon matListItemIcon>logout</mat-icon>
-            <span matListItemTitle i18n>Logout</span>
+            <span matListItemTitle i18n>Sign out</span>
         </a>
+        } @else {
+        <a mat-list-item routerLink="/login">
+            <mat-icon matListItemIcon>login</mat-icon>
+            <span matListItemTitle i18n>Sign in</span>
+        </a>
+        }
     </mat-nav-list>
 </mat-toolbar>
