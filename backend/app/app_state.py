@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 
-from ampf.base import BaseAsyncFactory
+from ampf.base import BaseAsyncCollectionStorage, BaseAsyncFactory
 from app_config import AppConfig
 from core.users.user_model import UserInDB
 from core.users.user_service import UserService
@@ -16,6 +16,7 @@ class AppState:
     config: AppConfig
     factory: BaseAsyncFactory
     prompt_service: PromptService
+    user_storage: BaseAsyncCollectionStorage[UserInDB]
     user_service: UserService
 
     _initialised = False
@@ -41,6 +42,7 @@ class AppState:
             config=config,
             factory=factory,
             prompt_service=PromptService(config.prompt_dir),
+            user_storage=user_storage,
             user_service=UserService(user_storage),
         )
 
