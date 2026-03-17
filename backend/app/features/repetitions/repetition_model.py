@@ -7,6 +7,14 @@ from fsrs import Card, Rating, State
 from pydantic import BaseModel, Field, computed_field
 
 
+class LanguageStatus(BaseModel):
+    language: Language
+
+
+class LevelStatus(BaseModel):
+    level: Level
+
+
 class PageEvaluation(BaseModel):
     rating: Rating
     evaluated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -42,9 +50,9 @@ class RepetitionCard(RepetitionCardHeader):
     #### FSRS fields ->
     card_id: int
     state: State
-    step: int | None
-    stability: float | None
-    difficulty: float | None
+    step: int | None = None
+    stability: float | None = None
+    difficulty: float | None = None
     #### <-
 
     def get_card(self) -> Card:

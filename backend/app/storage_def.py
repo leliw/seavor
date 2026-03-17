@@ -1,15 +1,6 @@
 from ampf.base import CollectionDef
-from pydantic import BaseModel
 from core.users.user_model import UserInDB
-from features.languages import Language
-from features.levels import Level
-from features.repetitions.repetition_model import RepetitionCard
-
-class LanguageStatus(BaseModel):
-    language: Language
-
-class LevelStatus(BaseModel):
-    level: Level
+from features.repetitions.repetition_model import LanguageStatus, LevelStatus, RepetitionCard
 
 # fmt: off
 STORAGE_DEF = [
