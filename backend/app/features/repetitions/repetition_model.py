@@ -6,6 +6,8 @@ from features.levels import Level
 from fsrs import Card, Rating, State
 from pydantic import BaseModel, Field, computed_field
 
+from features.pages.page_base_model import PageType
+
 
 class LanguageStatus(BaseModel):
     language: Language
@@ -25,6 +27,7 @@ class RepetitionCardCreate(BaseModel):
     level: Level
     topic_id: UUID
     page_id: UUID
+    type: PageType = PageType.DEFINITION_GUESS
     evaluation: PageEvaluation
 
 
@@ -33,6 +36,7 @@ class RepetitionCardHeader(BaseModel):
     level: Level
     topic_id: UUID
     page_id: UUID
+    type: PageType = PageType.DEFINITION_GUESS
     due: datetime
 
     @computed_field
