@@ -14,6 +14,7 @@ from routers import (
     images,
     letter_shuffles,
     native_topics,
+    repetitions,
     topics,
     users,
 )
@@ -41,6 +42,7 @@ app.include_router(users.router, prefix="/api/users")
 app.include_router(topics.router, prefix="/api/topics")
 app.include_router(native_topics.router, prefix="/api/native-topics/{target_language}/{level}/{native_language}")
 app.include_router(letter_shuffles.router, prefix="/api/target-languages/{target_language_code}/letter-shuffles")
+app.include_router(repetitions.router, prefix="/api/repetitions")
 app.include_router(audio_files.router, prefix="/api/audio-files")
 app.include_router(images.router, prefix="/api/images")
 

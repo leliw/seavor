@@ -7,7 +7,7 @@ from ampf.testing import ApiTestClient
 from features.languages import Language
 from features.levels import Level
 from features.pages.definition_guess_model import DefinitionGuess, DefinitionGuessCreate, Sentence
-from features.repetitions.repetition_model import PageEvaluation, RepetitionCard
+from features.repetitions.repetition_model import PageEvaluation, RepetitionCard, RepetitionCardHeader
 
 
 @pytest.fixture
@@ -88,3 +88,23 @@ def test_send_evaluation_again(
     assert card.due is not None
     assert card.evaluations[1].rating == Rating.Again
     assert card.evaluations[1].evaluated_at is not None
+
+
+def test_get_all_empty(client: ApiTestClient, headers: dict[str, str]):
+    r = client.get_typed_list("/api/repetitions", 200, RepetitionCardHeader, headers=headers)
+    assert 0 == len(r)
+
+
+def test_get_all_one_evaluated_twice(
+    client: ApiTestClient,
+    headers: dict[str, str],
+    topic_id: UUID,
+    definition_guess_create: DefinitionGuessCreate,
+):
+    # Given: One card evaluated twice
+    test_send_evaluation_again(client, headers, topic_id, definition_guess_create)
+    # When: Get all repetitions
+    r = client.get_typed_list("/api/repetitions", 200, RepetitionCardHeader, headers=headers)
+    # Then: One card is returned
+    assert 1 == len(r)  
+    

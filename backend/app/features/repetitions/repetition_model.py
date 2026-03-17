@@ -20,14 +20,25 @@ class RepetitionCardCreate(BaseModel):
     evaluation: PageEvaluation
 
 
-class RepetitionCard(BaseModel):
+class RepetitionCardHeader(BaseModel):
     language: Language
     level: Level
     topic_id: UUID
     page_id: UUID
-    evaluations: list[PageEvaluation] = Field(default_factory=list)
     due: datetime
-    
+
+    @computed_field
+    def id(self) -> UUID:
+        return self.get_id(self.topic_id, self.page_id)
+
+    @classmethod
+    def get_id(cls, topic_id: UUID, page_id: UUID) -> UUID:
+        return uuid5(page_id, str(topic_id))
+
+
+class RepetitionCard(RepetitionCardHeader):
+    evaluations: list[PageEvaluation] = Field(default_factory=list)
+
     #### FSRS fields ->
     card_id: int
     state: State
@@ -35,10 +46,6 @@ class RepetitionCard(BaseModel):
     stability: float | None
     difficulty: float | None
     #### <-
-
-    @computed_field
-    def id(self) -> UUID:
-        return self.get_id(self.topic_id, self.page_id)
 
     def get_card(self) -> Card:
         return Card(
@@ -58,10 +65,6 @@ class RepetitionCard(BaseModel):
         self.stability = card.stability
         self.difficulty = card.difficulty
         self.due = card.due
-
-    @classmethod
-    def get_id(cls, topic_id: UUID, page_id: UUID) -> UUID:
-        return uuid5(page_id, str(topic_id))
 
     @classmethod
     def create(cls, value_create: RepetitionCardCreate, card: Card) -> "RepetitionCard":
