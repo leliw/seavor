@@ -72,6 +72,6 @@ export class DefinitionGuessService {
     }
 
     evaluate(topicId: string, uid: string, rate: number): Observable<void> {
-        return this.httpClient.post<void>(`${this.getEndpoint()}/${topicId}/pages/${uid}/evaluate`, { rate: rate });
+        return this.httpClient.post<void>(`${this.getEndpoint()}/${topicId}/pages/${uid}/evaluate`, { rating: rate });
     }
 }
