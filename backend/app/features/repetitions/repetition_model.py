@@ -1,10 +1,10 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from uuid import UUID, uuid5
 
 from features.languages import Language
 from features.levels import Level
-from fsrs import Rating
-from pydantic import BaseModel, Field
+from fsrs import Card, Rating, State
+from pydantic import BaseModel, Field, computed_field
 
 
 class PageEvaluation(BaseModel):
@@ -26,23 +26,55 @@ class RepetitionCard(BaseModel):
     topic_id: UUID
     page_id: UUID
     evaluations: list[PageEvaluation] = Field(default_factory=list)
-    next_repetition: datetime
+    due: datetime
+    
+    #### FSRS fields ->
+    card_id: int
+    state: State
+    step: int | None
+    stability: float | None
+    difficulty: float | None
+    #### <-
 
-    @property
+    @computed_field
     def id(self) -> UUID:
         return self.get_id(self.topic_id, self.page_id)
+
+    def get_card(self) -> Card:
+        return Card(
+            card_id=self.card_id,
+            state=self.state,
+            step=self.step,
+            stability=self.stability,
+            difficulty=self.difficulty,
+            due=self.due,
+            last_review=self.evaluations[-1].evaluated_at if self.evaluations else None,
+        )
+
+    def set_card(self, card: Card) -> None:
+        self.card_id = card.card_id
+        self.state = card.state
+        self.step = card.step
+        self.stability = card.stability
+        self.difficulty = card.difficulty
+        self.due = card.due
 
     @classmethod
     def get_id(cls, topic_id: UUID, page_id: UUID) -> UUID:
         return uuid5(page_id, str(topic_id))
 
     @classmethod
-    def create(cls, value_create: RepetitionCardCreate) -> "RepetitionCard":
+    def create(cls, value_create: RepetitionCardCreate, card: Card) -> "RepetitionCard":
         return cls(
             language=value_create.language,
             level=value_create.level,
             topic_id=value_create.topic_id,
             page_id=value_create.page_id,
             evaluations=[value_create.evaluation],
-            next_repetition=datetime.now(timezone.utc) + timedelta(days=1),
+            card_id=card.card_id,
+            state=card.state,
+            step=card.step,
+            stability=card.stability,
+            difficulty=card.difficulty,
+            due=card.due,
         )

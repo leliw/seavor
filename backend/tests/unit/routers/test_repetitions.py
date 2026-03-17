@@ -43,19 +43,48 @@ async def test_send_evaluation(
     # And: An page evaluation
     evaluation = PageEvaluation(rating=Rating.Good)
     # When: Send evaluation
-    status = client.post_typed(
+    card = client.post_typed(
         f"/api/topics/en/A1/{topic_id}/pages/{page.id}/evaluate",
         200,
         RepetitionCard,
         json=evaluation,
         headers=headers,
     )
-    # Then: Status is returned
-    assert status.next_repetition is not None
-    assert status.evaluations[0].rating == evaluation.rating
-    assert status.evaluations[0].evaluated_at is not None
+    # Then: Card is returned
+    assert card.due is not None
+    assert card.evaluations[0].rating == evaluation.rating
+    assert card.evaluations[0].evaluated_at is not None
     # And: It is saved
     storage = factory.create_storage("users/test/languages/en/levels/A1/repetitions", RepetitionCard, "id")
-    stored = await storage.get(status.id)
-    assert stored.next_repetition is not None
+    stored = await storage.get(card.id)
+    assert stored.due is not None
 
+
+def test_send_evaluation_again(
+    client: ApiTestClient,
+    headers: dict[str, str],
+    topic_id: UUID,
+    definition_guess_create: DefinitionGuessCreate,
+):
+    # Given: A topic with definition guess page
+    page = client.post_typed(f"/api/topics/en/A1/{topic_id}/pages", 200, DefinitionGuess, json=definition_guess_create)
+    # And: An page evaluated once
+    client.post_typed(
+        f"/api/topics/en/A1/{topic_id}/pages/{page.id}/evaluate",
+        200,
+        RepetitionCard,
+        json=PageEvaluation(rating=Rating.Good),
+        headers=headers,
+    )
+    # When: Send evaluation again
+    card = client.post_typed(
+        f"/api/topics/en/A1/{topic_id}/pages/{page.id}/evaluate",
+        200,
+        RepetitionCard,
+        json=PageEvaluation(rating=Rating.Again),
+        headers=headers,
+    )
+    # Then: Card is returned
+    assert card.due is not None
+    assert card.evaluations[1].rating == Rating.Again
+    assert card.evaluations[1].evaluated_at is not None
