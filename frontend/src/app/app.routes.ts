@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { interfaceLanguageSelectedGuard, learningLanguageSelectedGuard } from './core/language.service';
+import { authGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'topics', pathMatch: 'full' },
@@ -11,7 +12,7 @@ export const routes: Routes = [
     {
         path: 'reset-password', title: "Reset password",
         loadComponent: () => import('./core/auth/reset-password-form/reset-password-form.component').then(mod => mod.ResetPasswordFormComponent)
-    },    
+    },
     {
         path: 'select-interface-language',
         loadComponent: () => import('./core/interface-language-selector/interface-language-selector.component').then(m => m.InterfaceLanguageSelectorComponent)
@@ -33,20 +34,13 @@ export const routes: Routes = [
     },
     {
         path: 'repetitions',
-        canActivate: [interfaceLanguageSelectedGuard, learningLanguageSelectedGuard],
-        loadComponent: () => import("./core/navigation-bar/navigation-bar.component").then(m => m.NavigationBarComponent),
-        children: [
-            {
-                path: '',
-                loadComponent: () => import('./features/repetitions/repetitions-page/repetitions-page.component').then(m => m.RepetitionsPageComponent)
-            }
-        ]
+        canActivate: [interfaceLanguageSelectedGuard, learningLanguageSelectedGuard, authGuard],
+        loadComponent: () => import('./features/repetitions/repetition-view/repetition-view.component').then(m => m.RepetitionViewComponent)
     },
     {
         path: '',
         canActivateChild: [interfaceLanguageSelectedGuard, learningLanguageSelectedGuard],
         children: [
-            { path: '', redirectTo: 'topics', pathMatch: 'full' },
             {
                 path: 'letter-shuffle/:id',
                 loadComponent: () => import('./features/letter-shuffle/letter-shuffle.component').then(m => m.LetterShuffleComponent)

@@ -1,24 +1,20 @@
 <mat-toolbar color="primary" class="navigation-bar">
     <mat-nav-list class="horizontal">
-        <a mat-list-item (click)="evaluation.emit(-2)">
-            <mat-icon matListItemIcon>sentiment_very_dissatisfied</mat-icon>
-            <span matListItemTitle i18n>Terrible</span>
-        </a>
-        <a mat-list-item (click)="evaluation.emit(-1)">
-            <mat-icon matListItemIcon>sentiment_dissatisfied</mat-icon>
-            <span matListItemTitle i18n>Bad</span>
-        </a>
-        <a mat-list-item (click)="evaluation.emit(0)">
-            <mat-icon matListItemIcon>sentiment_neutral</mat-icon>
-            <span matListItemTitle i18n>Average</span>
-        </a>
         <a mat-list-item (click)="evaluation.emit(1)">
+            <mat-icon matListItemIcon>sentiment_dissatisfied</mat-icon>
+            <span matListItemTitle i18n>Again</span>
+        </a>
+        <a mat-list-item (click)="evaluation.emit(2)">
+            <mat-icon matListItemIcon>sentiment_neutral</mat-icon>
+            <span matListItemTitle i18n>Hard</span>
+        </a>
+        <a mat-list-item (click)="evaluation.emit(3)">
             <mat-icon matListItemIcon>sentiment_satisfied</mat-icon>
             <span matListItemTitle i18n>Good</span>
         </a>
-        <a mat-list-item (click)="evaluation.emit(2)">
+        <a mat-list-item (click)="evaluation.emit(4)">
             <mat-icon matListItemIcon>sentiment_very_satisfied</mat-icon>
-            <span matListItemTitle i18n>Excellent</span>
+            <span matListItemTitle i18n>Easy</span>
         </a>
     </mat-nav-list>
 </mat-toolbar>

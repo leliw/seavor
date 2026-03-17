@@ -5,7 +5,6 @@ from uuid import UUID
 from ampf.auth import AuthService, InsufficientPermissionsError, TokenPayload
 from ampf.base import BaseEmailSender, EmailTemplate, SmtpEmailSender
 from ampf.base.versioned_base_model import StorageFormatFlags
-from fastapi.security import OAuth2PasswordBearer
 from app_config import AppConfig
 from app_state import AppState
 from core.roles import Role
@@ -13,12 +12,14 @@ from core.users.user_service import UserService
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.concurrency import asynccontextmanager
+from fastapi.security import OAuth2PasswordBearer
 from features.languages import Language
 from features.levels import Level
 from features.native_pages.native_page_model import NativeGapFillChoiceExercise_v2, NativeInfoPage_v2
 from features.native_topics.native_topic_service import NativeTopicService
 from features.pages.page_model import GapFillChoiceExercise_v2, InfoPage_v2
 from features.pages.page_service import PageService
+from features.repetitions.repetition_service import RepetitionService
 from features.topics.topic_model import Topic_v2
 from features.topics.topic_service import TopicService
 from haintech.ai import BaseAIModel, BaseImageGenerator
@@ -137,7 +138,7 @@ NativeTopicServiceDep = Annotated[NativeTopicService, Depends(get_topic_translat
 
 
 def get_translator_ai_model(app_state: AppStateDep):
-    from haintech.ai.google_generativeai import GoogleAIModel
+    from haintech.ai.google_genai import GoogleAIModel
 
     return GoogleAIModel(model_name="gemini-2.5-flash-lite", parameters={"temperature": 0.0})
 
@@ -210,3 +211,10 @@ class Authorize:
             return True
         else:
             raise InsufficientPermissionsError()
+
+
+def get_repetition_service(app_state: AppStateDep, token_payload: TokenPayloadDep) -> RepetitionService:
+    return RepetitionService(app_state.user_storage.get_collection(token_payload.sub, "languages"))
+
+
+RepetitionServiceDep = Annotated[RepetitionService, Depends(get_repetition_service)]

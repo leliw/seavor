@@ -1,5 +1,6 @@
 from io import BytesIO
 from typing import AsyncGenerator
+from uuid import UUID
 
 import pytest
 import pytest_asyncio
@@ -11,7 +12,7 @@ from dependencies import get_tts_service, lifespan
 from fastapi import FastAPI
 from features.languages import Language
 from features.levels import Level
-from features.topics.topic_model import TopicCreate, TopicType
+from features.topics.topic_model import Topic, TopicCreate, TopicType
 from haintech.ai import BaseImageGenerator
 from integrations.gtts.gtts_service import GttsService
 from main import app as main_app
@@ -69,6 +70,12 @@ def topic_create() -> TopicCreate:
         description="Semi-modals vs. pure modal verbs",
         type=TopicType.GRAMMAR,
     )
+
+
+@pytest.fixture
+def topic_id(client: ApiTestClient, topic_create: TopicCreate) -> UUID:
+    r = client.post_typed("/api/topics", 200, Topic, json=topic_create)
+    return r.id
 
 
 @pytest_asyncio.fixture

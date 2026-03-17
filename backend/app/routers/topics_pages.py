@@ -2,14 +2,17 @@ from typing import List
 from uuid import UUID
 
 from ampf.fastapi import JsonStreamingResponse
-from dependencies import PageServiceDep
+from dependencies import PageServiceDep, RepetitionServiceDep
 from fastapi import APIRouter
+from features.languages import Language
+from features.levels import Level
 from features.pages.page_base_model import BasePage
 from features.pages.page_model import (
     Page,
     PageCreate,
     PagePatch,
 )
+from features.repetitions.repetition_model import PageEvaluation, RepetitionCard
 
 router = APIRouter(tags=["Topic pages"])
 ITEM_PATH = "/{id}"
@@ -40,3 +43,15 @@ async def patch(service: PageServiceDep, id: UUID, value_patch: PagePatch) -> Pa
 @router.delete(ITEM_PATH)
 async def delete(service: PageServiceDep, id: UUID) -> None:
     await service.delete(id)
+
+
+@router.post(f"{ITEM_PATH}/evaluate")
+async def evaluate(
+    service: RepetitionServiceDep,
+    target_language: Language,
+    level: Level,
+    topic_id: UUID,
+    id: UUID,
+    page_evaluation: PageEvaluation,
+) -> RepetitionCard:
+    return await service.evaluate(target_language, level, topic_id, id, page_evaluation)

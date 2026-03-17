@@ -75,23 +75,30 @@ export class DefinitionGuessComponent implements OnDestroy {
         this.definition_audio.pause();
         this.hint_audio.play().catch(err => console.error('Audio play error:', err));
     }
+
+    playSentence() {
+        this.sentence_audio.play().catch(err => console.error('Audio play error:', err));
+    }
+
     check(): void {
         this.answer = this.sentence.text_with_gap.replace(/_{3,}/g, '<b>' + this.sentence.gap_filler_form + '</b>');
         this.showAnswer = true;
         this.definition_audio.pause();
         this.hint_audio.pause();
-        this.phrase_audio.addEventListener('ended', () => {
-                this.sentence_audio.play().catch(err => console.error('Audio play error:', err));
-            }, { once: true });
+        this.phrase_audio.addEventListener('ended', this.playSentence, { once: true });
         this.phrase_audio.play().catch(err => console.error('Audio play error:', err));
         
     }
 
     onEvaluation(evaluation: number): void {
         console.log(evaluation);
+        this.service.evaluate(this.topicId(), this.id(), evaluation).subscribe();
         this.showAnswer = false;
         this.showHint = false;
         this.phrase_audio.pause();
+        this.phrase_audio.removeEventListener('ended', this.playSentence);
+        this.definition_audio.pause();
+        this.hint_audio.pause();
         this.sentence_audio.pause();
         this.nextPage.emit();
     }

@@ -8,6 +8,7 @@ dependencies = [
     "aiogtts>=1.1.1",
     "ampf[fastapi,gcp]>=0.9.2",
     "fastapi[standard]>=0.128.0",
+    "fsrs>=6.3.1",
     "google-genai>=1.56.0",
     "gtts>=2.5.4",
     "gunicorn>=23.0.0",
