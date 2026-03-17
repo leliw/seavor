@@ -6,7 +6,7 @@ from ampf.testing import ApiTestClient
 from features.languages import Language
 from features.levels import Level
 from features.pages.definition_guess_model import DefinitionGuess, DefinitionGuessCreate, Sentence
-from features.repetitions.repetition_model import PageEvaluation, RepetitionStatus
+from features.repetitions.repetition_model import PageEvaluation, RepetitionCard
 
 
 @pytest.fixture
@@ -45,7 +45,7 @@ async def test_send_evaluation(
     status = client.post_typed(
         f"/api/topics/en/A1/{topic_id}/pages/{page.id}/evaluate",
         200,
-        RepetitionStatus,
+        RepetitionCard,
         json=evaluation,
         headers=headers,
     )
@@ -54,7 +54,7 @@ async def test_send_evaluation(
     assert status.evaluations[0].rate == evaluation.rate
     assert status.evaluations[0].evaluated_at is not None
     # And: It is saved
-    storage = factory.create_storage("users/test/languages/en/levels/A1/repetitions", RepetitionStatus, "id")
+    storage = factory.create_storage("users/test/languages/en/levels/A1/repetitions", RepetitionCard, "id")
     stored = await storage.get(status.id)
     assert stored.next_repetition is not None
 

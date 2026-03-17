@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from core.users.user_model import UserInDB
 from features.languages import Language
 from features.levels import Level
-from features.repetitions.repetition_model import RepetitionStatus
+from features.repetitions.repetition_model import RepetitionCard
 
 class LanguageStatus(BaseModel):
     language: Language
@@ -16,7 +16,7 @@ STORAGE_DEF = [
     CollectionDef("users", UserInDB, "username", subcollections=[
         CollectionDef("languages", LanguageStatus, subcollections=[
             CollectionDef("levels", LevelStatus, subcollections=[
-                CollectionDef("repetitions", RepetitionStatus, "id"),
+                CollectionDef("repetitions", RepetitionCard, "id"),
             ]),
         ]),
     ])

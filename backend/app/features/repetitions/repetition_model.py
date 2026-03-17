@@ -11,7 +11,7 @@ class PageEvaluation(BaseModel):
     evaluated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
-class RepetitionStatusCreate(BaseModel):
+class RepetitionCardCreate(BaseModel):
     language: Language
     level: Level
     topic_id: UUID
@@ -19,7 +19,7 @@ class RepetitionStatusCreate(BaseModel):
     evaluation: PageEvaluation
 
 
-class RepetitionStatus(BaseModel):
+class RepetitionCard(BaseModel):
     language: Language
     level: Level
     topic_id: UUID
@@ -36,7 +36,7 @@ class RepetitionStatus(BaseModel):
         return uuid5(page_id, str(topic_id))
 
     @classmethod
-    def create(cls, value_create: RepetitionStatusCreate) -> "RepetitionStatus":
+    def create(cls, value_create: RepetitionCardCreate) -> "RepetitionCard":
         return cls(
             language=value_create.language,
             level=value_create.level,

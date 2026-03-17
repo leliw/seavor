@@ -12,7 +12,7 @@ from features.pages.page_model import (
     PageCreate,
     PagePatch,
 )
-from features.repetitions.repetition_model import PageEvaluation, RepetitionStatus
+from features.repetitions.repetition_model import PageEvaluation, RepetitionCard
 
 router = APIRouter(tags=["Topic pages"])
 ITEM_PATH = "/{id}"
@@ -53,5 +53,5 @@ async def evaluate(
     topic_id: UUID,
     id: UUID,
     page_evaluation: PageEvaluation,
-) -> RepetitionStatus:
+) -> RepetitionCard:
     return await service.evaluate(target_language, level, topic_id, id, page_evaluation)
