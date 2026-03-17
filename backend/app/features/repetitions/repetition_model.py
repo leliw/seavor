@@ -3,11 +3,12 @@ from uuid import UUID, uuid5
 
 from features.languages import Language
 from features.levels import Level
+from fsrs import Rating
 from pydantic import BaseModel, Field
 
 
 class PageEvaluation(BaseModel):
-    rate: int
+    rating: Rating
     evaluated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 

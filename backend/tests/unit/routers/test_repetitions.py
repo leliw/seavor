@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from ampf.base import BaseAsyncFactory
+from fsrs import Rating
 import pytest
 from ampf.testing import ApiTestClient
 from features.languages import Language
@@ -40,7 +41,7 @@ async def test_send_evaluation(
     # Given: A topic with definition guess page
     page = client.post_typed(f"/api/topics/en/A1/{topic_id}/pages", 200, DefinitionGuess, json=definition_guess_create)
     # And: An page evaluation
-    evaluation = PageEvaluation(rate=0)
+    evaluation = PageEvaluation(rating=Rating.Good)
     # When: Send evaluation
     status = client.post_typed(
         f"/api/topics/en/A1/{topic_id}/pages/{page.id}/evaluate",
@@ -51,7 +52,7 @@ async def test_send_evaluation(
     )
     # Then: Status is returned
     assert status.next_repetition is not None
-    assert status.evaluations[0].rate == evaluation.rate
+    assert status.evaluations[0].rating == evaluation.rating
     assert status.evaluations[0].evaluated_at is not None
     # And: It is saved
     storage = factory.create_storage("users/test/languages/en/levels/A1/repetitions", RepetitionCard, "id")
