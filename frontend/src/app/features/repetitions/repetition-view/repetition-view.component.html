@@ -1,0 +1,11 @@
+@if (repetition) {
+@if (repetition.type=="gap-fill-choice") {
+<app-gap-fill-choice [topicId]="repetition.topic_id" [id]="repetition.page_id" (previousPage)="onPreviousPage()"
+    (nextPage)="onNextPage()"></app-gap-fill-choice>
+} @else if (repetition.type=="definition-guess") {
+<app-definition-guess [topicId]="repetition.topic_id" [id]="repetition.page_id" (previousPage)="onPreviousPage()"
+    (nextPage)="onNextPage()"></app-definition-guess>
+} @else {
+<pre>{{repetition | json}}</pre>
+}
+}
