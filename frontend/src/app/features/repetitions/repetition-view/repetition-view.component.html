@@ -8,4 +8,9 @@
 } @else {
 <pre>{{repetition | json}}</pre>
 }
+} @else if ( repetitions && repetitions.length==0) {
+<div class="full-screen-container vertically-centered">
+    <h2 i18n>All done!</h2>
+</div>
+<app-bottom-nav [showCheck]="false" [showHint]="false" [showTranslate]="false" ></app-bottom-nav>
 }

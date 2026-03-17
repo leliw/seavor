@@ -6,6 +6,7 @@ import { RepetitionCardHeader, RepetitionService } from '../repetition.service';
 import { SimpleDialogComponent } from '../../../shared/simple-dialog/simple-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { BottomNavComponent } from "../../../core/bottom-nav/bottom-nav.component";
 
 @Component({
   selector: 'app-repetition-view',
@@ -13,6 +14,7 @@ import { Router } from '@angular/router';
     CommonModule,
     GapFillChoiceComponent,
     DefinitionGuessComponent,
+    BottomNavComponent
   ],
   templateUrl: './repetition-view.component.html',
   styleUrl: './repetition-view.component.scss',
@@ -24,7 +26,7 @@ export class RepetitionViewComponent {
 
   repetitions!: RepetitionCardHeader[];
   repetitionIndex: number = 0;
-  repetition!: RepetitionCardHeader;
+  repetition: RepetitionCardHeader | undefined;
 
   ngOnInit(): void {
     this.repetitionService.getOverdue().subscribe(reps => {
@@ -49,7 +51,11 @@ export class RepetitionViewComponent {
           title: $localize`Congratulations!`,
           message: $localize`That's all!`
         }
-      }).afterClosed().subscribe(() => this.router.navigate(["/"]));
+      }).afterClosed().subscribe(() => {
+        this.repetitions = [];
+        this.repetition = undefined;
+        // this.router.navigate(["/"])
+      });
     }
   }
 }
