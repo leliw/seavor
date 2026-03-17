@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { interfaceLanguageSelectedGuard, learningLanguageSelectedGuard } from './core/language.service';
+import { authGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'topics', pathMatch: 'full' },
@@ -33,7 +34,7 @@ export const routes: Routes = [
     },
     {
         path: 'repetitions',
-        canActivate: [interfaceLanguageSelectedGuard, learningLanguageSelectedGuard],
+        canActivate: [interfaceLanguageSelectedGuard, learningLanguageSelectedGuard, authGuard],
         loadComponent: () => import('./features/repetitions/repetition-view/repetition-view.component').then(m => m.RepetitionViewComponent)
     },
     {
