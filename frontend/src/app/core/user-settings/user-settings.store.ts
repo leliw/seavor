@@ -1,4 +1,4 @@
-import { inject } from '@angular/core';
+import { effect, inject, untracked } from '@angular/core';
 import { tapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withHooks, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
@@ -6,6 +6,7 @@ import { pipe } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
 import { UserSettings } from './user-settings.model';
 import { UserSettingsService } from './user-settings.service';
+import { AuthStateService } from '../auth/auth-state.service';
 
 type UserSettingsState = {
     settings: UserSettings;
@@ -16,7 +17,9 @@ type UserSettingsState = {
 const initialState: UserSettingsState = {
     settings: {
         v: 1,
-        native_language: 'en',
+        ui_language: '',
+        learning_language: '',
+        learning_level: 'B1',
     },
     isLoading: true,
     error: null,
@@ -37,6 +40,33 @@ export const UserSettingsStore = signalStore(
                                 error: 'User settings load failed',
                                 isLoading: false
                             }),
+                        })
+                    )
+                )
+            )
+        ),
+        updateSettings: rxMethod<Partial<UserSettings>>(
+            pipe(
+                debounceTime(400),
+                map((changes) => {
+                    const originalSettings = store.settings();
+                    patchState(store, (state) => ({
+                        settings: { ...state.settings, ...changes },
+                        error: null,
+                    }));
+                    return { changes, originalSettings };
+                }),
+                switchMap(({ changes, originalSettings }) =>
+                    service.patch(changes).pipe(
+                        tapResponse({
+                            next: () => { },
+                            error: () => {
+                                // Rollback
+                                patchState(store, {
+                                    settings: originalSettings,
+                                    error: 'User settings update failed'
+                                });
+                            },
                         })
                     )
                 )
@@ -75,8 +105,12 @@ export const UserSettingsStore = signalStore(
     })),
 
     withHooks({
-        onInit(store) {
+        onInit(store, authStateService = inject(AuthStateService)) {
             store.load();
+            effect(() => {
+                if (authStateService.isAuthenticated())
+                    untracked(() => store.load());
+            });
         },
     })
 );

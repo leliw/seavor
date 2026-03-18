@@ -1,4 +1,6 @@
 export interface UserSettings {
     v: number;
-    native_language: string;
+    ui_language: string;
+    learning_language: string
+    learning_level: string
 }
