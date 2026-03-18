@@ -1,9 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { jwtDecode } from 'jwt-decode';
-import { BehaviorSubject, catchError, filter, finalize, Observable, take, tap, throwError } from 'rxjs';
-import { UserSettingsStore } from '../user-settings/user-settings.store';
+import { BehaviorSubject, catchError, filter, finalize, Observable, of, take, tap, throwError } from 'rxjs';
+import { AuthStateService } from './auth-state.service';
 
 
 export interface Credentials {
@@ -20,19 +19,28 @@ export interface Tokens {
     providedIn: 'root'
 })
 export class AuthService {
-    username?: string;
     access_token?: string;
     refresh_token?: string;
-    user_email?: string;
-    roles: string[] = [];
-    user_photo_url?: string;
     store_token = false;
     redirectUrl: string | undefined;
     continueWithoutLogin = false;
 
-    private userSettingsStore = inject(UserSettingsStore);
+    constructor(private http: HttpClient, private router: Router, private authState: AuthStateService) {
+        this.loadTokensFromLocalStorage();
+    }
 
-    constructor(private http: HttpClient, private router: Router) { }
+    private loadTokensFromLocalStorage(): void {
+        const storedAccessToken = localStorage.getItem("access_token");
+        const storedRefreshToken = localStorage.getItem("refresh_token");
+
+        if (storedAccessToken && storedRefreshToken) {
+            this.access_token = storedAccessToken;
+            this.refresh_token = storedRefreshToken;
+            this.store_token = true; // Assume if tokens were stored, we want to continue storing them
+            this.authState.setUserData({ access_token: storedAccessToken, refresh_token: storedRefreshToken });
+            this.continueWithoutLogin = false;
+        }
+    }
 
     /**
      * Login user with username and password
@@ -45,10 +53,11 @@ export class AuthService {
         formData.append('password', credentials.password);
         this.store_token = store_token;
         return this.http.post<Tokens>('/api/login', formData).pipe(
-            tap((value) => {
-                this.setData(value);
+            tap((tokens) => {
+                this.authState.setUserData(tokens);
                 this.continueWithoutLogin = false;
-                this.userSettingsStore.load();
+                this.storeTokensIfNeeded(tokens);
+                this.redirectAfterLogin();
             })
         );
     }
@@ -58,39 +67,28 @@ export class AuthService {
      * @returns Observable<void>
      */
     logout(): Observable<void> {
-        const headers = new HttpHeaders({ 'Authorization': `Bearer ${this.refresh_token}` });
-        return this.http.post<void>('/api/logout', {}, { headers: headers }).pipe(finalize(() => {
-            this.cleanData();
+        if (this.refresh_token) {
+            const headers = new HttpHeaders({ 'Authorization': `Bearer ${this.refresh_token}` });
+            return this.http.post<void>('/api/logout', {}, { headers: headers }).pipe(finalize(() => {
+                this.authState.clear();
+                this.clearStoredTokens();
+                this.router.navigate(['/login']);
+            }));
+        } else {
+            this.authState.clear();
+            this.clearStoredTokens();
             this.router.navigate(['/login']);
-        }));
+            return of(undefined);
+        }
     }
 
-    /**
-     * Set tokens, user data decoded from token and
-     * redirects if necessary
-     * @param tokens 
-     */
-    setData(tokens: Tokens): void {
-        this.setTokens(tokens);
-        this.decodeToken(tokens.access_token);
+    redirectAfterLogin(): void {
         if (this.redirectUrl) {
             this.router.navigate([this.redirectUrl]);
             this.redirectUrl = undefined;
         } else {
-            this.router.navigate(['/']); // Przekierowanie na stronę główną
+            this.router.navigate(['/']);
         }
-    }
-
-    /**
-     * Clear user data and remove tokens from local storage
-     */
-    cleanData(): void {
-        this.access_token = undefined;
-        this.username = undefined;
-        this.user_email = undefined;
-        this.roles = [];
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
     }
 
     /**
@@ -98,52 +96,27 @@ export class AuthService {
      * @returns boolean
      */
     isAuthenticated(): boolean {
-        if (this.username)
-            return true;
-        this.access_token = localStorage.getItem("access_token") ?? undefined
-        this.refresh_token = localStorage.getItem("refresh_token") ?? undefined
-        if (this.refresh_token) {
-            this.decodeToken(this.refresh_token);
-            return true;
-        }
-        return false;
-    }
-
-    hasRole(role: string): boolean {
-        return this.roles.includes(role);
-    }
-
-    hasAnyRole(requiredRoles: string[]): boolean {
-        return requiredRoles.some(role => this.roles.includes(role));
-    }
-
-    hasAllRoles(requiredRoles: string[]): boolean {
-        return requiredRoles.every(role => this.roles.includes(role));
-    }
-    
-    /**
-     * Decode JWT token and set user data
-     * @param token JWT token
-     */
-    private decodeToken(token: string): void {
-        const payload: any = jwtDecode(token);
-        this.username = payload.sub;
-        this.user_email = payload.email;
-        this.roles = payload.roles;
-        this.user_photo_url = payload.picture;
+        return this.authState.isAuthenticated();
     }
 
     /**
      * Set tokens (also in browser local storage)
      * @param tokens 
      */
-    setTokens(tokens: Tokens): void {
+    storeTokensIfNeeded(tokens: Tokens): void {
         this.access_token = tokens.access_token;
         this.refresh_token = tokens.refresh_token
         if (this.store_token) {
             localStorage.setItem("access_token", this.access_token);
             localStorage.setItem("refresh_token", this.refresh_token);
         }
+    }
+
+    clearStoredTokens(): void {
+        this.access_token = undefined;
+        this.refresh_token = undefined;
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
     }
 
     resetPasswordRequest(email: string): Observable<void> {
@@ -185,12 +158,13 @@ export class AuthService {
 
         return this.http.post<Tokens>('/api/refresh-token', {}, { headers }).pipe(
             tap(tokens => {
-                this.setTokens(tokens);
-                this.decodeToken(tokens.access_token);
+                this.authState.setUserData(tokens);
+                this.storeTokensIfNeeded(tokens);
                 this.refreshTokenSubject.next(tokens);
             }),
             catchError(err => {
-                this.cleanData();
+                this.authState.clear();
+                this.clearStoredTokens()
                 this.router.navigate(['/login']);
                 return throwError(() => err);
             }),
