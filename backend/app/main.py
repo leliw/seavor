@@ -16,6 +16,7 @@ from routers import (
     native_topics,
     repetitions,
     topics,
+    user_settings,
     users,
 )
 from shared.localized_static_files import LocalizedStaticFiles
@@ -38,6 +39,7 @@ app = FastAPI(
 
 app.include_router(auth.router, prefix="/api")
 app.include_router(config.router, prefix="/api/config")
+app.include_router(user_settings.router, prefix="/api/user-settings")
 app.include_router(users.router, prefix="/api/users")
 app.include_router(topics.router, prefix="/api/topics")
 app.include_router(native_topics.router, prefix="/api/native-topics/{target_language}/{level}/{native_language}")
