@@ -4,12 +4,12 @@ USER_SETTINGS_ID = "settings"
 
 
 class UserSettingsPatch(BaseModel):
-    native_language: str | None
+    ui_language: str | None = None
+    learning_language: str | None = None
+    learning_level: str | None = None
 
 
-class UserSettings(BaseModel):
-    native_language: str = "en"
-
+class UserSettings(UserSettingsPatch):
     @property
     def id(self) -> str:
         return USER_SETTINGS_ID
