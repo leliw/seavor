@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { Router } from '@angular/router';
 import { Language, LanguageService } from '../language.service';
+import { UserSettingsStore } from '../user-settings/user-settings.store';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 
 @Component({
@@ -12,6 +13,7 @@ import { Language, LanguageService } from '../language.service';
         MatCardModule,
         MatButtonModule,
         MatIconModule,
+        MatSnackBarModule,
     ],
     templateUrl: './interface-language-selector.component.html',
     styleUrl: './interface-language-selector.component.scss'
@@ -30,14 +32,19 @@ export class InterfaceLanguageSelectorComponent {
         // { code: 'ar', nativeName: 'العربية', flag: '🇸🇦' },
     ];
 
+    userSettingsStorage = inject(UserSettingsStore);
+    private _snackBar = inject(MatSnackBar);
+
+
     constructor(
-        private router: Router,
         private languageService: LanguageService
     ) { }
 
     selectLanguage(code: string): void {
+        this.userSettingsStorage.updateSetting({ key: 'ui_language', value: code });
         this.languageService.setInterfaceLanguage(code);
         const basePath = location.pathname.replace(/^\/(pl|en|de)/, '');
-        location.href = `/${code}/`;
+        this._snackBar.open($localize`Language changed`, $localize`Ok`, { duration: 2000 })
+            .afterDismissed().subscribe(() => location.href = `/${code}/`);
     }
 }
