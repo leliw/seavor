@@ -1,8 +1,10 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { jwtDecode } from 'jwt-decode';
 import { BehaviorSubject, catchError, filter, finalize, Observable, take, tap, throwError } from 'rxjs';
+import { UserSettingsStore } from '../user-settings/user-settings.store';
+
 
 export interface Credentials {
     username: string;
@@ -28,6 +30,7 @@ export class AuthService {
     redirectUrl: string | undefined;
     continueWithoutLogin = false;
 
+    private userSettingsStore = inject(UserSettingsStore);
 
     constructor(private http: HttpClient, private router: Router) { }
 
@@ -42,14 +45,18 @@ export class AuthService {
         formData.append('password', credentials.password);
         this.store_token = store_token;
         return this.http.post<Tokens>('/api/login', formData).pipe(
-            tap((value) => this.setData(value))
+            tap((value) => {
+                this.setData(value);
+                this.continueWithoutLogin = false;
+                this.userSettingsStore.load();
+            })
         );
     }
 
     /**
- * Logout user from server, clear data and redirect to login page
- * @returns Observable<void>
- */
+     * Logout user from server, clear data and redirect to login page
+     * @returns Observable<void>
+     */
     logout(): Observable<void> {
         const headers = new HttpHeaders({ 'Authorization': `Bearer ${this.refresh_token}` });
         return this.http.post<void>('/api/logout', {}, { headers: headers }).pipe(finalize(() => {
@@ -113,6 +120,7 @@ export class AuthService {
     hasAllRoles(requiredRoles: string[]): boolean {
         return requiredRoles.every(role => this.roles.includes(role));
     }
+    
     /**
      * Decode JWT token and set user data
      * @param token JWT token

@@ -7,6 +7,7 @@ import { ConfigService } from './core/config.service';
 import { languageInterceptor } from './core/language.interceptor';
 import { IMAGE_LOADER, ImageLoaderConfig } from '@angular/common';
 import { authInterceptor } from './core/auth/auth.interceptor';
+import { UserSettingsStore } from './core/user-settings/user-settings.store';
 
 
 export const customImageLoader = (config: ImageLoaderConfig) => {
@@ -22,6 +23,7 @@ export const appConfig: ApplicationConfig = {
         provideZoneChangeDetection({ eventCoalescing: true }),
         provideRouter(routes),
         provideHttpClient(withInterceptors([languageInterceptor, authInterceptor])),
-        { provide: IMAGE_LOADER, useValue: customImageLoader }
+        { provide: IMAGE_LOADER, useValue: customImageLoader },
+        UserSettingsStore
     ]
 };
