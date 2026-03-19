@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { LanguageService } from '../../core/language.service';
+import { UserSettingsStore } from '../../core/user-settings/user-settings.store';
 
 
 export interface Topic {
@@ -33,13 +33,15 @@ export interface PageHeader {
     providedIn: 'root',
 })
 export class TopicService {
-    constructor(private httpClient: HttpClient, private languageService: LanguageService) { }
+    private userSettingsStorage = inject(UserSettingsStore);
+    private language = computed(() => this.userSettingsStorage.settings().learning_language);
+    private level = computed(() => this.userSettingsStorage.settings().learning_level);
+    private uiLanguage = computed(() => this.userSettingsStorage.settings().ui_language);
+
+    constructor(private httpClient: HttpClient) { }
 
     getEndpoint(): string {
-        const targetLanguage = this.languageService.getLearningLanguage();
-        const nativeLanguage = this.languageService.getInterfaceLanguage();
-        const level = "B1"
-        return `/api/native-topics/${targetLanguage}/${level}/${nativeLanguage}`;
+        return `/api/native-topics/${this.language()}/${this.level()}/${this.uiLanguage()}`;
     }
 
     getAll(): Observable<Topic[]> {

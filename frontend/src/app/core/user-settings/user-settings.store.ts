@@ -19,7 +19,7 @@ const initialState: UserSettingsState = {
         v: 1,
         ui_language: '',
         learning_language: '',
-        learning_level: 'B1',
+        learning_level: '',
     },
     isLoading: true,
     error: null,
