@@ -41,7 +41,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
                         catchError(refreshErr => {
                             if (refreshErr.status === 401) {
                                 console.error('Refresh token error:', refreshErr);
-                                authService.cleanData();
                                 router.navigate(['/login']);
                             }
                             throw refreshErr;

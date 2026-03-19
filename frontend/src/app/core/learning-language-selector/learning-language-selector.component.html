@@ -1,10 +1,11 @@
 <div class="language-selector-container">
+    @if (!code) {
     <div class="header">
         <h1 class="title" i18n>Select learning language</h1>
     </div>
-    <mat-card class="languages-card">
+    <mat-card>
         <mat-card-content>
-            <div class="languages-grid">
+            <div class="grid">
                 @for(lang of learningLanguages; track lang.code) {
                 <button mat-stroked-button class="language-button" (click)="selectLanguage(lang.code)">
                     <span class="flag">{{ lang.flag }}</span>
@@ -14,4 +15,22 @@
             </div>
         </mat-card-content>
     </mat-card>
+} @else {
+    <div class="header">
+        <h1 class="title" i18n>Select learning level</h1>
+    </div>
+    <mat-card>
+        <mat-card-content>
+            <div class="grid">
+                @for(level of learningLevels; track level.code) {
+                <button mat-stroked-button class="level-button" (click)="selectLevel(level.code)">
+                    <span class="code">{{ level.code }}</span>
+                    <span class="name">{{ level.name }}</span>
+                </button>
+                }
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+}
 </div>

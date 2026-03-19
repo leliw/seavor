@@ -1,17 +1,17 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { LanguageService } from './language.service';
+import { UserSettingsStore } from './user-settings/user-settings.store';
 
 export const languageInterceptor: HttpInterceptorFn = (req, next) => {
-  const languageService = inject(LanguageService);
-  const lang = languageService.getInterfaceLanguage();
+    const userSettingsStore = inject(UserSettingsStore);
+    const lang = userSettingsStore.settings().ui_language
 
-  if (lang) {
-    req = req.clone({
-      setHeaders: {
-        'Accept-Language': lang
-      }
-    });
-  }
-  return next(req);
+    if (lang) {
+        req = req.clone({
+            setHeaders: {
+                'Accept-Language': lang,
+            }
+        });
+    }
+    return next(req);
 };
