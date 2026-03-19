@@ -3,6 +3,7 @@ import { DefinitionGuessExercise, DefinitionGuessService, NativeSentence, Senten
 import { BottomNavComponent } from "../../core/bottom-nav/bottom-nav.component";
 import { EvaluationBarComponent } from "../../core/evaluation-bar/evaluation-bar.component";
 import { NgOptimizedImage } from '@angular/common';
+import { AuthStateService } from '../../core/auth/auth-state.service';
 
 @Component({
     selector: 'app-definition-guess',
@@ -18,6 +19,7 @@ export class DefinitionGuessComponent implements OnDestroy {
     topicId = input.required<string>();
     id = input.required<string>();
     private service = inject(DefinitionGuessService);
+    public authStateService = inject(AuthStateService);
 
     previousPage = output<void>();
     nextPage = output<void>();
@@ -91,8 +93,9 @@ export class DefinitionGuessComponent implements OnDestroy {
     }
 
     onEvaluation(evaluation: number): void {
-        console.log(evaluation);
-        this.service.evaluate(this.topicId(), this.id(), evaluation).subscribe();
+        if (this.authStateService.isAuthenticated()) {
+            this.service.evaluate(this.topicId(), this.id(), evaluation).subscribe();
+        }
         this.showAnswer = false;
         this.showHint = false;
         this.phrase_audio.pause();
