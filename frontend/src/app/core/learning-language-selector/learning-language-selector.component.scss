@@ -20,7 +20,7 @@
 
     }
 
-    .languages-card {
+    mat-card {
         width: 100%;
         max-width: 600px;
         margin-bottom: 32px;
@@ -31,7 +31,7 @@
         color: var(--mat-sys-primary);
     }
 
-    .languages-grid {
+    .grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 12px;
@@ -49,10 +49,32 @@
         }
     }
 
+    .level-button {
+        .code {
+            position: absolute;
+            left: 0;
+            font-size: 1.3rem;
+        }
+
+        .name {
+            margin-left: 2rem;
+            text-align: center;
+        }
+    }
+
+}
+
+
+:host ::ng-deep .level-button .mdc-button__label {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
 }
 
 @media (max-width: 600px) {
-    .languages-grid {
+    .grid {
         grid-template-columns: 1fr;
     }
 }

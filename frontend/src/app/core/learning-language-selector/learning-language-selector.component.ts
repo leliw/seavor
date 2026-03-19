@@ -7,6 +7,12 @@ import { Language, LanguageService } from '../language.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserSettingsStore } from '../user-settings/user-settings.store';
 
+interface Level {
+    code: string;
+    name: string;
+}
+
+
 @Component({
     selector: 'app-learning-language-selector',
     imports: [
@@ -25,9 +31,18 @@ export class LearningLanguageSelectorComponent {
         { code: 'de', nativeName: 'Deutsch', flag: '🇩🇪' },
 
     ];
+    learningLevels: Level[] = [
+        { code: 'A1', name: $localize`Breakthrough / Beginner` },
+        { code: 'A2', name: $localize`Waystage / Elementary` },
+        { code: 'B1', name: $localize`Threshold / Lower intermediate` },
+        { code: 'B2', name: $localize`Vantage / Upper intermediate` },
+        { code: 'C1', name: $localize`Operational proficiency / Advanced` },
+        { code: 'C2', name: $localize`Mastery / Proficient` },
+    ];
 
     userSettingsStorage = inject(UserSettingsStore);
     private _snackBar = inject(MatSnackBar);
+    code?: string = undefined;
 
     constructor(
         private router: Router,
@@ -35,9 +50,14 @@ export class LearningLanguageSelectorComponent {
     ) { }
 
     selectLanguage(code: string): void {
-        this.userSettingsStorage.updateSettings({ learning_language: code, learning_level: 'B1' });
-        this.languageService.setLearningLanguage(code);
-        this._snackBar.open($localize`Language changed`, $localize`Ok`, { duration: 2000 })
-            .afterDismissed().subscribe(() => location.href = `/${code}/`);
+        this.code = code;
+    }
+    selectLevel(level: string): void {
+        if (this.code) {
+            this.userSettingsStorage.updateSettings({ learning_language: this.code, learning_level: level });
+            this.languageService.setLearningLanguage(this.code);
+            this._snackBar.open($localize`Language & level changed`, $localize`Ok`, { duration: 2000 })
+                .afterDismissed().subscribe(() => location.href = `/${this.code}/`);
+        }
     }
 }
