@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { effect, Injectable, signal, untracked } from '@angular/core';
-import { BehaviorSubject, catchError, combineLatest, interval, map, Observable, of, tap } from 'rxjs'; // Dodaj combineLatest
+import { effect, Injectable, untracked } from '@angular/core';
+import { BehaviorSubject, catchError, combineLatest, interval, map, Observable, of, startWith, tap } from 'rxjs'; // Dodaj combineLatest
 
 import { isAfter, parseISO } from 'date-fns';
 import { AuthStateService } from '../../core/auth/auth-state.service';
@@ -23,15 +23,26 @@ interface RepetitionSchedule {
   providedIn: 'root',
 })
 export class RepetitionService {
-  private repetitionScheduleSubject = new BehaviorSubject<RepetitionSchedule | null>(null);
+  private repetitionScheduleSubject = new BehaviorSubject<RepetitionSchedule | undefined>(undefined);
 
   public repetitionSchedule$ = this.repetitionScheduleSubject.asObservable();
+  public earliestOverdue$ = this.repetitionSchedule$.pipe(
+    map(schedule => {
+      if (!schedule)
+        return undefined;
+      else {
+        return Object.keys(schedule).sort((a, b) => parseISO(a).getTime() - parseISO(b).getTime())[0];
+      }
+    })
+  );
+
   public numberOfOverdue$ = combineLatest([
     this.repetitionSchedule$,
-    interval(60 * 1000)
+    interval(60 * 1000).pipe(startWith(0))
   ]).pipe(
     map(([schedule, _]) => {
-      if (!schedule) return null;
+      if (!schedule)
+        return null;
       else {
         const now = new Date();
         let numberOfOverdue = 0;
@@ -45,9 +56,6 @@ export class RepetitionService {
     })
   );
 
-  earliestOverdue = signal<string | undefined>(undefined);
-
-
   constructor(private httpClient: HttpClient, authStateService: AuthStateService) {
     effect((onCleanup) => {
       if (authStateService.isAuthenticated()) {
@@ -56,8 +64,7 @@ export class RepetitionService {
           onCleanup(() => httpSub.unsubscribe());
         })
       } else {
-        this.repetitionScheduleSubject.next(null);
-        this.earliestOverdue.set(undefined);
+        this.repetitionScheduleSubject.next(undefined);
       }
     });
   }
@@ -89,14 +96,10 @@ export class RepetitionService {
       .pipe(
         tap(schedule => {
           this.repetitionScheduleSubject.next(schedule);
-          this.earliestOverdue.set(
-            Object.keys(schedule).sort((a, b) => parseISO(a).getTime() - parseISO(b).getTime())[0]
-          );
         }),
         catchError(error => {
           console.error('Error fetching repetition schedule: ', error);
           this.repetitionScheduleSubject.next({});
-          this.earliestOverdue.set(undefined);
           return of({});
         })
       );
