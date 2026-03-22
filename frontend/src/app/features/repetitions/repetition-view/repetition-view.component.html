@@ -11,7 +11,7 @@
 } @else if ( repetitions && repetitions.length==0) {
 <div class="full-screen-container vertically-centered">
     <h2 i18n>All done!</h2>
-    <h3 i18n>Get back at {{repetitionService.firstOverdue() |  date:'medium':'':userSettingsStore.settings().ui_language}}</h3>
+    <h3 i18n>Get back at {{repetitionService.earliestOverdue() |  date:'medium':'':userSettingsStore.settings().ui_language}}</h3>
 </div>
 <app-bottom-nav [showCheck]="false" [showHint]="false" [showTranslate]="false" ></app-bottom-nav>
 }

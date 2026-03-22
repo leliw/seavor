@@ -1,9 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { effect, Injectable, signal, untracked } from '@angular/core';
-import { BehaviorSubject, interval, map, Observable } from 'rxjs';
+import { BehaviorSubject, catchError, combineLatest, interval, map, Observable, of, tap } from 'rxjs'; // Dodaj combineLatest
 
-import { parseISO } from 'date-fns';
-import { isAfter } from 'date-fns';
+import { isAfter, parseISO } from 'date-fns';
 import { AuthStateService } from '../../core/auth/auth-state.service';
 
 export interface RepetitionCardHeader {
@@ -24,34 +23,41 @@ interface RepetitionSchedule {
   providedIn: 'root',
 })
 export class RepetitionService {
-  repetitionSchedule: { [key: string]: number } = {};
-  
-  private numberOfOverdueSubject = new BehaviorSubject<number | null>(null);
-  public numberOfOverdue$ = this.numberOfOverdueSubject.asObservable()
-  
-  firstOverdue = signal<string | undefined>(undefined);
+  private repetitionScheduleSubject = new BehaviorSubject<RepetitionSchedule | null>(null);
 
-  
+  public repetitionSchedule$ = this.repetitionScheduleSubject.asObservable();
+  public numberOfOverdue$ = combineLatest([
+    this.repetitionSchedule$,
+    interval(60 * 1000)
+  ]).pipe(
+    map(([schedule, _]) => {
+      if (!schedule) return null;
+      else {
+        const now = new Date();
+        let numberOfOverdue = 0;
+        for (const key in schedule) {
+          if (schedule.hasOwnProperty(key) && isAfter(now, parseISO(key))) {
+            numberOfOverdue += schedule[key];
+          }
+        }
+        return numberOfOverdue;
+      }
+    })
+  );
+
+  earliestOverdue = signal<string | undefined>(undefined);
+
+
   constructor(private httpClient: HttpClient, authStateService: AuthStateService) {
     effect((onCleanup) => {
       if (authStateService.isAuthenticated()) {
         untracked(() => {
-          const httpSub = this.getSchedule().subscribe(schedule => {
-              this.repetitionSchedule = schedule;
-              this.firstOverdue.set(Object.keys(schedule)[0]);
-              this.countOverdue();
-            });
-          const intervalSub = interval(60 * 1000).subscribe(() => {
-            this.countOverdue();
-          });
-          onCleanup(() => {
-            httpSub.unsubscribe();
-            intervalSub.unsubscribe();
-          });
+          const httpSub = this.getSchedule().subscribe();
+          onCleanup(() => httpSub.unsubscribe());
         })
       } else {
-        this.repetitionSchedule = {};
-        this.numberOfOverdueSubject.next(null);
+        this.repetitionScheduleSubject.next(null);
+        this.earliestOverdue.set(undefined);
       }
     });
   }
@@ -79,18 +85,20 @@ export class RepetitionService {
   }
 
   getSchedule(): Observable<RepetitionSchedule> {
-    return this.httpClient.get<RepetitionSchedule>(`${this.getEndpoint()}/schedule`);
+    return this.httpClient.get<RepetitionSchedule>(`${this.getEndpoint()}/schedule`)
+      .pipe(
+        tap(schedule => {
+          this.repetitionScheduleSubject.next(schedule);
+          this.earliestOverdue.set(
+            Object.keys(schedule).sort((a, b) => parseISO(a).getTime() - parseISO(b).getTime())[0]
+          );
+        }),
+        catchError(error => {
+          console.error('Error fetching repetition schedule: ', error);
+          this.repetitionScheduleSubject.next({});
+          this.earliestOverdue.set(undefined);
+          return of({});
+        })
+      );
   }
-
-  private countOverdue() {
-    const now = new Date();
-    let numberOfOverdue = 0;
-    for (const key in this.repetitionSchedule) {
-      if (this.repetitionSchedule.hasOwnProperty(key) && isAfter(now, parseISO(key))) {
-        numberOfOverdue += this.repetitionSchedule[key];
-      }
-    }
-    this.numberOfOverdueSubject.next(numberOfOverdue);
-  }
-
 }
