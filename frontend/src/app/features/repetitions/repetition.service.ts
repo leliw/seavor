@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { effect, Injectable, untracked } from '@angular/core';
-import { BehaviorSubject, catchError, combineLatest, interval, map, Observable, of, startWith, tap } from 'rxjs'; // Dodaj combineLatest
+import { BehaviorSubject, catchError, combineLatest, interval, map, Observable, of, startWith, tap } from 'rxjs';
 
 import { isAfter, parseISO } from 'date-fns';
 import { AuthStateService } from '../../core/auth/auth-state.service';
@@ -57,42 +57,31 @@ export class RepetitionService {
   );
 
   constructor(private httpClient: HttpClient, authStateService: AuthStateService) {
-    effect((onCleanup) => {
+    effect(() => {
       if (authStateService.isAuthenticated()) {
-        untracked(() => {
-          const httpSub = this.getSchedule().subscribe();
-          onCleanup(() => httpSub.unsubscribe());
-        })
+        untracked(() => this.getSchedule().subscribe())
       } else {
         this.repetitionScheduleSubject.next(undefined);
       }
     });
   }
 
-  getEndpoint(): string {
-    return `/api/repetitions`;
-  }
-
   getAll(): Observable<RepetitionCardHeader[]> {
-    return this.httpClient.get<RepetitionCardHeader[]>(this.getEndpoint());
+    return this.httpClient.get<RepetitionCardHeader[]>("/api/repetitions");
   }
 
   getOverdue(): Observable<RepetitionCardHeader[]> {
-    return this.getAll().pipe(map(reps => reps.filter(rep => this.isOverdue(rep.due))));
-  }
-
-
-  private isOverdue(due: string): boolean {
-    if (!due) return false;
-
-    const dueDate = parseISO(due);
-    const now = new Date();
-
-    return isAfter(now, dueDate);
+    return this.getAll().pipe(
+      map(reps => reps.filter(rep => {
+        const dueDate = parseISO(rep.due);
+        const now = new Date();
+        return isAfter(now, dueDate);
+      }))
+    );
   }
 
   getSchedule(): Observable<RepetitionSchedule> {
-    return this.httpClient.get<RepetitionSchedule>(`${this.getEndpoint()}/schedule`)
+    return this.httpClient.get<RepetitionSchedule>("/api/repetitions/schedule")
       .pipe(
         tap(schedule => {
           this.repetitionScheduleSubject.next(schedule);
