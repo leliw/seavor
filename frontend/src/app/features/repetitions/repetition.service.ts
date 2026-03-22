@@ -1,10 +1,10 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
-import { LanguageService } from '../../core/language.service';
+import { effect, Injectable, signal, untracked } from '@angular/core';
+import { interval, map, Observable } from 'rxjs';
 
 import { parseISO } from 'date-fns';
 import { isAfter } from 'date-fns';
+import { AuthStateService } from '../../core/auth/auth-state.service';
 
 export interface RepetitionCardHeader {
   id: string;
@@ -16,12 +16,42 @@ export interface RepetitionCardHeader {
   due: string
 }
 
+interface RepetitionSchedule {
+  [key: string]: number;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class RepetitionService {
-  constructor(private httpClient: HttpClient, private languageService: LanguageService) { }
+  repetitionSchedule: { [key: string]: number } = {};
+  numberOfOverdue = signal<number>(0);
+  firstOverdue = signal<string | undefined>(undefined);
+
+
+  constructor(private httpClient: HttpClient, authStateService: AuthStateService) {
+    effect((onCleanup) => {
+      if (authStateService.isAuthenticated()) {
+        untracked(() => {
+          const httpSub = this.getSchedule().subscribe(schedule => {
+            this.repetitionSchedule = schedule;
+            this.firstOverdue.set(Object.keys(schedule)[0]);
+            this.countOverdue();
+          });
+          const intervalSub = interval(60 * 1000).subscribe(() => {
+            this.countOverdue();
+          });
+          onCleanup(() => {
+            httpSub.unsubscribe();
+            intervalSub.unsubscribe();
+          });
+        })
+      } else {
+        this.repetitionSchedule = {};
+        this.numberOfOverdue.set(0);
+      }
+    });
+  }
 
   getEndpoint(): string {
     return `/api/repetitions`;
@@ -44,4 +74,20 @@ export class RepetitionService {
 
     return isAfter(now, dueDate);
   }
+
+  getSchedule(): Observable<RepetitionSchedule> {
+    return this.httpClient.get<RepetitionSchedule>(`${this.getEndpoint()}/schedule`);
+  }
+
+  private countOverdue() {
+    const now = new Date();
+    let numberOfOverdue = 0;
+    for (const key in this.repetitionSchedule) {
+      if (this.repetitionSchedule.hasOwnProperty(key) && isAfter(now, parseISO(key))) {
+        numberOfOverdue += this.repetitionSchedule[key];
+      }
+    }
+    this.numberOfOverdue.set(numberOfOverdue);
+  }
+
 }
