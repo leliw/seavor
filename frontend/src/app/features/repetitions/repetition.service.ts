@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { effect, Injectable, signal, untracked } from '@angular/core';
-import { interval, map, Observable } from 'rxjs';
+import { BehaviorSubject, interval, map, Observable } from 'rxjs';
 
 import { parseISO } from 'date-fns';
 import { isAfter } from 'date-fns';
@@ -25,19 +25,22 @@ interface RepetitionSchedule {
 })
 export class RepetitionService {
   repetitionSchedule: { [key: string]: number } = {};
-  numberOfOverdue = signal<number>(0);
+  
+  private numberOfOverdueSubject = new BehaviorSubject<number | null>(null);
+  public numberOfOverdue$ = this.numberOfOverdueSubject.asObservable()
+  
   firstOverdue = signal<string | undefined>(undefined);
 
-
+  
   constructor(private httpClient: HttpClient, authStateService: AuthStateService) {
     effect((onCleanup) => {
       if (authStateService.isAuthenticated()) {
         untracked(() => {
           const httpSub = this.getSchedule().subscribe(schedule => {
-            this.repetitionSchedule = schedule;
-            this.firstOverdue.set(Object.keys(schedule)[0]);
-            this.countOverdue();
-          });
+              this.repetitionSchedule = schedule;
+              this.firstOverdue.set(Object.keys(schedule)[0]);
+              this.countOverdue();
+            });
           const intervalSub = interval(60 * 1000).subscribe(() => {
             this.countOverdue();
           });
@@ -48,7 +51,7 @@ export class RepetitionService {
         })
       } else {
         this.repetitionSchedule = {};
-        this.numberOfOverdue.set(0);
+        this.numberOfOverdueSubject.next(null);
       }
     });
   }
@@ -87,7 +90,7 @@ export class RepetitionService {
         numberOfOverdue += this.repetitionSchedule[key];
       }
     }
-    this.numberOfOverdue.set(numberOfOverdue);
+    this.numberOfOverdueSubject.next(numberOfOverdue);
   }
 
 }

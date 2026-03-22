@@ -6,11 +6,13 @@ import { MatToolbarModule } from "@angular/material/toolbar";
 import { RouterModule } from '@angular/router';
 import { RepetitionService } from '../../features/repetitions/repetition.service';
 import { AuthService } from '../auth/auth.service';
+import { CommonModule } from '@angular/common';
 
 
 @Component({
   selector: 'app-bottom-nav',
   imports: [
+    CommonModule,
     RouterModule,
     MatToolbarModule,
     MatListModule,
