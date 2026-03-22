@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timedelta, timezone
 import logging
 from typing import AsyncGenerator
 from uuid import UUID
@@ -15,6 +16,7 @@ from .repetition_model import (
     RepetitionCard,
     RepetitionCardCreate,
     RepetitionCardHeader,
+    RepetitionSchedule,
 )
 
 _log = logging.getLogger(__name__)
@@ -73,3 +75,27 @@ class RepetitionService:
                 repetition_storage.decorated.create(value),
             )
         return value
+
+    async def get_schedule(self) -> RepetitionSchedule:
+        schedule = {}
+        groups = self.create_groups()
+        async for rch in self.get_all():
+            for group in groups:
+                if rch.due <= group:
+                    s_group = str(group)
+                    schedule[s_group] = schedule.get(s_group, 0) + 1
+                    break
+        return RepetitionSchedule(root=schedule)
+    
+    def create_groups(self) -> list[datetime]:
+        groups = []
+        curr = datetime.now(timezone.utc)
+        # First 2 days per 5 minutes (12 times per hour)
+        for i in range(2*24*12):
+            groups.append(curr)
+            curr = curr + timedelta(minutes=5)
+        # Next month per 1 day
+        for i in range(31):
+            curr = curr + timedelta(days=1)
+            groups.append(curr)
+        return groups
