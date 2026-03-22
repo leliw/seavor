@@ -57,6 +57,7 @@ export class RepetitionViewComponent {
       }).afterClosed().subscribe(() => {
         this.repetitions = [];
         this.repetition = undefined;
+        this.repetitionService.getSchedule().subscribe();
         // this.router.navigate(["/"])
       });
     }
