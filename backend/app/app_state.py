@@ -37,7 +37,7 @@ class AppState:
         else:
             raise ValueError("No factory setup!")
 
-        user_storage = factory.create_storage_tree(STORAGE_DEF[0], UserInDB)
+        user_storage = factory.create_storage_tree(STORAGE_DEF[0])
         return cls(
             config=config,
             factory=factory,
