@@ -4,7 +4,7 @@ from uuid import UUID, uuid5
 from features.languages import Language
 from features.levels import Level
 from fsrs import Card, Rating, State
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field, RootModel, computed_field
 
 from features.pages.page_base_model import PageType
 
@@ -93,3 +93,6 @@ class RepetitionCard(RepetitionCardHeader):
             difficulty=card.difficulty,
             due=card.due,
         )
+
+class RepetitionSchedule(RootModel):
+    root: dict[str, int]

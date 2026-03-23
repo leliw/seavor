@@ -1,17 +1,23 @@
 import { Component, inject, input, output } from '@angular/core';
+import { MatBadgeModule } from '@angular/material/badge';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from "@angular/material/list";
 import { MatToolbarModule } from "@angular/material/toolbar";
 import { RouterModule } from '@angular/router';
+import { RepetitionService } from '../../features/repetitions/repetition.service';
 import { AuthService } from '../auth/auth.service';
+import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-bottom-nav',
   imports: [
+    CommonModule,
     RouterModule,
     MatToolbarModule,
     MatListModule,
     MatIconModule,
+    MatBadgeModule,
   ],
   templateUrl: './bottom-nav.component.html',
   styleUrl: './bottom-nav.component.scss',
@@ -39,7 +45,8 @@ export class BottomNavComponent {
   translate = output();
 
   authService = inject(AuthService);
-  
+  repetitionService = inject(RepetitionService);
+
   logout() {
     this.authService.logout().subscribe();
   }

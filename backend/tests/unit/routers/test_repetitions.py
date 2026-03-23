@@ -7,7 +7,7 @@ from ampf.testing import ApiTestClient
 from features.languages import Language
 from features.levels import Level
 from features.pages.definition_guess_model import DefinitionGuess, DefinitionGuessCreate, Sentence
-from features.repetitions.repetition_model import PageEvaluation, RepetitionCard, RepetitionCardHeader
+from features.repetitions.repetition_model import PageEvaluation, RepetitionCard, RepetitionCardHeader, RepetitionSchedule
 
 
 @pytest.fixture
@@ -108,3 +108,29 @@ def test_get_all_one_evaluated_twice(
     # Then: One card is returned
     assert 1 == len(r)  
     
+@pytest.mark.asyncio
+async def test_get_status(
+    client: ApiTestClient,
+    headers: dict[str, str],
+    factory: BaseAsyncFactory,
+    topic_id: UUID,
+    definition_guess_create: DefinitionGuessCreate,
+):
+    # Given: A topic with definition guess page
+    page = client.post_typed(f"/api/topics/en/A1/{topic_id}/pages", 200, DefinitionGuess, json=definition_guess_create)
+    # And: An page evaluation
+    evaluation = PageEvaluation(rating=Rating.Good)
+    client.post_typed(
+        f"/api/topics/en/A1/{topic_id}/pages/{page.id}/evaluate",
+        200,
+        RepetitionCard,
+        json=evaluation,
+        headers=headers,
+    )
+    # When: Get repetition status
+    schedule = client.get_typed("/api/repetitions/schedule", 200, RepetitionSchedule, headers=headers)
+    # Then: Status is returned
+    assert schedule
+    assert len(schedule.root) == 1
+    assert list(schedule.root.items())[0][1] == 1
+

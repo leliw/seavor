@@ -7,6 +7,7 @@ import { SimpleDialogComponent } from '../../../shared/simple-dialog/simple-dial
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { BottomNavComponent } from "../../../core/bottom-nav/bottom-nav.component";
+import { UserSettingsStore } from '../../../core/user-settings/user-settings.store';
 
 @Component({
   selector: 'app-repetition-view',
@@ -23,6 +24,7 @@ export class RepetitionViewComponent {
   router = inject(Router);
   dialog = inject(MatDialog);
   repetitionService = inject(RepetitionService)
+  userSettingsStore = inject(UserSettingsStore)
 
   repetitions!: RepetitionCardHeader[];
   repetitionIndex: number = 0;
@@ -35,6 +37,7 @@ export class RepetitionViewComponent {
       this.repetition = this.repetitions[this.repetitionIndex];
     })
   }
+  
   onPreviousPage() {
     if (this.repetitionIndex > 0) {
       this.repetitionIndex -= 1;
@@ -54,6 +57,7 @@ export class RepetitionViewComponent {
       }).afterClosed().subscribe(() => {
         this.repetitions = [];
         this.repetition = undefined;
+        this.repetitionService.getSchedule().subscribe();
         // this.router.navigate(["/"])
       });
     }

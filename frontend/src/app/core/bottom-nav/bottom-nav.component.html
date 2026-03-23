@@ -8,7 +8,8 @@
         }
         @if (showRepetitions()) {
         <a mat-list-item routerLink="/repetitions">
-            <mat-icon matListItemIcon>repeat</mat-icon>
+            <mat-icon matListItemIcon [matBadge]="this.repetitionService.numberOfOverdue$ | async"
+                [matBadgeHidden]="!(this.repetitionService.numberOfOverdue$ | async)">repeat</mat-icon>
             <span matListItemTitle i18n>Repetitions</span>
         </a>
         }
