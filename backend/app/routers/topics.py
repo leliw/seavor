@@ -2,7 +2,7 @@ from typing import List
 from uuid import UUID
 
 from ampf.fastapi import JsonStreamingResponse
-from dependencies import TokenPayloadDep, TopicServiceDep
+from dependencies import OptionalTokenPayloadDep, TokenPayloadDep, TopicServiceDep
 from fastapi import APIRouter
 from features.languages import Language
 from features.levels import Level
@@ -14,8 +14,9 @@ ITEM_PATH = "/{target_language}/{level}/{topic_id}"
 
 
 @router.get("/{target_language}/{level}", response_model=List[Topic])
-async def get_all(service: TopicServiceDep, target_language: Language, level: Level):
-    return JsonStreamingResponse(service.get_list(target_language, level))
+async def get_all(service: TopicServiceDep, target_language: Language, level: Level, token_payload: OptionalTokenPayloadDep):
+    username = token_payload.sub if token_payload else None
+    return JsonStreamingResponse(service.get_list(target_language, level, username))
 
 
 @router.post("")

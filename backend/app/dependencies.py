@@ -191,13 +191,19 @@ AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 
 
 AuthTokenDep = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="api/login"))]
-
+OptionalAuthTokenDep = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="api/login", auto_error=False))]
 
 async def decode_token(auth_service: AuthServiceDep, token: AuthTokenDep) -> TokenPayload:
     return await auth_service.decode_token(token)
 
+async def optional_decode_token(auth_service: AuthServiceDep, token: OptionalAuthTokenDep) -> TokenPayload | None:
+    if not token:
+        return None
+    return await auth_service.decode_token(token)
+
 
 TokenPayloadDep = Annotated[TokenPayload, Depends(decode_token)]
+OptionalTokenPayloadDep = Annotated[TokenPayload | None, Depends(optional_decode_token)]
 
 
 class Authorize:

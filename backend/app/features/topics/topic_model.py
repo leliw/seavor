@@ -96,6 +96,7 @@ class Topic_v2(VersionedBaseModel):
             type=value_create.type,
             title=value_create.title,
             description=value_create.description,
+            private=value_create.private,
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc),
         )
