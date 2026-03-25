@@ -73,8 +73,8 @@ def topic_create() -> TopicCreate:
 
 
 @pytest.fixture
-def topic_id(client: ApiTestClient, topic_create: TopicCreate) -> UUID:
-    r = client.post_typed("/api/topics", 200, Topic, json=topic_create)
+def topic_id(client: ApiTestClient, headers: dict[str, str], topic_create: TopicCreate) -> UUID:
+    r = client.post_typed("/api/topics", 200, Topic, json=topic_create, headers=headers)
     return r.id
 
 

@@ -62,9 +62,9 @@ def test_post_get_put_patch_delete_letter_shuffle_translation(client: ApiTestCli
         assert r[0].language == value.target_language_code
 
 
-def test_post_get(client: ApiTestClient, topic_create: TopicCreate):
+def test_post_get(client: ApiTestClient, headers: dict[str, str], topic_create: TopicCreate):
     # POST
-    r = client.post_typed("/api/topics", 200, Topic, json=topic_create)
+    r = client.post_typed("/api/topics", 200, Topic, json=topic_create, headers=headers)
     assert r.title == topic_create.title
 
     # GET

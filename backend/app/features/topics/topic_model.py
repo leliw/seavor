@@ -4,7 +4,6 @@ from typing import List, Optional
 from uuid import UUID, uuid4
 
 from ampf.base import VersionedBaseModel
-
 from features.languages import Language
 from features.levels import Level
 from pydantic import BaseModel, ValidationError
@@ -32,6 +31,7 @@ class TopicCreate(BaseModel):
     title: str
     description: str
     image_name: Optional[str] = None
+    private: bool = True
 
 
 class Topic_v1(BaseModel):
@@ -73,6 +73,7 @@ class Topic_v1(BaseModel):
 class Topic_v2(VersionedBaseModel):
     CURRENT_VERSION = 2
     id: UUID
+    username: str | None = None
     content_id: Optional[UUID] = None
     content_type: Optional[str] = None
     language: Language
@@ -81,14 +82,15 @@ class Topic_v2(VersionedBaseModel):
     title: str
     description: str
     image_name: Optional[str] = None
+    private: bool = True
     created_at: datetime
     updated_at: datetime
 
-
     @classmethod
-    def create(cls, value_create: TopicCreate) -> "Topic_v2":
+    def create(cls, value_create: TopicCreate, username: str | None = None) -> "Topic_v2":
         return cls(
             id=uuid4(),
+            username=username,
             language=value_create.language,
             level=value_create.level,
             type=value_create.type,

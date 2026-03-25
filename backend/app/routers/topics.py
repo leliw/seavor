@@ -2,7 +2,7 @@ from typing import List
 from uuid import UUID
 
 from ampf.fastapi import JsonStreamingResponse
-from dependencies import TopicServiceDep
+from dependencies import TokenPayloadDep, TopicServiceDep
 from fastapi import APIRouter
 from features.languages import Language
 from features.levels import Level
@@ -19,8 +19,8 @@ async def get_all(service: TopicServiceDep, target_language: Language, level: Le
 
 
 @router.post("")
-async def post(service: TopicServiceDep, value_create: TopicCreate) -> Topic:
-    return await service.create(value_create)
+async def post(service: TopicServiceDep, value_create: TopicCreate, token_payload: TokenPayloadDep) -> Topic:
+    return await service.create(value_create, token_payload.sub)
 
 
 @router.get(ITEM_PATH)

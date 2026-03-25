@@ -4,10 +4,15 @@ import pytest
 from ampf.testing import ApiTestClient
 from features.languages import Language
 from features.levels import Level
-from features.pages.definition_guess_model import AnswerOption, DefinitionGuess, DefinitionGuessCreate, DefinitionGuessPatch, Sentence
+from features.pages.definition_guess_model import (
+    AnswerOption,
+    DefinitionGuess,
+    DefinitionGuessCreate,
+    DefinitionGuessPatch,
+    Sentence,
+)
 from features.pages.page_base_model import BasePage
 from features.pages.page_model import (
-
     GapFillChoiceExercise,
     GapFillChoiceExerciseCreate,
     GapFillChoiceExercisePatch,
@@ -30,9 +35,6 @@ def gap_fill_choice_exercise_create() -> GapFillChoiceExerciseCreate:
     )
 
 
-
-
-
 @pytest.fixture
 def endpoint(topic_id: UUID) -> str:
     return f"/api/topics/en/A1/{topic_id}/pages"
@@ -44,9 +46,13 @@ def test_get_all(client: ApiTestClient, endpoint: str):
     assert 0 == len(r)
 
 
-def test_post_get_put_delete(client: ApiTestClient, endpoint: str, gap_fill_choice_exercise_create: GapFillChoiceExerciseCreate):
+def test_post_get_put_delete(
+    client: ApiTestClient, headers: dict[str, str], endpoint: str, gap_fill_choice_exercise_create: GapFillChoiceExerciseCreate
+):
     # POST
-    posted_exercise = client.post_typed(endpoint, 200, GapFillChoiceExercise, json=gap_fill_choice_exercise_create.model_dump())
+    posted_exercise = client.post_typed(
+        endpoint, 200, GapFillChoiceExercise, json=gap_fill_choice_exercise_create.model_dump(), headers=headers
+    )
     exercise_id = posted_exercise.id
 
     # GET
@@ -115,7 +121,9 @@ def test_post_get_put_delete_definition_guess(
     client: ApiTestClient, endpoint: str, definition_guess_create: DefinitionGuessCreate
 ):
     # POST
-    posted_exercise = client.post_typed(endpoint, 200, DefinitionGuess, json=definition_guess_create.model_dump(mode="json"))
+    posted_exercise = client.post_typed(
+        endpoint, 200, DefinitionGuess, json=definition_guess_create.model_dump(mode="json")
+    )
     exercise_id = posted_exercise.id
 
     # GET
@@ -123,7 +131,6 @@ def test_post_get_put_delete_definition_guess(
     assert r.id == exercise_id
     assert r.phrase == "Hello"
     assert r.definition == "The common greeting."
-
 
     # PATCH
     updated_phrase = "Hi"
