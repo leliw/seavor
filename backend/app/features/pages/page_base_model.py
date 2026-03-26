@@ -30,7 +30,7 @@ class BasePageCreate(BaseModel):
 
     language: Language
     level: Level
-    order: int
+    order: int = 0
     type: PageType  # literal below will override this
 
 

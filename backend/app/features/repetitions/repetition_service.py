@@ -50,6 +50,17 @@ class RepetitionService:
         async for repetition in repetition_storage.decorated.get_all():
             yield repetition
 
+    async def create(self, value_create: RepetitionCardCreate) -> RepetitionCard:
+        level_storage = self.language_storage.get_collection(value_create.language, "levels")
+        repetition_storage = level_storage.get_collection(value_create.level, RepetitionCard)
+        value = self.scheduler.update_repetition_card_due(value_create)
+        await asyncio.gather(
+            self.language_storage.decorated.save(LanguageStatus(language=value_create.language)),
+            level_storage.decorated.save(LevelStatus(level=value_create.level)),
+            repetition_storage.decorated.create(value),
+        )
+        return value
+
     async def evaluate(
         self, language: Language, level: Level, topic_id: UUID, page_id: UUID, evaluation: PageEvaluation
     ) -> RepetitionCard:
@@ -60,21 +71,17 @@ class RepetitionService:
             value.evaluations.append(evaluation)
             self.scheduler.update_repetition_card_due(value)
             await repetition_storage.decorated.save(value)
+            return value
         except KeyNotExistsException:
-            value_create = RepetitionCardCreate(
-                language=language,
-                level=level,
-                topic_id=topic_id,
-                page_id=page_id,
-                evaluation=evaluation,
+            return await self.create(
+                RepetitionCardCreate(
+                    language=language,
+                    level=level,
+                    topic_id=topic_id,
+                    page_id=page_id,
+                    evaluation=evaluation,
+                )
             )
-            value = self.scheduler.update_repetition_card_due(value_create)
-            await asyncio.gather(
-                self.language_storage.decorated.save(LanguageStatus(language=language)),
-                level_storage.decorated.save(LevelStatus(level=level)),
-                repetition_storage.decorated.create(value),
-            )
-        return value
 
     async def get_schedule(self) -> RepetitionSchedule:
         schedule = {}
@@ -86,12 +93,12 @@ class RepetitionService:
                     schedule[s_group] = schedule.get(s_group, 0) + 1
                     break
         return RepetitionSchedule(root=schedule)
-    
+
     def create_groups(self) -> list[datetime]:
         groups = []
         curr = datetime.now(timezone.utc)
         # First 2 days per 5 minutes (12 times per hour)
-        for i in range(2*24*12):
+        for i in range(2 * 24 * 12):
             groups.append(curr)
             curr = curr + timedelta(minutes=5)
         # Next month per 1 day
