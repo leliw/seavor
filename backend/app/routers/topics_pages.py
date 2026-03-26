@@ -2,8 +2,8 @@ from typing import List
 from uuid import UUID
 
 from ampf.fastapi import JsonStreamingResponse
-from dependencies import PageServiceDep, RepetitionServiceDep
-from fastapi import APIRouter
+from dependencies import PageServiceDep, RepetitionServiceDep, get_topic_for_user
+from fastapi import APIRouter, Depends
 from features.languages import Language
 from features.levels import Level
 from features.pages.page_base_model import BasePage
@@ -14,7 +14,7 @@ from features.pages.page_model import (
 )
 from features.repetitions.repetition_model import PageEvaluation, RepetitionCard
 
-router = APIRouter(tags=["Topic pages"])
+router = APIRouter(tags=["Topic pages"], dependencies=[Depends(get_topic_for_user)])
 ITEM_PATH = "/{id}"
 
 

@@ -16,11 +16,13 @@ from fastapi.security import OAuth2PasswordBearer
 from features.languages import Language
 from features.levels import Level
 from features.native_pages.native_page_model import NativeGapFillChoiceExercise_v2, NativeInfoPage_v2
+from features.native_pages.native_page_translator import NativePageTranslator
 from features.native_topics.native_topic_service import NativeTopicService
+from features.native_topics.native_topic_translator import NativeTopicTranslator
 from features.pages.page_model import GapFillChoiceExercise_v2, InfoPage_v2
 from features.pages.page_service import PageService
 from features.repetitions.repetition_service import RepetitionService
-from features.topics.topic_model import Topic_v2
+from features.topics.topic_model import Topic, Topic_v2
 from features.topics.topic_service import TopicService
 from haintech.ai import BaseAIModel, BaseImageGenerator
 from haintech.ai.google_genai import GenAIImageGenerator
@@ -146,6 +148,15 @@ def get_translator_ai_model(app_state: AppStateDep):
 TranslatorAIModelDep = Annotated[BaseAIModel, Depends(get_translator_ai_model)]
 
 
+def get_native_topic_translator(
+    translator_ai_model: TranslatorAIModelDep, topic_service: TopicServiceDep
+) -> NativeTopicTranslator:
+    return NativeTopicTranslator(translator_ai_model, topic_service)
+
+
+NativeTopicTranslatorDep = Annotated[NativeTopicTranslator, Depends(get_native_topic_translator)]
+
+
 def get_page_service(
     app_state: AppStateDep,
     audio_file_service: AudioFileServiceDep,
@@ -193,8 +204,10 @@ AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 AuthTokenDep = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="api/login"))]
 OptionalAuthTokenDep = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="api/login", auto_error=False))]
 
+
 async def decode_token(auth_service: AuthServiceDep, token: AuthTokenDep) -> TokenPayload:
     return await auth_service.decode_token(token)
+
 
 async def optional_decode_token(auth_service: AuthServiceDep, token: OptionalAuthTokenDep) -> TokenPayload | None:
     if not token:
@@ -224,3 +237,26 @@ def get_repetition_service(app_state: AppStateDep, token_payload: TokenPayloadDe
 
 
 RepetitionServiceDep = Annotated[RepetitionService, Depends(get_repetition_service)]
+
+
+def get_native_topic_page_translator(
+    translator_ai_model: TranslatorAIModelDep, prompt_service: PromptServiceDep, page_service: PageServiceDep
+) -> NativePageTranslator:
+    return NativePageTranslator(translator_ai_model, prompt_service, page_service)
+
+
+NativePageTranslatorDep = Annotated[NativePageTranslator, Depends(get_native_topic_page_translator)]
+
+
+async def get_topic_for_user(
+    service: TopicServiceDep,
+    target_language: Language,
+    level: Level,
+    topic_id: UUID,
+    token_payload: OptionalTokenPayloadDep,
+) -> Topic:
+    username = token_payload.sub if token_payload else None
+    return await service.get_for_user(target_language, level, topic_id, username)
+
+
+AuthorizedTopicDep = Annotated[Topic, Depends(get_topic_for_user)]

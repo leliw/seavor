@@ -1,17 +1,18 @@
 from typing import AsyncGenerator, Optional
 from uuid import UUID
 
-from ampf.base import BaseAsyncFactory, BaseAsyncStorage
+from ampf.base import BaseAsyncFactory, BaseAsyncQueryStorage
+from fastapi import HTTPException
 from features.languages import Language
 from features.levels import Level
-from features.topics.topic_model import Topic, TopicCreate
+from features.topics.topic_model import Topic, TopicCreate, TopicType
 
 
 class TopicService:
     def __init__(self, factory: BaseAsyncFactory):
         self.factory = factory
 
-    def _get_storage(self, language: Language, level: Level) -> BaseAsyncStorage[Topic]:
+    def _get_storage(self, language: Language, level: Level) -> BaseAsyncQueryStorage[Topic]:
         return self.factory.create_storage(f"target-languages/{language}/levels/{level}/topics", Topic)
 
     async def get_list(self, language: Language, level: Level, username: str | None = None) -> AsyncGenerator[Topic]:
@@ -35,4 +36,31 @@ class TopicService:
 
     async def get(self, language: Language, level: Level, id: UUID) -> Topic:
         storage = self._get_storage(language, level)
-        return await storage.get(id)
+        topic = await storage.get(id)
+        return topic
+
+    async def get_for_user(self, language: Language, level: Level, id: UUID, username: str | None = None) -> Topic:
+        topic = await self.get(language, level, id)
+        if topic.private and topic.username != username:
+            raise HTTPException(status_code=403, detail="Forbidden")
+        return topic
+
+    async def get_or_create_default_topic(self, language: Language, level: Level, username: str) -> Topic:
+        storage = self._get_storage(language, level)
+        async for topic in storage.where("username", "==", username).get_all():
+            if topic.private and topic.username != username and topic.title == "Default":
+                continue
+            return topic
+        value = Topic.create(
+            TopicCreate(
+                language=language,
+                level=level,
+                title="Default",
+                description="Various words",
+                type=TopicType.VOCABULARY,
+                private=True,
+            ),
+            username,
+        )
+        await storage.create(value)
+        return value

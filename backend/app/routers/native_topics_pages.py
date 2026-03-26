@@ -2,7 +2,14 @@ from typing import Annotated, List
 from uuid import UUID
 
 from ampf.fastapi import JsonStreamingResponse
-from dependencies import AppStateDep, AudioFileServiceDep, PageServiceDep, PromptServiceDep, TranslatorAIModelDep
+from dependencies import (
+    AppStateDep,
+    AudioFileServiceDep,
+    PageServiceDep,
+    PromptServiceDep,
+    TranslatorAIModelDep,
+    get_topic_for_user,
+)
 from fastapi import APIRouter, Depends
 from features.languages import Language
 from features.levels import Level
@@ -10,7 +17,7 @@ from features.native_pages.native_page_model import NativePage, NativePageHeader
 from features.native_pages.native_page_service import NativePageService
 from features.native_pages.native_page_translator import NativePageTranslator
 
-router = APIRouter(tags=["Topic pages translations"])
+router = APIRouter(tags=["Topic pages translations"], dependencies=[Depends(get_topic_for_user)])
 ITEM_PATH = "/{id}"
 
 
