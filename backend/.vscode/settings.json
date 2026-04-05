@@ -17,8 +17,8 @@
     "python.testing.pytestEnabled": true,
     "debugpy.debugJustMyCode": false,
     "window.autoDetectColorScheme": true,
-    "workbench.preferredDarkColorTheme": "Default Dark Modern",
-    "workbench.preferredLightColorTheme": "Default Light Modern",
+    "workbench.preferredDarkColorTheme": "Dark Modern",
+    "workbench.preferredLightColorTheme": "Light Modern",
     "window.title": "${dirty}${activeRepositoryName}${separator}${rootName}${separator}${profileName}",
     "ruff.lineLength": 120
 }
