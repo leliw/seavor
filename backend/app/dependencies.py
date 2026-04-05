@@ -126,17 +126,17 @@ def not_production(app_state: AppStateDep) -> bool:
 
 
 def get_topic_service(app_state: AppStateDep) -> TopicService:
-    return TopicService(app_state.factory)
+    return app_state.topic_service
 
 
 TopicServiceDep = Annotated[TopicService, Depends(get_topic_service)]
 
 
-def get_topic_translation_service(app_state: AppStateDep) -> NativeTopicService:
-    return NativeTopicService(app_state.factory)
+def get_native_topic_service(app_state: AppStateDep) -> NativeTopicService:
+    return app_state.native_topic_service
 
 
-NativeTopicServiceDep = Annotated[NativeTopicService, Depends(get_topic_translation_service)]
+NativeTopicServiceDep = Annotated[NativeTopicService, Depends(get_native_topic_service)]
 
 
 def get_translator_ai_model(app_state: AppStateDep):

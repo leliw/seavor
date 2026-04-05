@@ -5,6 +5,8 @@ from ampf.base import BaseAsyncCollectionStorage, BaseAsyncFactory
 from app_config import AppConfig
 from core.users.user_model import UserInDB
 from core.users.user_service import UserService
+from features.native_topics.native_topic_service import NativeTopicService
+from features.topics.topic_service import TopicService
 from shared.prompts.prompt_service import PromptService
 from storage_def import STORAGE_DEF
 
@@ -18,6 +20,8 @@ class AppState:
     prompt_service: PromptService
     user_storage: BaseAsyncCollectionStorage[UserInDB]
     user_service: UserService
+    topic_service: TopicService
+    native_topic_service: NativeTopicService
 
     _initialised = False
     
@@ -38,12 +42,16 @@ class AppState:
             raise ValueError("No factory setup!")
 
         user_storage = factory.create_storage_tree(STORAGE_DEF[0])
+        native_topic_service = NativeTopicService(factory)
+        topic_service = TopicService(factory)
         return cls(
             config=config,
             factory=factory,
             prompt_service=PromptService(config.prompt_dir),
             user_storage=user_storage,
             user_service=UserService(user_storage),
+            topic_service=topic_service,
+            native_topic_service=native_topic_service,
         )
 
     async def __aenter__(self):
