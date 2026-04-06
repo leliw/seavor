@@ -63,12 +63,12 @@ export class DefinitionGuessService {
         return `/api/topics/${this.language()}/${this.level()}`;
     }
 
-    getNativeEndpoint(): string {
-        return `/api/native-topics/${this.language()}/${this.level()}/${this.uiLanguage()}`;
+    getNativeEndpoint(level: string | undefined): string {
+        return `/api/native-topics/${this.language()}/${level ?? this.level()}/${this.uiLanguage()}`;
     }
 
-    get(topicId: string, uid: string): Observable<DefinitionGuessExercise> {
-        return this.httpClient.get<DefinitionGuessExercise>(`${this.getNativeEndpoint()}/${topicId}/pages/${uid}`);
+    get(level: string, topicId: string, uid: string): Observable<DefinitionGuessExercise> {
+        return this.httpClient.get<DefinitionGuessExercise>(`${this.getNativeEndpoint(level)}/${topicId}/pages/${uid}`);
     }
 
     evaluate(topicId: string, uid: string, rate: number): Observable<void> {

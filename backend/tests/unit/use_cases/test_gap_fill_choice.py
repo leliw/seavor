@@ -11,9 +11,9 @@ from haintech.testing import MockerAIModel
 # - translate topic page
 
 
-def test_gap_fill_choice(client: ApiTestClient, topic_create: TopicCreate, mocker_ai_model: MockerAIModel):
+def test_gap_fill_choice(client: ApiTestClient, headers: dict[str, str], topic_create: TopicCreate, mocker_ai_model: MockerAIModel):
     # Add topic
-    t = client.post_typed("/api/topics", 200, Topic, json=topic_create)
+    t = client.post_typed("/api/topics", 200, Topic, json=topic_create, headers=headers)
 
     # Add topic page
     topic_page = GapFillChoiceExerciseCreate(

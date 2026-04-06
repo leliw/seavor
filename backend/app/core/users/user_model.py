@@ -1,9 +1,6 @@
-from typing import Any
-
 from ampf.auth.auth_model import AuthUser
-from pydantic import BaseModel, EmailStr, Field, model_serializer
-
 from core.roles import Role
+from pydantic import BaseModel, EmailStr, Field
 
 
 class UserHeader(BaseModel):
@@ -21,31 +18,21 @@ class UserPatch(BaseModel):
 
 
 class User(UserHeader):
-    password: str | None = None
+    password: str | None = Field(None, exclude=True)
 
     @classmethod
     def create_from_db(cls, user_in_db: "UserInDB") -> "User":
-        return User(**user_in_db.model_dump(exclude={"password"}))
+        return cls(**user_in_db.model_dump(exclude={"password"}))
 
     def to_db(self) -> "UserInDB":
-        user_dict = dict(self)
-        if user_dict["email"]:
-            user_dict["email"] = user_dict["email"].lower()
-        else:
+        if not self.email:
             raise ValueError("Email is required")
-        user_dict.pop("password")
-        return UserInDB(**user_dict)
+        user_dict = self.model_dump()
+        user_dict["password"] = self.password
+        user_dict["email"] = user_dict["email"].lower()
 
-    @model_serializer
-    def ser_model(self) -> dict[str, Any]:
-        self_dict = dict(self)
-        self_dict.pop("password")
-        return self_dict
+        return UserInDB(**user_dict)
 
 
 class UserInDB(AuthUser):
-    @model_serializer
-    def ser_model(self) -> dict[str, Any]:
-        self_dict = dict(self)
-        self_dict.pop("password")
-        return self_dict
+    pass

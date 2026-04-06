@@ -9,7 +9,7 @@ export interface Topic {
     content_id: string;
     content_type: string;
     language: string;
-    levels: string[];
+    level: string;
     type: string;
     title: string;
     description: string;

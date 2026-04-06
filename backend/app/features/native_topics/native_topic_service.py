@@ -19,10 +19,12 @@ class NativeTopicService:
         )
 
     async def get_list(
-        self, language: Language, level: Level, native_language: Language
+        self, language: Language, level: Level, native_language: Language, username: str | None = None
     ) -> AsyncGenerator[NativeTopic]:
         storage = self._get_storage(language, level, native_language)
         async for topic in storage.get_all():
+            if topic.private and topic.username != username:
+                continue
             yield topic
 
     async def save(self, value: NativeTopic, level: Optional[Level] = None) -> None:

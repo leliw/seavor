@@ -8,6 +8,22 @@ from features.native_pages.native_page_model import NativePage, NativePageHeader
 from shared.audio_files.audio_file_service import AudioFileService
 
 
+class NativePageServiceFactory:
+    def __init__(self, factory: BaseAsyncFactory, audio_file_service: AudioFileService):
+        self.factory = factory
+        self.audio_file_service = audio_file_service
+
+    def create(self, target_language: Language, level: Level, native_language: Language, topic_id: UUID) -> "NativePageService":
+        return NativePageService(
+            factory=self.factory,
+            audio_file_service=self.audio_file_service,
+            target_language=target_language,
+            level=level,
+            native_language=native_language,
+            topic_id=topic_id,
+        )
+
+
 class NativePageService:
     def __init__(
         self,

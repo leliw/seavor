@@ -24,6 +24,21 @@ from shared.audio_files.audio_file_service import AudioFileService
 PageAdapter = TypeAdapter(Page)
 
 
+class PageServiceFactory:
+    def __init__(self, factory: BaseAsyncFactory, audio_file_service: AudioFileService):
+        self.factory = factory
+        self.audio_file_service = audio_file_service
+
+    def create(self, language: Language, level: Level, topic_id: UUID) -> "PageService":
+        return PageService(
+            factory=self.factory,
+            audio_file_service=self.audio_file_service,
+            language=language,
+            level=level,
+            topic_id=topic_id,
+        )
+
+
 class PageService:
     def __init__(
         self,

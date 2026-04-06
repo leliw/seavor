@@ -21,8 +21,9 @@ class RepetitionScheduler:
             card = Card()
         else:
             evaluation = repetition_card.evaluations[-1]
-            card = repetition_card.get_card()        
-        card, _ = self.scheduler.review_card(card, evaluation.rating, evaluation.evaluated_at)
+            card = repetition_card.get_card()
+        if evaluation:
+            card, _ = self.scheduler.review_card(card, evaluation.rating, evaluation.evaluated_at)
         if isinstance(repetition_card, RepetitionCardCreate):
             ret = RepetitionCard.create(repetition_card, card)
         else:

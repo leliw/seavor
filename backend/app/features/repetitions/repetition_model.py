@@ -28,7 +28,7 @@ class RepetitionCardCreate(BaseModel):
     topic_id: UUID
     page_id: UUID
     type: PageType = PageType.DEFINITION_GUESS
-    evaluation: PageEvaluation
+    evaluation: PageEvaluation | None = None
 
 
 class RepetitionCardHeader(BaseModel):
@@ -79,13 +79,15 @@ class RepetitionCard(RepetitionCardHeader):
         self.due = card.due
 
     @classmethod
-    def create(cls, value_create: RepetitionCardCreate, card: Card) -> "RepetitionCard":
+    def create(cls, value_create: RepetitionCardCreate, card: Card | None = None) -> "RepetitionCard":
+        if not card:
+            card = Card()
         return cls(
             language=value_create.language,
             level=value_create.level,
             topic_id=value_create.topic_id,
             page_id=value_create.page_id,
-            evaluations=[value_create.evaluation],
+            evaluations=[value_create.evaluation] if value_create.evaluation else [],
             card_id=card.card_id,
             state=card.state,
             step=card.step,

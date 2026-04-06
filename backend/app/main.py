@@ -15,6 +15,7 @@ from routers import (
     letter_shuffles,
     native_topics,
     repetitions,
+    teacher,
     topics,
     user_settings,
     users,
@@ -47,7 +48,7 @@ app.include_router(letter_shuffles.router, prefix="/api/target-languages/{target
 app.include_router(repetitions.router, prefix="/api/repetitions")
 app.include_router(audio_files.router, prefix="/api/audio-files")
 app.include_router(images.router, prefix="/api/images")
-
+app.include_router(teacher.router, prefix="/api/teacher")
 
 @app.get("/api/ping")
 async def ping() -> None:

@@ -1,13 +1,15 @@
 from datetime import datetime, timezone
 from enum import StrEnum
+import logging
 from typing import List, Optional
 from uuid import UUID, uuid4
 
 from ampf.base import VersionedBaseModel
-
 from features.languages import Language
 from features.levels import Level
 from pydantic import BaseModel, ValidationError
+
+_log = logging.getLogger(__name__)
 
 
 class TopicType(StrEnum):
@@ -32,6 +34,7 @@ class TopicCreate(BaseModel):
     title: str
     description: str
     image_name: Optional[str] = None
+    private: bool = True
 
 
 class Topic_v1(BaseModel):
@@ -73,27 +76,30 @@ class Topic_v1(BaseModel):
 class Topic_v2(VersionedBaseModel):
     CURRENT_VERSION = 2
     id: UUID
+    username: str | None = None
     content_id: Optional[UUID] = None
     content_type: Optional[str] = None
     language: Language
     level: Level
-    type: TopicType
+    type: TopicType = TopicType.VOCABULARY
     title: str
     description: str
     image_name: Optional[str] = None
+    private: bool = True
     created_at: datetime
     updated_at: datetime
 
-
     @classmethod
-    def create(cls, value_create: TopicCreate) -> "Topic_v2":
+    def create(cls, value_create: TopicCreate, username: str | None = None) -> "Topic_v2":
         return cls(
             id=uuid4(),
+            username=username,
             language=value_create.language,
             level=value_create.level,
             type=value_create.type,
             title=value_create.title,
             description=value_create.description,
+            private=value_create.private,
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc),
         )
@@ -103,21 +109,26 @@ class Topic_v2(VersionedBaseModel):
         try:
             return cls.model_validate(data)
         except ValidationError:
-            v1 = Topic_v1.model_validate(data)
-            return cls(
-                v=v1.v,
-                id=v1.id,
-                content_id=v1.content_id,
-                content_type=v1.content_type,
-                language=v1.target_language,
-                level=v1.level,
-                type=v1.type,
-                title=v1.target_title,
-                description=v1.target_description,
-                image_name=v1.image_name,
-                created_at=v1.created_at,
-                updated_at=v1.updated_at,
-            )
+            try:
+                v1 = Topic_v1.model_validate(data)
+                return cls(
+                    v=v1.v,
+                    id=v1.id,
+                    content_id=v1.content_id,
+                    content_type=v1.content_type,
+                    language=v1.target_language,
+                    level=v1.level,
+                    type=v1.type,
+                    title=v1.target_title,
+                    description=v1.target_description,
+                    image_name=v1.image_name,
+                    private=False,
+                    created_at=v1.created_at,
+                    updated_at=v1.updated_at,
+                )
+            except ValidationError:
+                _log.error(f"Invalid data: {data}")
+                raise ValueError("Invalid data")
 
     def to_storage(self):
         if self.FORMAT_FLAGS.save_new_format:

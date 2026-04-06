@@ -12,7 +12,7 @@ from features.letter_shuffles.letter_shuffle_translation_model import (
     LetterShuffleSetTranslationCreate,
 )
 from features.levels import Level
-from features.topics.topic_model import Topic, TopicCreate
+from features.topics.topic_model import Topic, TopicCreate, TopicType
 
 from tests.unit.routers.test_letter_shuffles import letter_shuffle_set
 
@@ -27,6 +27,7 @@ def id(client: ApiTestClient) -> UUID:
 @pytest.fixture()
 def endpoint(client: ApiTestClient, id) -> str:
     return f"/api/target-languages/en/letter-shuffles/{id}/translations"
+
 
 def test_post_get_put_patch_delete_letter_shuffle_translation(client: ApiTestClient, id: UUID, endpoint: str):
     # Given: A set translation
@@ -62,11 +63,87 @@ def test_post_get_put_patch_delete_letter_shuffle_translation(client: ApiTestCli
         assert r[0].language == value.target_language_code
 
 
-def test_post_get(client: ApiTestClient, topic_create: TopicCreate):
+def test_post_get(client: ApiTestClient, headers: dict[str, str], topic_create: TopicCreate):
     # POST
-    r = client.post_typed("/api/topics", 200, Topic, json=topic_create)
+    r = client.post_typed("/api/topics", 200, Topic, json=topic_create, headers=headers)
     assert r.title == topic_create.title
 
     # GET
     r = client.get_typed(f"/api/topics/{r.language}/{topic_create.level}/{r.id}", 200, Topic)
     assert r.title == topic_create.title
+
+
+def test_get_topics_unauthorized(client: ApiTestClient, headers: dict[str, str]):
+    # Given: One public topic
+    pub = client.post_typed(
+        "/api/topics",
+        200,
+        Topic,
+        headers=headers,
+        json=TopicCreate(
+            language=Language.EN,
+            level=Level.A1,
+            title="Semi-modals",
+            description="Semi-modals vs. pure modal verbs",
+            type=TopicType.GRAMMAR,
+            private= False
+        ),
+    )
+    # And: One private topic
+    client.post_typed(
+        "/api/topics",
+        200,
+        Topic,
+        headers=headers,
+        json=TopicCreate(
+            language=Language.EN,
+            level=Level.A1,
+            title="To be",
+            description="To be or not to be",
+            type=TopicType.GRAMMAR,
+            private= True
+        ),
+    )
+    # When: Unauthorized user get all topics
+    t = client.get_typed_list("/api/topics/en/A1", 200, Topic)
+    # Then: Only public topic is returned
+    assert len(t) == 1
+    assert t[0].id == pub.id
+    assert t[0].title == pub.title
+    # And: Private topic is not
+
+def test_get_topics_authorized(client: ApiTestClient, headers: dict[str, str]):
+    # Given: One public topic
+    client.post_typed(
+        "/api/topics",
+        200,
+        Topic,
+        headers=headers,
+        json=TopicCreate(
+            language=Language.EN,
+            level=Level.A1,
+            title="Semi-modals",
+            description="Semi-modals vs. pure modal verbs",
+            type=TopicType.GRAMMAR,
+            private= False
+        ),
+    )
+    # And: One private topic
+    client.post_typed(
+        "/api/topics",
+        200,
+        Topic,
+        headers=headers,
+        json=TopicCreate(
+            language=Language.EN,
+            level=Level.A1,
+            title="To be",
+            description="To be or not to be",
+            type=TopicType.GRAMMAR,
+            private= True
+        ),
+    )
+    # When: Authorized user get all topics
+    t = client.get_typed_list("/api/topics/en/A1", 200, Topic, headers=headers)
+    # Then: Both topics are returned
+    assert len(t) == 2

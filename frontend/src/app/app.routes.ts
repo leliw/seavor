@@ -22,7 +22,7 @@ export const routes: Routes = [
         loadComponent: () => import('./core/learning-language-selector/learning-language-selector.component').then(m => m.LearningLanguageSelectorComponent)
     },
     {
-        path: 'topics',
+        path: 'topics', title: "Saevor",
         canActivate: [interfaceLanguageSelectedGuard, learningLanguageSelectedGuard],
         loadComponent: () => import("./core/navigation-bar/navigation-bar.component").then(m => m.NavigationBarComponent),
         children: [
@@ -56,4 +56,9 @@ export const routes: Routes = [
 
         ]
     },
+    { 
+        path: "teacher/add-page", title: "Add new card",
+        canActivate: [interfaceLanguageSelectedGuard, learningLanguageSelectedGuard, authGuard],
+        loadComponent: () => import('./features/teacher/teacher-add-page/teacher-add-page.component').then(m => m.TeacherAddPageComponent)
+    }
 ];

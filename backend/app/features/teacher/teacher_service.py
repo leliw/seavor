@@ -17,9 +17,27 @@ from shared.prompts.prompt_executor import PromptExecutor
 from shared.prompts.prompt_service import PromptService
 
 
-class ExpressionAndDefintion(BaseModel):
+class ExpressionAndDefinition(BaseModel):
     expression: str
     definition: str
+
+
+class TeacherServiceFactory:
+    def __init__(
+        self,
+        prompt_service: PromptService,
+        ai_model: Optional[BaseAIModel] = None,
+    ):
+        self.prompt_service = prompt_service
+        self.ai_model = ai_model
+
+    def create(self, language: Language, level: Optional[Level] = None) -> "TeacherService":
+        return TeacherService(
+            prompt_service=self.prompt_service,
+            ai_model=self.ai_model,
+            language=language,
+            level=level,
+        )
 
 
 class TeacherService:
@@ -51,7 +69,7 @@ class TeacherService:
         )
         return ret
 
-    def create_definition_guess(self, theme: str, phrase: str, order: int) -> DefinitionGuessCreate:
+    def create_definition_guess(self, theme: str, phrase: str, order: int = 0) -> DefinitionGuessCreate:
         return PromptExecutor(self.ai_model, self.prompt_service).execute_typed(
             "create_definition_guess",
             DefinitionGuessCreate,
@@ -138,11 +156,11 @@ class TeacherService:
 
     def translate_expression_and_definition(
         self, native_language: Language, expression: str, definition: str
-    ) -> ExpressionAndDefintion:
+    ) -> ExpressionAndDefinition:
 
         return PromptExecutor(self.ai_model, self.prompt_service).execute_typed(
             "translate_expression_and_definition",
-            ExpressionAndDefintion,
+            ExpressionAndDefinition,
             language_name=self.language_name,
             level=self.level,
             native_language_name=LANGUAGE_NAMES[native_language],

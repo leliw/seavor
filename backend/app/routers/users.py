@@ -10,9 +10,8 @@ router = APIRouter(tags=["Users"], dependencies=[Depends(Authorize(Role.ADMIN))]
 
 
 @router.post("")
-async def create(user_service: UserServiceDep, user: User):
-    await user_service.create(user.to_db())
-    return user
+async def create(user_service: UserServiceDep, user: User) -> User:
+    return User.create_from_db(await user_service.create(user.to_db()))
 
 
 @router.get("")
@@ -26,8 +25,8 @@ async def get(user_service: UserServiceDep, username: str) -> User:
 
 
 @router.put("/{username}")
-async def update(user_service: UserServiceDep, username: str, user: User):
-    return await user_service.update(username, user.to_db())
+async def update(user_service: UserServiceDep, username: str, user: User) -> None:
+    await user_service.update(username, user.to_db())
 
 
 class PasswordDTO(BaseModel):
@@ -35,10 +34,10 @@ class PasswordDTO(BaseModel):
 
 
 @router.patch("/{username}/change-password")
-async def change_password(user_service: UserServiceDep, username: str, body: PasswordDTO):
+async def change_password(user_service: UserServiceDep, username: str, body: PasswordDTO) -> None:
     await user_service.patch(username, UserPatch(password=body.password))
 
 
 @router.delete("/{username}")
-async def delete(user_service: UserServiceDep, username: str):
+async def delete(user_service: UserServiceDep, username: str) -> None:
     await user_service.delete(username)
