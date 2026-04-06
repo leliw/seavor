@@ -1,5 +1,4 @@
 from typing import Any, Dict
-from uuid import UUID
 
 from features.languages import LANGUAGE_NAMES, Language
 from features.native_pages.native_page_model import (
@@ -13,24 +12,18 @@ from features.native_pages.native_page_model import (
 )
 from features.pages.definition_guess_model import DefinitionGuess
 from features.pages.page_base_model import PageType
-from features.pages.page_model import GapFillChoiceExercise, InfoPage
-from features.pages.page_service import PageService
+from features.pages.page_model import GapFillChoiceExercise, InfoPage, Page
 from haintech.ai import AITaskExecutor, BaseAIModel
-
 from shared.prompts.prompt_executor import PromptExecutor
 from shared.prompts.prompt_service import PromptService
 
 
 class NativePageTranslator:
-    def __init__(self, ai_model: BaseAIModel, prompt_service: PromptService, service: PageService):
+    def __init__(self, ai_model: BaseAIModel, prompt_service: PromptService):
         self.ai_model = ai_model
         self.prompt_executor = PromptExecutor(ai_model, prompt_service)
-        self.service = service
 
-    async def translate_page_to_native(
-        self, language: Language, native_language: Language, page_id: UUID
-    ) -> NativePage:
-        page = await self.service.get(page_id)
+    async def translate_page_to_native(self, language: Language, native_language: Language, page: Page) -> NativePage:
         match page.type:
             case PageType.GAP_FILL_CHOICE:
                 native = await self._translate(language, native_language, page)
