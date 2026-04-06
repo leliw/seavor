@@ -33,6 +33,8 @@ export class BottomNavComponent {
   showCheck = input(false);
   showHint = input(false);
   showTranslate = input(false);
+  showAdd = input(false);
+
 
   disabledHint = input(false);
   disabledTranslate = input(false);

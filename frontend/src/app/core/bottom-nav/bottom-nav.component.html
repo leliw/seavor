@@ -56,6 +56,12 @@
             <span matListItemTitle i18n>Settings</span>
         </a>
         }
+        @if (showAdd() && authService.isAuthenticated()) {
+        <a mat-list-item routerLink="/teacher/add-page" i18n-matTooltip matTooltip="Add new card">
+            <mat-icon matListItemIcon>note_add</mat-icon>
+            <span matListItemTitle i18n>Add</span>
+        </a>
+        }
         @if (authService.isAuthenticated()) {
         <a mat-list-item (click)="logout()">
             <mat-icon matListItemIcon>logout</mat-icon>

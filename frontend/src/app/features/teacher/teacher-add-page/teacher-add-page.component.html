@@ -1,0 +1,19 @@
+<mat-toolbar>
+    <button matIconButton (click)="onClose()">
+        <mat-icon>close</mat-icon>
+    </button>
+    <span i18n>Add new card</span>
+    <span class="flex-spacer"></span>
+    <button mat-button color="primary" type="button" (click)="onSubmit()" [disabled]="!form.valid" i18n>Save</button>
+</mat-toolbar>
+<form class="full-screen-container" [formGroup]="form" novalidate (ngSubmit)="onSubmit()">
+    <mat-form-field class="full-width" appearance="outline">
+        <mat-label i18n>Content</mat-label>
+        <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="10" formControlName="phrase" 
+            cdkAutosizeMaxRows="50"></textarea>
+        @if (form.controls['phrase'].hasError('required')) {
+        <mat-error i18n>Content is <strong>required</strong></mat-error>
+        }
+    </mat-form-field>
+
+</form>
