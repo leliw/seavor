@@ -92,6 +92,7 @@ class NativeTopic_v2(Topic, NativeTopicBase, VersionedBaseModel):
             native_title=v1.native_title,
             native_description=v1.native_description,
             image_name=v1.image_name,
+            private=False,
             created_at=v1.created_at,
             updated_at=v1.updated_at,
         )

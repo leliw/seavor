@@ -16,6 +16,7 @@ import { AuthStateService } from '../../core/auth/auth-state.service';
     styleUrl: './definition-guess.component.scss',
 })
 export class DefinitionGuessComponent implements OnDestroy {
+    level = input.required<string>();
     topicId = input.required<string>();
     id = input.required<string>();
     private service = inject(DefinitionGuessService);
@@ -41,9 +42,10 @@ export class DefinitionGuessComponent implements OnDestroy {
 
     constructor() {
         effect(() => {
+            const level = this.level();
             const topicId = this.topicId();
             const id = this.id();
-            this.service.get(topicId, id).subscribe(e => {
+            this.service.get(level, topicId, id).subscribe(e => {
                 this.answer = null;
                 this.exercise = e;
                 const sentenceIndex = Math.floor(Math.random() * this.exercise.sentences.length)

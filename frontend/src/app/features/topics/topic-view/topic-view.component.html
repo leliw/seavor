@@ -3,7 +3,7 @@
 <app-gap-fill-choice [topicId]="topicId" [id]="pages[page_no].id" (previousPage)="onPreviousPage()"
     (nextPage)="onNextPage()"></app-gap-fill-choice>
 } @else if (pages[page_no].type=="definition-guess") {
-    <app-definition-guess [topicId]="topicId" [id]="pages[page_no].id" (previousPage)="onPreviousPage()"
+    <app-definition-guess [topicId]="topicId" level="B1" [id]="pages[page_no].id" (previousPage)="onPreviousPage()"
     (nextPage)="onNextPage()"></app-definition-guess>
 } @else if (pages[page_no].type=="info") {
     <app-info-page [topicId]="topicId" [id]="pages[page_no].id" (previousPage)="onPreviousPage()"
