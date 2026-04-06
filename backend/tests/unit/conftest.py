@@ -8,6 +8,7 @@ from ampf.auth import AuthConfig, DefaultUser, TokenExp, Tokens
 from ampf.base import BaseAsyncFactory, BlobCreate
 from ampf.testing import ApiTestClient
 from app_config import AppConfig
+from core.users.user_model import User
 from dependencies import get_tts_service, lifespan
 from fastapi import FastAPI
 from features.languages import Language
@@ -69,6 +70,7 @@ def topic_create() -> TopicCreate:
         title="Semi-modals",
         description="Semi-modals vs. pure modal verbs",
         type=TopicType.GRAMMAR,
+        private=False,
     )
 
 
@@ -88,4 +90,11 @@ async def tokens(factory: BaseAsyncFactory, client: ApiTestClient) -> Tokens:
 
 @pytest.fixture
 def headers(tokens: Tokens) -> dict[str, str]:
+    return {"Authorization": f"Bearer {tokens.access_token}"}
+
+@pytest.fixture
+def second_user_headers(client: ApiTestClient, headers: dict[str, str]) -> dict[str, str]:
+    user = User(username="test2", email="tes2@test.com", password="test2")
+    client.post("/api/users", 200, json=dict(user), headers=headers)
+    tokens = client.post_typed("/api/login", 200, Tokens, data={"username": "test2", "password": "test2"})
     return {"Authorization": f"Bearer {tokens.access_token}"}
