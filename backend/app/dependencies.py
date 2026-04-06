@@ -16,16 +16,19 @@ from fastapi.security import OAuth2PasswordBearer
 from features.languages import Language
 from features.levels import Level
 from features.native_pages.native_page_model import NativeGapFillChoiceExercise_v2, NativeInfoPage_v2
+from features.native_pages.native_page_service import NativePageService, NativePageServiceFactory
 from features.native_pages.native_page_translator import NativePageTranslator
 from features.native_topics.native_topic_service import NativeTopicService
 from features.native_topics.native_topic_translator import NativeTopicTranslator
 from features.pages.page_model import GapFillChoiceExercise_v2, InfoPage_v2
-from features.pages.page_service import PageService
+from features.pages.page_service import PageService, PageServiceFactory
 from features.repetitions.repetition_service import RepetitionService
+from features.teacher.teacher_orchestrator import TeacherOrchestrator
+from features.teacher.teacher_service import TeacherServiceFactory
 from features.topics.topic_model import Topic, Topic_v2
 from features.topics.topic_service import TopicService
 from haintech.ai import BaseAIModel, BaseImageGenerator
-from haintech.ai.google_genai import GenAIImageGenerator
+from haintech.ai.google_genai import GenAIImageGenerator, GoogleAIModel
 from integrations.gtts.gtts_service import GttsService
 from shared.audio_files.audio_file_service import AudioFileService
 from shared.images.image_service import ImageService
@@ -71,7 +74,7 @@ def get_app_config(app_state: AppStateDep) -> AppConfig:
     return app_state.config
 
 
-ConfigDep = Annotated[AppConfig, Depends(get_app_config)]
+AppConfigDep = Annotated[AppConfig, Depends(get_app_config)]
 
 
 def get_user_service(app_state: AppStateDep) -> UserService:
@@ -140,8 +143,6 @@ NativeTopicServiceDep = Annotated[NativeTopicService, Depends(get_native_topic_s
 
 
 def get_translator_ai_model(app_state: AppStateDep):
-    from haintech.ai.google_genai import GoogleAIModel
-
     return GoogleAIModel(model_name="gemini-2.5-flash-lite", parameters={"temperature": 0.0})
 
 
@@ -157,14 +158,20 @@ def get_native_topic_translator(
 NativeTopicTranslatorDep = Annotated[NativeTopicTranslator, Depends(get_native_topic_translator)]
 
 
+def get_page_service_factory(app_state: AppStateDep, audio_file_service: AudioFileServiceDep) -> PageServiceFactory:
+    return PageServiceFactory(app_state.factory, audio_file_service)
+
+
+PageServiceFactoryDep = Annotated[PageServiceFactory, Depends(get_page_service_factory)]
+
+
 def get_page_service(
-    app_state: AppStateDep,
-    audio_file_service: AudioFileServiceDep,
+    page_service_factory: PageServiceFactoryDep,
     target_language: Language,
     level: Level,
     topic_id: UUID,
 ):
-    return PageService(app_state.factory, audio_file_service, target_language, level, topic_id)
+    return page_service_factory.create(target_language, level, topic_id)
 
 
 PageServiceDep = Annotated[PageService, Depends(get_page_service)]
@@ -240,9 +247,9 @@ RepetitionServiceDep = Annotated[RepetitionService, Depends(get_repetition_servi
 
 
 def get_native_topic_page_translator(
-    translator_ai_model: TranslatorAIModelDep, prompt_service: PromptServiceDep, page_service: PageServiceDep
+    translator_ai_model: TranslatorAIModelDep, prompt_service: PromptServiceDep
 ) -> NativePageTranslator:
-    return NativePageTranslator(translator_ai_model, prompt_service, page_service)
+    return NativePageTranslator(translator_ai_model, prompt_service)
 
 
 NativePageTranslatorDep = Annotated[NativePageTranslator, Depends(get_native_topic_page_translator)]
@@ -260,3 +267,60 @@ async def get_topic_for_user(
 
 
 AuthorizedTopicDep = Annotated[Topic, Depends(get_topic_for_user)]
+
+
+def get_native_page_service_factory(
+    app_state: AppStateDep, audio_file_service: AudioFileServiceDep
+) -> NativePageServiceFactory:
+    return NativePageServiceFactory(app_state.factory, audio_file_service)
+
+
+NativePageServiceFactoryDep = Annotated[NativePageServiceFactory, Depends(get_native_page_service_factory)]
+
+
+def get_native_page_service(
+    native_page_service_factory: NativePageServiceFactoryDep,
+    target_language: Language,
+    level: Level,
+    native_language: Language,
+    topic_id: UUID,
+):
+    return native_page_service_factory.create(target_language, level, native_language, topic_id)
+
+
+NativePageServiceDep = Annotated[NativePageService, Depends(get_native_page_service)]
+
+
+def get_teacher_service_factory(prompt_service: PromptServiceDep) -> TeacherServiceFactory:
+    return TeacherServiceFactory(
+        prompt_service=prompt_service,
+        ai_model=GoogleAIModel(parameters={"temperature": 0.1}),
+    )
+
+
+TeacherServiceFactoryDep = Annotated[TeacherServiceFactory, Depends(get_teacher_service_factory)]
+
+
+def get_teacher_orchestrator(
+    topic_service: TopicServiceDep,
+    topic_translator: NativeTopicTranslatorDep,
+    native_topic_service: NativeTopicServiceDep,
+    page_service_factory: PageServiceFactoryDep,
+    page_translator: NativePageTranslatorDep,
+    native_page_service_factory: NativePageServiceFactoryDep,
+    teacher_service_factory: TeacherServiceFactoryDep,
+    repetition_service: RepetitionServiceDep,
+) -> TeacherOrchestrator:
+    return TeacherOrchestrator(
+        topic_service,
+        topic_translator,
+        native_topic_service,
+        page_service_factory,
+        page_translator,
+        native_page_service_factory,
+        teacher_service_factory,
+        repetition_service,
+    )
+
+
+TeacherOrchestratorDep = Annotated[TeacherOrchestrator, Depends(get_teacher_orchestrator)]
