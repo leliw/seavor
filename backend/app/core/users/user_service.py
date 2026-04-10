@@ -23,6 +23,11 @@ class UserService(BaseUserService[UserInDB]):
     async def get_all(self) -> list[UserHeader]:
         return [UserHeader(**i.model_dump(by_alias=True)) async for i in self.storage.get_all()]
 
+    async def create(self, user: UserInDB) -> UserInDB:
+        # TODO: Fix it in AMPF
+        await super().create(user)
+        return user
+    
     async def get(self, key: str) -> UserInDB:
         return await self.storage.get(key)
 
