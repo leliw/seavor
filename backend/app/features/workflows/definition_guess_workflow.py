@@ -46,7 +46,7 @@ class DefinitionGuessWorkflow(BaseWorkflow):
 
     async def _generate_definition_guess(self, snapshot: DefinitionGuessSnapshotTopicCreated) -> DefinitionGuessCreate:
         teacher_service = self.teacher_service_factory.create(snapshot.language, snapshot.level)
-        return teacher_service.create_definition_guess(snapshot.topic_title, snapshot.phrase)
+        return await teacher_service.create_definition_guess(snapshot.topic_title, snapshot.phrase)
 
     async def _create_page_with_translation(
         self, snapshot: DefinitionGuessSnapshotTopicCreated, content: DefinitionGuessCreate

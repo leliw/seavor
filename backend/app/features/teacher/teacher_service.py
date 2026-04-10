@@ -63,8 +63,8 @@ class TeacherService:
         )
         return ret
 
-    def create_definition_guess(self, theme: str, phrase: str, order: int = 0) -> DefinitionGuessCreate:
-        return PromptExecutor(self.ai_model, self.prompt_service).execute_typed(
+    async def create_definition_guess(self, theme: str, phrase: str, order: int = 0) -> DefinitionGuessCreate:
+        return await PromptExecutor(self.ai_model, self.prompt_service).execute_typed_async(
             "create_definition_guess",
             DefinitionGuessCreate,
             language=self.language,
@@ -200,4 +200,3 @@ class TeacherService:
             description=topic_description,
             type=type,
         )
- 
