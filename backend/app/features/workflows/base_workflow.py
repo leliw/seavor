@@ -24,6 +24,25 @@ class BaseWorkflowSnapshot(BaseModel):
     username: str
 
 
+class BaseWorkflowTopicSnapshot(BaseWorkflowSnapshot):
+    topic_id: UUID | None = None
+
+    @property
+    def required_topic_id(self) -> UUID:
+        if self.topic_id is None:
+            raise RuntimeError("topic_id is required for this operation")
+        return self.topic_id
+
+class BaseWorkflowPageSnapshot(BaseWorkflowTopicSnapshot):
+    page_id: UUID | None = None
+
+    @property
+    def required_page_id(self) -> UUID:
+        if self.page_id is None:
+            raise RuntimeError("page_id is required for this operation")
+        return self.page_id
+
+
 class BaseWorkflow:
     def __init__(
         self,
@@ -61,13 +80,11 @@ class BaseWorkflow:
             )
             return await self.native_topic_service.create(native_topic)
 
-    async def _create_repetition_card(
-        self, snapshot: BaseWorkflowSnapshot, topic_id: UUID, page_id: UUID
-    ) -> RepetitionCard:
+    async def _create_repetition_card(self, snapshot: BaseWorkflowPageSnapshot) -> RepetitionCard:
         repetition_card_create = RepetitionCardCreate(
             language=snapshot.language,
             level=snapshot.level,
-            topic_id=topic_id,
-            page_id=page_id,
+            topic_id=snapshot.required_topic_id,
+            page_id=snapshot.required_page_id,
         )
         return await self.repetition_service.create(repetition_card_create)
