@@ -23,7 +23,7 @@ from features.native_topics.native_topic_translator import NativeTopicTranslator
 from features.pages.page_model import GapFillChoiceExercise_v2, InfoPage_v2
 from features.pages.page_service import PageService, PageServiceFactory
 from features.repetitions.repetition_service import RepetitionService
-from features.teacher.teacher_orchestrator import TeacherOrchestrator
+from features.workflows.workflow_factory import WorkflowFactory
 from features.teacher.teacher_service import TeacherServiceFactory
 from features.topics.topic_model import Topic, Topic_v2
 from features.topics.topic_service import TopicService
@@ -301,7 +301,7 @@ def get_teacher_service_factory(prompt_service: PromptServiceDep) -> TeacherServ
 TeacherServiceFactoryDep = Annotated[TeacherServiceFactory, Depends(get_teacher_service_factory)]
 
 
-def get_teacher_orchestrator(
+def get_workflow_factory(
     topic_service: TopicServiceDep,
     topic_translator: NativeTopicTranslatorDep,
     native_topic_service: NativeTopicServiceDep,
@@ -310,8 +310,8 @@ def get_teacher_orchestrator(
     native_page_service_factory: NativePageServiceFactoryDep,
     teacher_service_factory: TeacherServiceFactoryDep,
     repetition_service: RepetitionServiceDep,
-) -> TeacherOrchestrator:
-    return TeacherOrchestrator(
+) -> WorkflowFactory:
+    return WorkflowFactory(
         topic_service,
         topic_translator,
         native_topic_service,
@@ -323,4 +323,4 @@ def get_teacher_orchestrator(
     )
 
 
-TeacherOrchestratorDep = Annotated[TeacherOrchestrator, Depends(get_teacher_orchestrator)]
+WorkflowFactoryDep = Annotated[WorkflowFactory, Depends(get_workflow_factory)]
