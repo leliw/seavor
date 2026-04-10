@@ -12,6 +12,7 @@ from features.pages.page_service import PageServiceFactory
 from features.repetitions.repetition_model import RepetitionCard, RepetitionCardCreate
 from features.repetitions.repetition_service import RepetitionService
 from features.teacher.teacher_service import TeacherServiceFactory
+from features.teacher.verifier_service import VerifierService
 from features.topics.topic_model import Topic
 from features.topics.topic_service import TopicService
 from pydantic import BaseModel
@@ -33,6 +34,7 @@ class BaseWorkflowTopicSnapshot(BaseWorkflowSnapshot):
             raise RuntimeError("topic_id is required for this operation")
         return self.topic_id
 
+
 class BaseWorkflowPageSnapshot(BaseWorkflowTopicSnapshot):
     page_id: UUID | None = None
 
@@ -53,16 +55,18 @@ class BaseWorkflow:
         page_translator: NativePageTranslator,
         native_page_service_factory: NativePageServiceFactory,
         teacher_service_factory: TeacherServiceFactory,
+        verifier_service: VerifierService,
         repetition_service: RepetitionService,
     ):
         self.topic_service = topic_service
         self.topic_translator = topic_translator
         self.native_topic_service = native_topic_service
-        self.repetition_service = repetition_service
         self.page_service_factory = page_service_factory
         self.page_translator = page_translator
         self.native_page_service_factory = native_page_service_factory
         self.teacher_service_factory = teacher_service_factory
+        self.verifier_service = verifier_service
+        self.repetition_service = repetition_service
 
     async def _ensure_topic(self, snapshot: BaseWorkflowSnapshot) -> Topic:
         return await self.topic_service.get_or_create_default_topic(

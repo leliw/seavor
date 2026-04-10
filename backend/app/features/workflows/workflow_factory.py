@@ -7,6 +7,7 @@ from features.native_topics.native_topic_translator import NativeTopicTranslator
 from features.pages.page_service import PageServiceFactory
 from features.repetitions.repetition_service import RepetitionService
 from features.teacher.teacher_service import TeacherServiceFactory
+from features.teacher.verifier_service import VerifierService
 from features.workflows.definition_guess_workflow import DefinitionGuessWorkflow
 from features.topics.topic_service import TopicService
 
@@ -20,6 +21,7 @@ class WorkflowFactory:
     page_translator: NativePageTranslator
     native_page_service_factory: NativePageServiceFactory
     teacher_service_factory: TeacherServiceFactory
+    verifier_service: VerifierService
     repetition_service: RepetitionService
 
     def create_definition_guess_workflow(self) -> DefinitionGuessWorkflow:
