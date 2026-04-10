@@ -5,7 +5,7 @@ from features.pages.page_model import GapFillChoiceExerciseCreate, InfoPageCreat
 from features.teacher.teacher_service import TeacherService
 from haintech.testing import MockerAIModel
 from features.topics.topic_model import TopicType
-from shared.prompts.prompt_service import PromptService
+from haintech.ai.prompts.prompt_service import PromptService
 
 
 @pytest.fixture
@@ -45,7 +45,7 @@ def test_get_word_definition(teacher_service: TeacherService, mocker_ai_model: M
 def test_create_gap_fill_choice_exercises(teacher_service: TeacherService, mocker_ai_model: MockerAIModel):
     mocker_ai_model.add(
         message_containing="Semi-modal verbs",
-        response="""[{
+        response="""{ "list":[{
         "language": "en",
         "level": "A2",
         "order": 1,
@@ -58,7 +58,7 @@ def test_create_gap_fill_choice_exercises(teacher_service: TeacherService, mocke
             "used to": "This refers to a past habit or state that no longer exists, which isn't applicable here as driving on the left is a current rule.",
             "ought to": "This suggests a recommendation or moral duty, but driving on the left is a legal requirement, not just a suggestion or a matter of good manners."
         }
-    }]""",
+    }]}""",
     )
     # Given: A teacher service
     assert teacher_service is not None
@@ -74,14 +74,14 @@ def test_create_gap_fill_choice_exercises(teacher_service: TeacherService, mocke
 def test_create_info_pages(teacher_service: TeacherService, mocker_ai_model: MockerAIModel):
     mocker_ai_model.add(
         message_containing="Verb to be (am / is / are)",
-        response="""[  {
+        response="""{ "list": [  {
         "language": "en",
         "level": "A1",
         "order": 1,
         "type": "info",
         "title": "To Be or Not To Be?",
         "content": "Hello there! Today, we learn about 'to be'. It's a very important verb in English!"
-    }]""",
+    }]}""",
     )
     # Given: A teacher service
     assert teacher_service is not None

@@ -3,7 +3,7 @@ from enum import StrEnum
 from features.pages.definition_guess_model import DefinitionGuessCreate
 from features.pages.page_base_model import PageType
 from pydantic import BaseModel
-from shared.prompts.prompt_model import BaseOutput
+from haintech.ai.prompts.prompt_model import BaseOutput
 
 
 class Level(StrEnum):

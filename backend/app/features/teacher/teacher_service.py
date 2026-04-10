@@ -13,8 +13,7 @@ from features.teacher.teacher_model import ExpressionAndDefinition
 from features.topics.topic_model import TopicCreate, TopicType
 from haintech.ai import AITaskExecutor, BaseAIModel
 from haintech.ai.open_ai import OpenAIModel
-from shared.prompts.prompt_executor import PromptExecutor
-from shared.prompts.prompt_service import PromptService
+from haintech.ai.prompts import PromptExecutor, PromptService
 
 
 class TeacherServiceFactory:
@@ -190,8 +189,7 @@ class TeacherService:
             topic_type=type,
             topic_name=topic_name,
         )
-        assert ret.content
-        return ret.content.strip()
+        return ret.strip()
 
     def create_topic_create(self, level: Level, type: TopicType, topic_name: str) -> TopicCreate:
         topic_description = self.create_topic_description(level, type, topic_name)
@@ -202,3 +200,4 @@ class TeacherService:
             description=topic_description,
             type=type,
         )
+ 

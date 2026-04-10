@@ -32,7 +32,7 @@ from haintech.ai.google_genai import GenAIImageGenerator, GoogleAIModel
 from integrations.gtts.gtts_service import GttsService
 from shared.audio_files.audio_file_service import AudioFileService
 from shared.images.image_service import ImageService
-from shared.prompts.prompt_service import PromptService
+from haintech.ai.prompts.prompt_service import PromptService
 
 load_dotenv()
 
