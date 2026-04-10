@@ -64,7 +64,7 @@ def test_create_gap_fill_choice_exercises(teacher_service: TeacherService, mocke
     assert teacher_service is not None
     # When: Create excercises
 
-    pages = teacher_service.create_gap_fill_choice_excercises("Semi-modal verbs", 1)
+    pages = teacher_service.create_gap_fill_choice_exercises("Semi-modal verbs", 1)
     # Then: Excercises are created
     assert len(pages) > 0
     assert isinstance(pages, list)

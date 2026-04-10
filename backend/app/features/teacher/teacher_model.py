@@ -8,3 +8,8 @@ class TeacherDefinitionGuessCreate(BaseModel):
     level: Level
     phrase: str
     native_language: Language = Language.PL
+
+
+class ExpressionAndDefinition(BaseModel):
+    expression: str
+    definition: str
