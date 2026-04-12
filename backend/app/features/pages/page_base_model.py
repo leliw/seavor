@@ -33,6 +33,9 @@ class BasePageCreate(BaseModel):
     order: int = 0
     type: PageType  # literal below will override this
 
+    def model_post_init(self, __context):
+        self.__pydantic_fields_set__.add("type")
+
 
 class BasePage_v1(BaseModel):
     """Common fields for ALL page types"""
@@ -61,5 +64,8 @@ class BasePage_v2(VersionedBaseModel):
     created_at: datetime
     updated_at: datetime
 
+    def model_post_init(self, __context):
+        super().model_post_init(__context)
+        self.__pydantic_fields_set__.add("type")
 
 BasePage = BasePage_v2

@@ -14,8 +14,7 @@ from features.pages.definition_guess_model import DefinitionGuess
 from features.pages.page_base_model import PageType
 from features.pages.page_model import GapFillChoiceExercise, InfoPage, Page
 from haintech.ai import AITaskExecutor, BaseAIModel
-from shared.prompts.prompt_executor import PromptExecutor
-from shared.prompts.prompt_service import PromptService
+from haintech.ai.prompts.prompt_executor import PromptExecutor, PromptService
 
 
 class NativePageTranslator:

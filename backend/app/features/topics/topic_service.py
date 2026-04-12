@@ -48,15 +48,14 @@ class TopicService:
     async def get_or_create_default_topic(self, language: Language, level: Level, username: str) -> Topic:
         storage = self._get_storage(language, level)
         async for topic in storage.where("username", "==", username).get_all():
-            if topic.private and topic.username != username and topic.title == "Default":
-                continue
-            return topic
+            if topic.private and topic.title == "Default":
+                return topic
         value = Topic.create(
             TopicCreate(
                 language=language,
                 level=level,
                 title="Default",
-                description="Various words",
+                description="Various words and phrases",
                 type=TopicType.VOCABULARY,
                 private=True,
             ),

@@ -23,7 +23,8 @@ from features.native_topics.native_topic_translator import NativeTopicTranslator
 from features.pages.page_model import GapFillChoiceExercise_v2, InfoPage_v2
 from features.pages.page_service import PageService, PageServiceFactory
 from features.repetitions.repetition_service import RepetitionService
-from features.teacher.teacher_orchestrator import TeacherOrchestrator
+from features.teacher.verifier_service import VerifierService
+from features.workflows.workflow_factory import WorkflowFactory
 from features.teacher.teacher_service import TeacherServiceFactory
 from features.topics.topic_model import Topic, Topic_v2
 from features.topics.topic_service import TopicService
@@ -32,7 +33,7 @@ from haintech.ai.google_genai import GenAIImageGenerator, GoogleAIModel
 from integrations.gtts.gtts_service import GttsService
 from shared.audio_files.audio_file_service import AudioFileService
 from shared.images.image_service import ImageService
-from shared.prompts.prompt_service import PromptService
+from haintech.ai.prompts.prompt_service import PromptService
 
 load_dotenv()
 
@@ -301,7 +302,17 @@ def get_teacher_service_factory(prompt_service: PromptServiceDep) -> TeacherServ
 TeacherServiceFactoryDep = Annotated[TeacherServiceFactory, Depends(get_teacher_service_factory)]
 
 
-def get_teacher_orchestrator(
+def get_verifier_service(prompt_service: PromptServiceDep) -> VerifierService:
+    return VerifierService(
+        prompt_service=prompt_service,
+        ai_model=GoogleAIModel(parameters={"temperature": 0.1}),
+    )
+
+
+VerifierServiceDep = Annotated[VerifierService, Depends(get_verifier_service)]
+
+
+def get_workflow_factory(
     topic_service: TopicServiceDep,
     topic_translator: NativeTopicTranslatorDep,
     native_topic_service: NativeTopicServiceDep,
@@ -309,9 +320,10 @@ def get_teacher_orchestrator(
     page_translator: NativePageTranslatorDep,
     native_page_service_factory: NativePageServiceFactoryDep,
     teacher_service_factory: TeacherServiceFactoryDep,
+    verifier_service: VerifierServiceDep,
     repetition_service: RepetitionServiceDep,
-) -> TeacherOrchestrator:
-    return TeacherOrchestrator(
+) -> WorkflowFactory:
+    return WorkflowFactory(
         topic_service,
         topic_translator,
         native_topic_service,
@@ -319,8 +331,9 @@ def get_teacher_orchestrator(
         page_translator,
         native_page_service_factory,
         teacher_service_factory,
+        verifier_service,
         repetition_service,
     )
 
 
-TeacherOrchestratorDep = Annotated[TeacherOrchestrator, Depends(get_teacher_orchestrator)]
+WorkflowFactoryDep = Annotated[WorkflowFactory, Depends(get_workflow_factory)]

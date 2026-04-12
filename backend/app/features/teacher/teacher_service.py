@@ -9,17 +9,11 @@ from features.letter_shuffles.letter_shuffle_translation_model import (
 from features.levels import Level
 from features.pages.definition_guess_model import DefinitionGuessCreate
 from features.pages.page_model import GapFillChoiceExerciseCreate, InfoPageCreate
+from features.teacher.teacher_model import ExpressionAndDefinition
 from features.topics.topic_model import TopicCreate, TopicType
 from haintech.ai import AITaskExecutor, BaseAIModel
 from haintech.ai.open_ai import OpenAIModel
-from pydantic import BaseModel
-from shared.prompts.prompt_executor import PromptExecutor
-from shared.prompts.prompt_service import PromptService
-
-
-class ExpressionAndDefinition(BaseModel):
-    expression: str
-    definition: str
+from haintech.ai.prompts import PromptExecutor, PromptService
 
 
 class TeacherServiceFactory:
@@ -69,8 +63,8 @@ class TeacherService:
         )
         return ret
 
-    def create_definition_guess(self, theme: str, phrase: str, order: int = 0) -> DefinitionGuessCreate:
-        return PromptExecutor(self.ai_model, self.prompt_service).execute_typed(
+    async def create_definition_guess(self, theme: str, phrase: str, order: int = 0) -> DefinitionGuessCreate:
+        return await PromptExecutor(self.ai_model, self.prompt_service).execute_typed_async(
             "create_definition_guess",
             DefinitionGuessCreate,
             language=self.language,
@@ -168,7 +162,7 @@ class TeacherService:
             definition=definition,
         )
 
-    def create_gap_fill_choice_excercises(self, theme: str, count: int = 10) -> List[GapFillChoiceExerciseCreate]:
+    def create_gap_fill_choice_exercises(self, theme: str, count: int = 10) -> List[GapFillChoiceExerciseCreate]:
         return PromptExecutor(self.ai_model, self.prompt_service).execute_typed_list(
             "create_gap_fill_choice",
             GapFillChoiceExerciseCreate,
@@ -195,8 +189,7 @@ class TeacherService:
             topic_type=type,
             topic_name=topic_name,
         )
-        assert ret.content
-        return ret.content.strip()
+        return ret.strip()
 
     def create_topic_create(self, level: Level, type: TopicType, topic_name: str) -> TopicCreate:
         topic_description = self.create_topic_description(level, type, topic_name)

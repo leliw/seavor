@@ -7,7 +7,7 @@ from core.users.user_model import UserInDB
 from core.users.user_service import UserService
 from features.native_topics.native_topic_service import NativeTopicService
 from features.topics.topic_service import TopicService
-from shared.prompts.prompt_service import PromptService
+from haintech.ai.prompts.prompt_service import PromptService
 from storage_def import STORAGE_DEF
 
 _log = logging.getLogger(__name__)
