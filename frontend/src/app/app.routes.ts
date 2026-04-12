@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-import { interfaceLanguageSelectedGuard, learningLanguageSelectedGuard } from './core/language.service';
 import { authGuard } from './core/auth/auth.guard';
+import { interfaceLanguageSelectedGuard, learningLanguageSelectedGuard } from './core/language.service';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'topics', pathMatch: 'full' },
@@ -24,13 +24,7 @@ export const routes: Routes = [
     {
         path: 'topics', title: "Saevor",
         canActivate: [interfaceLanguageSelectedGuard, learningLanguageSelectedGuard],
-        loadComponent: () => import("./core/navigation-bar/navigation-bar.component").then(m => m.NavigationBarComponent),
-        children: [
-            {
-                path: '',
-                loadComponent: () => import('./features/topics/topic-list/topic-list.component').then(m => m.TopicListComponent)
-            }
-        ]
+        loadComponent: () => import('./features/topics/topic-list/topic-list.component').then(m => m.TopicListComponent)
     },
     {
         path: 'repetitions',
@@ -56,7 +50,7 @@ export const routes: Routes = [
 
         ]
     },
-    { 
+    {
         path: "teacher/add-page", title: "Add new card",
         canActivate: [interfaceLanguageSelectedGuard, learningLanguageSelectedGuard, authGuard],
         loadComponent: () => import('./features/teacher/teacher-add-page/teacher-add-page.component').then(m => m.TeacherAddPageComponent)

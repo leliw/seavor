@@ -6,6 +6,7 @@ import { RouterModule } from "@angular/router";
 import { Topic, TopicService } from '../topic.service';
 import { NgOptimizedImage } from '@angular/common';
 import { MatTooltip } from "@angular/material/tooltip";
+import { BottomNavComponent } from '../../../core/bottom-nav/bottom-nav.component';
 
 
 @Component({
@@ -16,7 +17,8 @@ import { MatTooltip } from "@angular/material/tooltip";
     MatButtonModule,
     MatIconModule,
     RouterModule,
-    MatTooltip
+    MatTooltip,
+    BottomNavComponent,
 ],
     templateUrl: './topic-list.component.html',
     styleUrl: './topic-list.component.scss',
