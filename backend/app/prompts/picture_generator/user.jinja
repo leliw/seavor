@@ -1,0 +1,25 @@
+{# user.jinja #}
+Please generate an image prompt for the following language learning exercise based on the provided context.
+
+### CONTEXT & TARGET AUDIENCE:
+- **Target Language**: {{ language | default('Not specified') }}
+- **Student Proficiency Level**: {{ level | default('Not specified') }}
+
+### EXERCISE CONTEXT:
+{% if topic is defined and topic %}
+- **Topic**: {{ topic.title }}
+{% endif %}
+{% if topic_description is defined and topic_description %}
+- **Topic Description**: {{ topic.description }}
+{% endif %}
+
+### TARGET VOCABULARY (DO NOT REVEAL IN IMAGE):
+- **Word/Phrase to Guess (Answer)**: {{ content.phrase }}
+- **Definition/Clue**: {{ content.definition }}
+
+### INSTRUCTIONS:
+1. Analyze the target word/phrase ("{{ content.phrase }}") and its definition.
+2. Determine if the concept is highly abstract. If it cannot be clearly and unambiguously illustrated, return `{"image_prompt": null}`.
+3. If it can be illustrated, create a detailed, vivid image generation prompt that captures the essence of the definition and fits the topic.
+4. Ensure the prompt explicitly forbids any text, letters, or words from appearing in the image.
+5. Return ONLY the JSON object.

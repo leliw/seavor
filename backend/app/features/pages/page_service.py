@@ -6,7 +6,7 @@ from uuid import UUID
 from ampf.base import BaseAsyncFactory
 from features.languages import Language
 from features.levels import Level
-from features.pages.definition_guess_model import DefinitionGuess, DefinitionGuessCreate
+from features.pages.definition_guess_model import DefinitionGuess, DefinitionGuessCreate, DefinitionGuessPatch
 from features.pages.page_base_model import PageHeader, PageType
 from features.pages.page_model import (
     GapFillChoiceExercise,
@@ -164,3 +164,13 @@ class PageService:
                 #     *[self.audio_file_service.delete(name=file_name) for file_name in audio_files_to_delete]
                 # )
         await self.storage.delete(key)
+
+    async def add_image_name(self, page_id: UUID, image_name: str) -> Page | None:
+        page = await self.get(page_id)
+        if page.type != PageType.DEFINITION_GUESS:
+            raise ValueError(f"Unsupported page type: {page.type}")
+        if not page.image_names:
+            page.image_names = []
+        if image_name not in page.image_names:
+            page.image_names.append(image_name)
+            return await self.patch(page_id, DefinitionGuessPatch(image_names=page.image_names))

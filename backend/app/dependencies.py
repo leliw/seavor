@@ -35,6 +35,8 @@ from shared.audio_files.audio_file_service import AudioFileService
 from shared.images.image_service import ImageService
 from haintech.ai.prompts.prompt_service import PromptService
 
+from shared.prompts.prompt_executor_image import PromptExecutorImage
+
 load_dotenv()
 
 _log = logging.getLogger(__name__)
@@ -337,3 +339,12 @@ def get_workflow_factory(
 
 
 WorkflowFactoryDep = Annotated[WorkflowFactory, Depends(get_workflow_factory)]
+
+def prompt_executor_image(prompt_service: PromptServiceDep) -> PromptExecutorImage:
+    return PromptExecutorImage(
+        ai_model=GoogleAIModel(parameters={"temperature": 0.5}),
+        image_generator=GenAIImageGenerator(model_name="gemini-3.1-flash-image-preview"),
+        prompt_service=prompt_service,
+    )
+
+PromptExecutorImageDep = Annotated[PromptExecutorImage, Depends(prompt_executor_image)]

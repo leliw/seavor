@@ -8,15 +8,24 @@ from ampf.auth import AuthConfig, DefaultUser, TokenExp, Tokens
 from ampf.base import BaseAsyncFactory, BlobCreate
 from ampf.testing import ApiTestClient
 from app_config import AppConfig
+from app_state import AppState
 from core.users.user_model import User
 from dependencies import get_tts_service, lifespan
 from fastapi import FastAPI
 from features.languages import Language
 from features.levels import Level
+from features.native_pages.native_page_service import NativePageServiceFactory
+from features.pages.page_service import PageServiceFactory
 from features.topics.topic_model import Topic, TopicCreate, TopicType
 from haintech.ai import BaseImageGenerator
+from haintech.ai.google_genai import GenAIImageGenerator, GoogleAIModel
+from haintech.ai.prompts import PromptExecutor, PromptService
+from features.topics.topic_service import TopicService
 from integrations.gtts.gtts_service import GttsService
 from main import app as main_app
+from shared.audio_files.audio_file_service import AudioFileService
+from shared.images.image_service import ImageService
+from shared.prompts.prompt_executor_image import PromptExecutorImage
 
 
 @pytest.fixture
@@ -56,6 +65,11 @@ def client(app: FastAPI) -> ApiTestClient:  # type: ignore
     with ApiTestClient(app) as client:
         yield client  # type: ignore
 
+@pytest.fixture
+def app_state(client: ApiTestClient) -> AppState:
+    return client.app.state.app_state  # type: ignore
+
+
 
 @pytest.fixture
 def factory(client: ApiTestClient) -> BaseAsyncFactory:
@@ -92,9 +106,43 @@ async def tokens(factory: BaseAsyncFactory, client: ApiTestClient) -> Tokens:
 def headers(tokens: Tokens) -> dict[str, str]:
     return {"Authorization": f"Bearer {tokens.access_token}"}
 
+
 @pytest.fixture
 def second_user_headers(client: ApiTestClient, headers: dict[str, str]) -> dict[str, str]:
     user = User(username="test2", email="tes2@test.com", password="test2")
     client.post("/api/users", 200, json=dict(user), headers=headers)
     tokens = client.post_typed("/api/login", 200, Tokens, data={"username": "test2", "password": "test2"})
     return {"Authorization": f"Bearer {tokens.access_token}"}
+
+
+@pytest.fixture
+def topic_service(app_state: AppState) -> TopicService:
+    return app_state.topic_service
+
+@pytest.fixture
+def page_service_factory(app_state: AppState) -> PageServiceFactory:
+    return PageServiceFactory(app_state.factory, AudioFileService(app_state.factory, TtsServiceMock()))
+
+@pytest.fixture
+def native_page_service_factory(app_state: AppState) -> NativePageServiceFactory:
+    return NativePageServiceFactory(app_state.factory, AudioFileService(app_state.factory, TtsServiceMock()))
+
+@pytest.fixture
+def image_service(app_state: AppState) -> ImageService:
+    return ImageService(app_state.factory, None)
+
+
+@pytest.fixture
+def prompt_executor() -> PromptExecutor:
+    return PromptExecutor(
+        ai_model=GoogleAIModel(parameters={"temperature": 0.1}),
+        prompt_service=PromptService("./app/prompts"),
+    )
+
+@pytest.fixture
+def prompt_executor_image() -> PromptExecutorImage:
+    return PromptExecutorImage(
+        ai_model=GoogleAIModel(parameters={"temperature": 0.5}),
+        image_generator=GenAIImageGenerator(model_name="gemini-3.1-flash-image-preview"),
+        prompt_service=PromptService("./app/prompts"),
+    )
