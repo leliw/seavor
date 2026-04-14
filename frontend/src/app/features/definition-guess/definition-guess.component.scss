@@ -1,4 +1,5 @@
 #sentence,
+#phrase,
 #description,
 #native-sentence {
     margin: 1em 0;
@@ -26,4 +27,10 @@
         width: auto;
         height: auto;
     }
+}
+
+.text-with-player {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
