@@ -221,6 +221,7 @@ async def decode_token(auth_service: AuthServiceDep, token: AuthTokenDep) -> Tok
 
 async def optional_decode_token(auth_service: AuthServiceDep, token: OptionalAuthTokenDep) -> TokenPayload | None:
     if not token:
+        _log.debug("No token provided")
         return None
     return await auth_service.decode_token(token)
 
