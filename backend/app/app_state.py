@@ -41,7 +41,8 @@ class AppState:
         else:
             raise ValueError("No factory setup!")
 
-        user_storage = factory.create_storage_tree(STORAGE_DEF[0])
+        factory.register_collections(STORAGE_DEF)
+        user_storage = factory.get_collection("users")
         native_topic_service = NativeTopicService(factory)
         topic_service = TopicService(factory)
         return cls(
