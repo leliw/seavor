@@ -1,4 +1,4 @@
-from typing import AsyncGenerator
+from typing import Any, AsyncGenerator
 from uuid import UUID
 
 from ampf.base import BaseAsyncFactory
@@ -53,6 +53,9 @@ class NativePageService:
     async def create(self, value: NativePage) -> NativePage:
         await self.storage.create(value)
         return value
+
+    async def patch(self, key: UUID, value_patch: dict[str, Any]) -> NativePage:
+        return await self.storage.patch(key, value_patch)
 
     async def delete(self, key: UUID) -> None:
         await self.storage.delete(key)

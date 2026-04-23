@@ -1,11 +1,11 @@
-from typing import Optional
-from ampf.base import Blob, BaseBlobMetadata
+from ampf.base import Blob
+from shared.prompts.prompt_executor_image import ImageGeneratedMetadata
 
 
-class ImageMetadata(BaseBlobMetadata):
-    text: Optional[str] = None
-    description: Optional[str] = None
-    language: Optional[str] = None
+class ImageMetadata(ImageGeneratedMetadata):
+    language: str | None = None
+    text: str | None = None
+    description: str | None = None
 
 
 ImageBlob = Blob[ImageMetadata]

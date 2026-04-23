@@ -1,5 +1,6 @@
-<div class="container">
-    <!-- <mat-card>
+<div class="full-screen-container">
+    <div class="container">
+        <!-- <mat-card>
         <mat-card-header>
             <mat-card-title>Repetitions</mat-card-title>
         </mat-card-header>
@@ -11,22 +12,27 @@
         </mat-card-content>
     </mat-card> -->
 
-    @for(topic of topics; track topic.id) {
-    <mat-card>
-        <mat-card-header>
-            <mat-card-title>@if(topic.type=="letter-shuffle"){ Quiz} @else { {{topic.type.charAt(0).toUpperCase() + topic.type.slice(1)}} }</mat-card-title>
-            <mat-card-subtitle>{{topic.title}}</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content [routerLink]="topic.content_id ? ['/', topic.content_type, topic.content_id] : [topic.id]">
-            <div>
-                @if (topic.image_name) {
-                <img [ngSrc]="`/api/images/${topic.image_name}`" fill [ngSrcset]="'400w, 600w, 800w, 1024w'" priority
-                    [matTooltip]="topic.description" [matTooltipTouchGestures]="'off'" />
-                } @else {
-                {{topic.description}}
-                }
-            </div>
-        </mat-card-content>
-    </mat-card>
-    }
+        @for(topic of topics; track topic.id) {
+        <mat-card>
+            <mat-card-header>
+                <mat-card-title>@if(topic.type=="letter-shuffle"){ Quiz} @else { {{topic.type.charAt(0).toUpperCase() +
+                    topic.type.slice(1)}} }</mat-card-title>
+                <mat-card-subtitle>{{topic.title}}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content
+                [routerLink]="topic.content_id ? ['/', topic.content_type, topic.content_id] : [topic.id]">
+                <div>
+                    @if (topic.image_name) {
+                    <img [ngSrc]="`/api/images/${topic.image_name}`" fill [ngSrcset]="'400w, 600w, 800w, 1024w'"
+                        priority [matTooltip]="topic.description" [matTooltipTouchGestures]="'off'" />
+                    } @else {
+                    {{topic.description}}
+                    }
+                </div>
+            </mat-card-content>
+        </mat-card>
+        }
+    </div>
 </div>
+<app-bottom-nav [showHome]="false" [showRepetitions]="true" [showLearningLanguage]="true" [showSettings]="true"
+    [showAdd]="true" [showSignInOut]="true"></app-bottom-nav>

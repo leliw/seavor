@@ -8,7 +8,7 @@
         }
         @if (showRepetitions()) {
         <a mat-list-item routerLink="/repetitions">
-            <mat-icon matListItemIcon [matBadge]="this.repetitionService.numberOfOverdue$ | async"
+            <mat-icon matListItemIcon [matBadge]="repetitionService.numberOfOverdue$ | async"
                 [matBadgeHidden]="!(this.repetitionService.numberOfOverdue$ | async)">repeat</mat-icon>
             <span matListItemTitle i18n>Repetitions</span>
         </a>
@@ -62,6 +62,7 @@
             <span matListItemTitle i18n>Add</span>
         </a>
         }
+        @if (showSignInOut()) {
         @if (authService.isAuthenticated()) {
         <a mat-list-item (click)="logout()">
             <mat-icon matListItemIcon>logout</mat-icon>
@@ -72,6 +73,7 @@
             <mat-icon matListItemIcon>login</mat-icon>
             <span matListItemTitle i18n>Sign in</span>
         </a>
+        }
         }
     </mat-nav-list>
 </mat-toolbar>

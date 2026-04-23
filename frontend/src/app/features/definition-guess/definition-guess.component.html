@@ -2,32 +2,63 @@
     @if (exercise) {
 
     <div class="part left vertically-centered">
-        @if (image_src) {
+        @if (imageSrc) {
         <div class="image-container">
-            <img [ngSrc]="image_src" fill [ngSrcset]="'400w, 600w, 800w, 1024w'" priority />
+            <img [ngSrc]="imageSrc" fill [ngSrcset]="'400w, 600w, 800w, 1024w'" priority />
         </div>
         }
-        <div id="description">
+        <div id="description" class="text-with-player">
             @if (native && exercise.native_definition) {
             {{ exercise.native_definition }}
             } @else {
             {{ exercise.definition }}
-            }</div>
+            <app-play-audio-button #definitionAudioButton
+                [srcUrl]="'/api/audio-files/' + exercise.definition_audio_file_name" [autoPlay]="true" />
+            }
+        </div>
         @if (showHint) {
-        <div id="hint">
+        <div id="hint" class="text-with-player">
             @if (native && exercise.native_hint) {
-            ({{ exercise.native_hint}})
+            ({{ exercise.native_hint }})
             } @else {
-            ({{ exercise.hint}})
+            <span>({{ exercise.hint }})</span>
+            <app-play-audio-button #hintAudioButton [srcUrl]="'/api/audio-files/' + exercise.hint_audio_file_name" />
             }
         </div>
         }
     </div>
     <div class="part right vertically-centered">
-        <div id="sentence" [innerHTML]="!showAnswer ? sentence.text_with_gap : answer"></div>
+        @if (showAnswer) {
+        <div id="phrase" class="text-with-player">
+            <span>{{ exercise.phrase }}</span>
+            <app-play-audio-button #phraseAudioButton
+                [srcUrl]="'/api/audio-files/' + exercise.phrase_audio_file_name" />
+        </div>
+        <div id="sentence" class="text-with-player">
+            <div [innerHTML]="answer"></div>
+            <app-play-audio-button #sentenceAudioButton [srcUrl]="'/api/audio-files/' + sentence.audio_file_name" />
+        </div>
+        } @else {
+        <div id="sentence" [innerHTML]="sentence.text_with_gap"></div>
+        }
         @if (native && nativeSentence) {
         <div id="native-sentence">{{ nativeSentence.text}}</div>
         }
+        @if (exercise.alternatives.length) {
+        <div id="alternatives"><span class="group-title" i18n>Alternatives</span>:
+            @for(alt of exercise.alternatives; track alt.value; let last=$last;) {
+            <span [matTooltip]="alt.explanation">{{ alt.value }}</span>@if (!last) {, } @else {.}
+            }
+        </div>
+        }
+        @if (exercise.distractors.length) {
+        <div id="distractors"><span class="group-title" i18n>Distractors</span>:
+            @for(distr of exercise.distractors; track distr.value; let last=$last;) {
+            <span [matTooltip]="distr.explanation">{{ distr.value }}</span>@if (!last) {, } @else {.}
+            }
+        </div>
+        }
+
     </div>
     }
 </div>

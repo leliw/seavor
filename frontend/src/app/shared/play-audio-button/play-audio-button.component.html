@@ -1,0 +1,9 @@
+@if (isPlaying()) {
+<button matIconButton (click)="pause()">
+    <mat-icon>pause_circle</mat-icon>
+</button>
+} @else {
+<button matIconButton (click)="play()">
+    <mat-icon>play_circle</mat-icon>
+</button>
+}

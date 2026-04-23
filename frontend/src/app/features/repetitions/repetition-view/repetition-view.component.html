@@ -1,13 +1,29 @@
+<mat-toolbar color="primary">
+    <button mat-icon-button routerLink="/topics">
+        <mat-icon>navigate_before</mat-icon>
+    </button>
+    <div class="flex-spacer"></div>
+    <span i18n>Repetitions</span>
+    <div class="flex-spacer"></div>
+    <button mat-icon-button [matMenuTriggerFor]="menu">
+        <mat-icon>more_vert</mat-icon>
+    </button>
+</mat-toolbar>
+
+<mat-menu #menu="matMenu">
+    <button mat-menu-item (click)="addImage()">
+        <mat-icon>add_photo_alternate</mat-icon>
+        <span>Generate & Add image</span>
+    </button>
+</mat-menu>
+
 @if (repetition) {
 @if (repetition.type=="gap-fill-choice") {
 <app-gap-fill-choice [topicId]="repetition.topic_id" [id]="repetition.page_id" (previousPage)="onPreviousPage()"
     (nextPage)="onNextPage()"></app-gap-fill-choice>
 } @else if (repetition.type=="definition-guess") {
-<app-definition-guess 
-[level] = "repetition.level"
-[topicId]="repetition.topic_id" 
-[id]="repetition.page_id" (previousPage)="onPreviousPage()"
-    (nextPage)="onNextPage()"></app-definition-guess>
+<app-definition-guess [level]="repetition.level" [topicId]="repetition.topic_id" [id]="repetition.page_id"
+    (previousPage)="onPreviousPage()" (nextPage)="onNextPage()"></app-definition-guess>
 } @else {
 <pre>{{repetition | json}}</pre>
 }

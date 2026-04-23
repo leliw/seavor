@@ -1,44 +1,50 @@
-import { Component, effect, inject, input, OnDestroy, output } from '@angular/core';
-import { DefinitionGuessExercise, DefinitionGuessService, NativeSentence, Sentence } from './definition-guess.service';
+import { NgOptimizedImage } from '@angular/common';
+import { ChangeDetectorRef, Component, effect, inject, input, output, ViewChild } from '@angular/core';
+import { MatTooltip } from "@angular/material/tooltip";
+import { AuthStateService } from '../../core/auth/auth-state.service';
 import { BottomNavComponent } from "../../core/bottom-nav/bottom-nav.component";
 import { EvaluationBarComponent } from "../../core/evaluation-bar/evaluation-bar.component";
-import { NgOptimizedImage } from '@angular/common';
-import { AuthStateService } from '../../core/auth/auth-state.service';
+import { PlayAudioButtonComponent } from '../../shared/play-audio-button/play-audio-button.component';
+import { DefinitionGuessExercise, DefinitionGuessService, NativeSentence, Sentence } from './definition-guess.service';
 
 @Component({
     selector: 'app-definition-guess',
     imports: [
         NgOptimizedImage,
         BottomNavComponent,
-        EvaluationBarComponent
+        EvaluationBarComponent,
+        PlayAudioButtonComponent,
+        MatTooltip,
     ],
     templateUrl: './definition-guess.component.html',
     styleUrl: './definition-guess.component.scss',
 })
-export class DefinitionGuessComponent implements OnDestroy {
+export class DefinitionGuessComponent {
     level = input.required<string>();
     topicId = input.required<string>();
     id = input.required<string>();
-    private service = inject(DefinitionGuessService);
-    public authStateService = inject(AuthStateService);
 
     previousPage = output<void>();
     nextPage = output<void>();
 
-    public exercise!: DefinitionGuessExercise;
 
+    @ViewChild("definitionAudioButton") definitionAudioButton!: PlayAudioButtonComponent;
+    @ViewChild("phraseAudioButton") phraseAudioButton!: PlayAudioButtonComponent;
+    @ViewChild("sentenceAudioButton") sentenceAudioButton!: PlayAudioButtonComponent;
+    @ViewChild("hintAudioButton") hintAudioButton!: PlayAudioButtonComponent;
+
+    private service = inject(DefinitionGuessService);
+    private cdr = inject(ChangeDetectorRef);
+    public authStateService = inject(AuthStateService);
+
+    public exercise!: DefinitionGuessExercise;
     public sentence!: Sentence;
     public nativeSentence?: NativeSentence;
     public showHint: boolean = false;
     public native: boolean = false;
     public showAnswer: boolean = false;
     public answer: string | null = null;
-    public image_src!: string;
-
-    phrase_audio: HTMLAudioElement = new Audio();
-    definition_audio: HTMLAudioElement = new Audio();
-    hint_audio: HTMLAudioElement = new Audio();
-    sentence_audio: HTMLAudioElement = new Audio();
+    public imageSrc: string | null = null;
 
     constructor() {
         effect(() => {
@@ -50,48 +56,36 @@ export class DefinitionGuessComponent implements OnDestroy {
                 this.exercise = e;
                 const sentenceIndex = Math.floor(Math.random() * this.exercise.sentences.length)
                 this.sentence = this.exercise.sentences[sentenceIndex];
-                this.sentence_audio.src = '/api/audio-files/' + this.sentence.audio_file_name;
-                this.sentence_audio.load();
                 this.nativeSentence = this.exercise.native_sentences ? this.exercise.native_sentences[sentenceIndex] : undefined;
                 this.showHint = false;
                 this.native = false;
-                this.definition_audio.src = '/api/audio-files/' + this.exercise.definition_audio_file_name;
-                this.definition_audio.load();
-                this.definition_audio.play().catch(err => console.error('Audio play error:', err));
-                this.hint_audio.src = '/api/audio-files/' + this.exercise.hint_audio_file_name;
-                this.hint_audio.load();
                 if (this.exercise.image_names) {
                     const imageIndex = Math.floor(Math.random() * this.exercise.image_names.length)
-                    this.image_src = '/api/images/' + this.exercise.image_names?.[imageIndex];
+                    this.imageSrc = '/api/images/' + this.exercise.image_names[imageIndex];
                 } else {
-                    this.image_src = '';
+                    this.imageSrc = null;
                 }
-                setTimeout(() => {
-                    this.phrase_audio.src = '/api/audio-files/' + this.exercise.phrase_audio_file_name;
-                    this.phrase_audio.load();
-                }, 500);
             })
         });
     }
 
     onShowHint() {
         this.showHint = true;
-        this.definition_audio.pause();
-        this.hint_audio.play().catch(err => console.error('Audio play error:', err));
+        this.cdr.detectChanges();
+        this.phraseAudioButton?.pause();
+        this.definitionAudioButton?.pause();
+        this.hintAudioButton?.play();
     }
 
-    playSentence() {
-        this.sentence_audio.play().catch(err => console.error('Audio play error:', err));
-    }
 
-    check(): void {
+    async check(): Promise<void> {
         this.answer = this.sentence.text_with_gap.replace(/_{3,}/g, '<b>' + this.sentence.gap_filler_form + '</b>');
         this.showAnswer = true;
-        this.definition_audio.pause();
-        this.hint_audio.pause();
-        this.phrase_audio.addEventListener('ended', this.playSentence, { once: true });
-        this.phrase_audio.play().catch(err => console.error('Audio play error:', err));
-        
+        this.cdr.detectChanges();
+        this.definitionAudioButton?.pause();
+        this.hintAudioButton?.pause();
+        await this.phraseAudioButton?.play();
+        this.sentenceAudioButton?.play();
     }
 
     onEvaluation(evaluation: number): void {
@@ -100,22 +94,11 @@ export class DefinitionGuessComponent implements OnDestroy {
         }
         this.showAnswer = false;
         this.showHint = false;
-        this.phrase_audio.pause();
-        this.phrase_audio.removeEventListener('ended', this.playSentence);
-        this.definition_audio.pause();
-        this.hint_audio.pause();
-        this.sentence_audio.pause();
+        this.cdr.detectChanges();
+        this.phraseAudioButton?.pause();
+        this.definitionAudioButton?.pause();
+        this.hintAudioButton?.pause();
         this.nextPage.emit();
     }
 
-    ngOnDestroy(): void {
-        this.phrase_audio.pause();
-        this.phrase_audio.src = '';
-        this.definition_audio.pause();
-        this.definition_audio.src = '';
-        this.hint_audio.pause();
-        this.hint_audio.src = '';
-        this.sentence_audio.pause();
-        this.sentence_audio.src = '';
-    }
 }

@@ -1,0 +1,27 @@
+.fullscreen-loader {
+  // Force full viewport – no scrolling possible
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.35);
+  color: white;
+  gap: 32px;
+  text-align: center;
+
+  // Remove any default dialog padding/margin
+  .mat-mdc-dialog-container & {
+    padding: 0;
+    margin: 0;
+  }
+
+  .message {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+    opacity: 0.9;
+    letter-spacing: 0.5px;
+  }
+}
