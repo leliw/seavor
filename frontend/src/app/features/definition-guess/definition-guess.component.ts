@@ -1,10 +1,11 @@
+import { NgOptimizedImage } from '@angular/common';
 import { ChangeDetectorRef, Component, effect, inject, input, output, ViewChild } from '@angular/core';
-import { DefinitionGuessExercise, DefinitionGuessService, NativeSentence, Sentence } from './definition-guess.service';
+import { MatTooltip } from "@angular/material/tooltip";
+import { AuthStateService } from '../../core/auth/auth-state.service';
 import { BottomNavComponent } from "../../core/bottom-nav/bottom-nav.component";
 import { EvaluationBarComponent } from "../../core/evaluation-bar/evaluation-bar.component";
-import { NgOptimizedImage } from '@angular/common';
-import { AuthStateService } from '../../core/auth/auth-state.service';
 import { PlayAudioButtonComponent } from '../../shared/play-audio-button/play-audio-button.component';
+import { DefinitionGuessExercise, DefinitionGuessService, NativeSentence, Sentence } from './definition-guess.service';
 
 @Component({
     selector: 'app-definition-guess',
@@ -13,6 +14,7 @@ import { PlayAudioButtonComponent } from '../../shared/play-audio-button/play-au
         BottomNavComponent,
         EvaluationBarComponent,
         PlayAudioButtonComponent,
+        MatTooltip,
     ],
     templateUrl: './definition-guess.component.html',
     styleUrl: './definition-guess.component.scss',
@@ -42,7 +44,7 @@ export class DefinitionGuessComponent {
     public native: boolean = false;
     public showAnswer: boolean = false;
     public answer: string | null = null;
-    public imageSrc!: string;
+    public imageSrc: string | null = null;
 
     constructor() {
         effect(() => {
@@ -59,9 +61,9 @@ export class DefinitionGuessComponent {
                 this.native = false;
                 if (this.exercise.image_names) {
                     const imageIndex = Math.floor(Math.random() * this.exercise.image_names.length)
-                    this.imageSrc = '/api/images/' + this.exercise.image_names?.[imageIndex];
+                    this.imageSrc = '/api/images/' + this.exercise.image_names[imageIndex];
                 } else {
-                    this.imageSrc = '';
+                    this.imageSrc = null;
                 }
             })
         });

@@ -34,3 +34,16 @@
     align-items: center;
     justify-content: center;
 }
+
+#alternatives,
+#distractors {
+    margin: 0.2em 0;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: larger;
+    text-align: left;
+}
+
+.group-title {
+    font-weight: bold;
+}
