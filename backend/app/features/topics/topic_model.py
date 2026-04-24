@@ -42,9 +42,9 @@ class Topic_v1(BaseModel):
     id: UUID
     content_id: Optional[UUID] = None
     content_type: Optional[str] = None
-    target_language: Language
+    target_language: Language = Language.EN
     levels: Optional[List[Level]] = None
-    type: TopicType
+    type: TopicType = TopicType.LETTER_SHUFFLE
     target_title: str
     target_description: str
     image_name: Optional[str] = None
@@ -58,6 +58,22 @@ class Topic_v1(BaseModel):
         if len(self.levels) > 1:
             raise ValueError("Level is not unique")
         return self.levels[0]
+
+    @property
+    def target_language_code(self):
+        return self.target_language.value
+
+    @target_language_code.setter
+    def target_language_code(self, value):
+        self.target_language = Language(value)
+
+    @property
+    def native_language_code(self):
+        return self.native_language.value
+
+    @native_language_code.setter
+    def native_language_code(self, value):
+        self.native_language = Language(value)
 
     @classmethod
     def create(cls, value_create: TopicCreate) -> "Topic_v1":
@@ -132,6 +148,7 @@ class Topic_v2(VersionedBaseModel):
 
     def to_storage(self):
         if self.FORMAT_FLAGS.save_new_format:
+            self.v = self.CURRENT_VERSION
             return self.model_dump(by_alias=True, exclude_none=True)
         else:
             return Topic_v1(

@@ -175,7 +175,11 @@ class NativeDefinitionGuess_v2(DefinitionGuess_v2, NativeDefinitionGuessBase):
 
     @classmethod
     def from_storage(cls, data: dict):
-            return cls.model_validate(data)
+        if "description" in data:
+            data["definition"] = data.pop("description")
+        if "description_audio_file_name" in data:
+            data["definition_audio_file_name"] = data.pop("description_audio_file_name")
+        return cls.model_validate(data)
 
     def to_storage(self):
         return self.model_dump(by_alias=True, exclude_none=True)

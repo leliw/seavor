@@ -137,6 +137,10 @@ class DefinitionGuess_v2(BasePage_v2):
 
     @classmethod
     def from_storage(cls, data: dict[str, Any]):
+        if "description" in data:
+            data["definition"] = data.pop("description")
+        if "description_audio_file_name" in data:
+            data["definition_audio_file_name"] = data.pop("description_audio_file_name")
         return cls.model_validate(data)
 
     def to_storage(self) -> dict[str, Any]:

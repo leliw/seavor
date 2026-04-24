@@ -3,4 +3,5 @@
 **/__pycache__/**
 backend.egg-info/**
 data/**
+data-old/**
 static/**
