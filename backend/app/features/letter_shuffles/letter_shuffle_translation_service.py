@@ -11,9 +11,9 @@ from features.letter_shuffles.letter_shuffle_translation_model import (
     LetterShuffleSetTranslationUpdate,
 )
 from features.levels import Level
+from features.native_topics.native_topic_model import NativeTopic
 from features.native_topics.native_topic_service import NativeTopicService
 from features.topics.topic_service import TopicService
-from features.native_topics.native_topic_model import NativeTopic
 from shared.audio_files.audio_file_service import AudioFileService
 
 _log = logging.getLogger(__name__)
@@ -25,18 +25,18 @@ class LetterShuffleTranslationService:
     ):
         self.factory = factory
         _log.debug(f"target-languages/{target_language_code}/letter-shuffles/{id}/native-languages")
-        self.storage = factory.create_storage(
-            f"target-languages/{target_language_code}/letter-shuffles/{id}/native-languages",
-            LetterShuffleSetTranslation,
-            key="native_language_code",
+        self.storage = (
+            factory.get_collection("target-languages")
+            .get_collection(target_language_code, "letter-shuffles")
+            .get_collection(id, LetterShuffleSetTranslation)
         )
         self.audio_file_service = audio_file_service
         self.target_language_code = target_language_code
         self.id = id
 
     async def get_all(self):
-        async for set in self.storage.where("id", "==", self.id).get_all():
-            yield LetterShuffleSetTranslationHeader(**set.model_dump())
+        async for n_set in self.storage.get_all():
+            yield LetterShuffleSetTranslationHeader(**n_set.model_dump())
 
     async def post(
         self,

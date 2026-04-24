@@ -48,13 +48,12 @@ class PageService:
         level: Level,
         topic_id: UUID,
     ):
-        self.storage = factory.create_storage(
-            f"target-languages/{language}/levels/{level}/topics/{topic_id}/pages",
-            Page,  # type: ignore
-            "id",
+        self.storage = (
+            factory.get_collection("target-languages")
+            .get_collection(language, "levels")
+            .get_collection(level, "topics")
+            .get_collection(topic_id, Page)
         )
-        # self.storage.from_storage = lambda value: PageAdapter.validate_python(value)  # type: ignore
-
         self.audio_file_service = audio_file_service
         self.language_code = language
 

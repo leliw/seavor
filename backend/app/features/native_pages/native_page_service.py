@@ -13,7 +13,9 @@ class NativePageServiceFactory:
         self.factory = factory
         self.audio_file_service = audio_file_service
 
-    def create(self, target_language: Language, level: Level, native_language: Language, topic_id: UUID) -> "NativePageService":
+    def create(
+        self, target_language: Language, level: Level, native_language: Language, topic_id: UUID
+    ) -> "NativePageService":
         return NativePageService(
             factory=self.factory,
             audio_file_service=self.audio_file_service,
@@ -34,10 +36,12 @@ class NativePageService:
         native_language: Language,
         topic_id: UUID,
     ):
-        self.storage = factory.create_storage(
-            f"target-languages/{target_language}/levels/{level}/native-languages/{native_language}/topics/{topic_id}/pages",
-            NativePage,  # type: ignore
-            "id",
+        self.storage = (
+            factory.get_collection("target-languages")
+            .get_collection(target_language, "levels")
+            .get_collection(level, "native-languages")
+            .get_collection(native_language, "topics")
+            .get_collection(topic_id, NativePage)
         )
 
         self.audio_file_service = audio_file_service

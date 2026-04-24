@@ -1,7 +1,7 @@
 from typing import AsyncGenerator, Optional
 from uuid import UUID
 
-from ampf.base import BaseAsyncFactory, BaseAsyncQueryStorage
+from ampf.base import BaseAsyncCollectionStorage, BaseAsyncFactory
 from fastapi import HTTPException
 from features.languages import Language
 from features.levels import Level
@@ -12,8 +12,12 @@ class TopicService:
     def __init__(self, factory: BaseAsyncFactory):
         self.factory = factory
 
-    def _get_storage(self, language: Language, level: Level) -> BaseAsyncQueryStorage[Topic]:
-        return self.factory.create_storage(f"target-languages/{language}/levels/{level}/topics", Topic)
+    def _get_storage(self, language: Language, level: Level) -> BaseAsyncCollectionStorage[Topic]:
+        return (
+            self.factory.get_collection("target-languages")
+            .get_collection(language, "levels")
+            .get_collection(level, Topic)
+        )
 
     async def get_list(self, language: Language, level: Level, username: str | None = None) -> AsyncGenerator[Topic]:
         storage = self._get_storage(language, level)

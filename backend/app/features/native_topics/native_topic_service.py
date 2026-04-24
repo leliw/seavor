@@ -1,7 +1,7 @@
 from typing import AsyncGenerator, Optional
 from uuid import UUID
 
-from ampf.base import BaseAsyncFactory, BaseAsyncStorage
+from ampf.base import BaseAsyncCollectionStorage, BaseAsyncFactory
 from features.languages import Language
 from features.levels import Level
 from features.native_topics.native_topic_model import NativeTopic
@@ -13,9 +13,12 @@ class NativeTopicService:
 
     def _get_storage(
         self, language: Language, level: Level, native_language: Language
-    ) -> BaseAsyncStorage[NativeTopic]:
-        return self.factory.create_storage(
-            f"target-languages/{language}/levels/{level}/native-languages/{native_language}/topics", NativeTopic
+    ) -> BaseAsyncCollectionStorage[NativeTopic]:
+        return (
+            self.factory.get_collection("target-languages")
+            .get_collection(language, "levels")
+            .get_collection(level, "native-languages")
+            .get_collection(native_language, NativeTopic)
         )
 
     async def get_list(

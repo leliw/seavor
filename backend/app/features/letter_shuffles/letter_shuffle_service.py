@@ -17,15 +17,13 @@ from .letter_shuffle_translation_service import LetterShuffleTranslationService
 class LetterShuffleService:
     def __init__(self, factory: BaseAsyncFactory, audio_file_service: AudioFileService, target_language_code: str):
         self.factory = factory
-        self.storage = factory.create_storage(
-            f"target-languages/{target_language_code}/letter-shuffles", LetterShuffleSet
-        )
+        self.storage = factory.get_collection("target-languages").get_collection(target_language_code, LetterShuffleSet)
         self.audio_file_service = audio_file_service
         self.target_language_code = target_language_code
 
     async def get_all(self):
-        async for set in self.storage.get_all():
-            yield LetterShuffleSetHeader(**set.model_dump())
+        async for tset in self.storage.get_all():
+            yield LetterShuffleSetHeader(**tset.model_dump())
 
     async def post(self, value_create: LetterShuffleSetCreate) -> LetterShuffleSet:
         if value_create.target_language_code != self.target_language_code:
