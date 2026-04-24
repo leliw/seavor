@@ -1,6 +1,6 @@
 locals {
   service_name       = "seavor"
-  version            = "0.7.1"
+  version            = "0.7.2"
   container_registry = "europe-west3-docker.pkg.dev/development-428212/docker-eu"
 
   container_image  = "${local.container_registry}/${local.service_name}:${local.version}"
@@ -58,6 +58,8 @@ module "app" {
     SMTP__PORT     = 465
     SMTP__USERNAME = "reset-password@leliwa.priv.pl"
     SMTP__USE_SSL  = "True"
+
+    FEATURE_FLAGS = "topic_v2_storage,page_v2_storage"
   }
 
   env_vars_secrets = {
