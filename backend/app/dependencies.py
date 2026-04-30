@@ -4,7 +4,6 @@ from uuid import UUID
 
 from ampf.auth import AuthService, InsufficientPermissionsError, TokenPayload
 from ampf.base import BaseEmailSender, EmailTemplate, SmtpEmailSender
-from ampf.base.versioned_base_model import StorageFormatFlags
 from app_config import AppConfig
 from app_state import AppState
 from core.roles import Role
@@ -15,18 +14,16 @@ from fastapi.concurrency import asynccontextmanager
 from fastapi.security import OAuth2PasswordBearer
 from features.languages import Language
 from features.levels import Level
-from features.native_pages.native_page_model import NativeGapFillChoiceExercise_v2, NativeInfoPage_v2
 from features.native_pages.native_page_service import NativePageService, NativePageServiceFactory
 from features.native_pages.native_page_translator import NativePageTranslator
 from features.native_topics.native_topic_service import NativeTopicService
 from features.native_topics.native_topic_translator import NativeTopicTranslator
-from features.pages.page_model import GapFillChoiceExercise_v2, InfoPage_v2
 from features.pages.page_service import PageService, PageServiceFactory
 from features.repetitions.repetition_service import RepetitionService
 from features.teacher.verifier_service import VerifierService
 from features.workflows.workflow_factory import WorkflowFactory
 from features.teacher.teacher_service import TeacherServiceFactory
-from features.topics.topic_model import Topic, Topic_v2
+from features.topics.topic_model import Topic
 from features.topics.topic_service import TopicService
 from haintech.ai import BaseAIModel, BaseImageGenerator
 from haintech.ai.google_genai import GenAIImageGenerator, GoogleAIModel
@@ -44,19 +41,6 @@ _log = logging.getLogger(__name__)
 
 def lifespan(config: AppConfig):
     app_state = AppState.create(config)
-    Topic_v2.FORMAT_FLAGS = StorageFormatFlags(
-        save_new_format=config.feature_flags.topic_v2_storage,
-        migrate_legacy_on_read=config.feature_flags.topic_v2_migrate,
-    )
-    page_sff = StorageFormatFlags(
-        save_new_format=config.feature_flags.page_v2_storage,
-        migrate_legacy_on_read=config.feature_flags.page_v2_migrate,
-    )
-    InfoPage_v2.FORMAT_FLAGS = page_sff
-    NativeInfoPage_v2.FORMAT_FLAGS = page_sff
-    GapFillChoiceExercise_v2.FORMAT_FLAGS = page_sff
-    NativeGapFillChoiceExercise_v2.FORMAT_FLAGS = page_sff
-
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         app.state.app_state = app_state

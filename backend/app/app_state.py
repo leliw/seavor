@@ -8,7 +8,7 @@ from core.users.user_service import UserService
 from features.native_topics.native_topic_service import NativeTopicService
 from features.topics.topic_service import TopicService
 from haintech.ai.prompts.prompt_service import PromptService
-from storage_def import STORAGE_DEF
+from storage_def import STORAGE_DEF, set_storage_formats
 
 _log = logging.getLogger(__name__)
 
@@ -42,6 +42,7 @@ class AppState:
             raise ValueError("No factory setup!")
 
         factory.register_collections(STORAGE_DEF)
+        set_storage_formats(config.feature_flags)
         user_storage = factory.get_collection("users")
         native_topic_service = NativeTopicService(factory)
         topic_service = TopicService(factory)
