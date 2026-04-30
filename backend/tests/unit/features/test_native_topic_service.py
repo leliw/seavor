@@ -1,15 +1,19 @@
 from datetime import datetime
 from uuid import uuid4
 
-from ampf.base import BaseAsyncFactory, BaseAsyncStorage, StorageFormatFlags
+from ampf.base import BaseAsyncFactory, BaseAsyncStorage, KeyNotExistsException, StorageFormatFlags
+from ampf.dependency import DependencyRegistry
 from pydantic import ValidationError
 import pytest
 import pytest_asyncio
 
 from features.languages import Language
 from features.levels import Level
+from features.native_pages.native_page_model import NativeDefinitionGuess, NativeDefinitionGuessBase
 from features.native_topics.native_topic_model import NativeTopic_v1, NativeTopic_v2
 from features.native_topics.native_topic_service import NativeTopicService
+from features.pages.definition_guess_model import DefinitionGuess, DefinitionGuessCreate, Sentence
+from features.pages.page_base_model import PageType
 from features.topics.topic_model import TopicType
 
 target_language = Language.EN
@@ -51,7 +55,7 @@ def storage_v1(factory: BaseAsyncFactory):
 
 @pytest.fixture
 def service(factory: BaseAsyncFactory):
-    return NativeTopicService(factory)
+    return DependencyRegistry.get(NativeTopicService)
 
 
 @pytest_asyncio.fixture
@@ -114,3 +118,47 @@ async def test_save_new_read_new(
     saved = await storage_v2.get(new.id)
     assert isinstance(saved, NativeTopic_v2)
     assert saved.v == 2
+
+
+@pytest.mark.asyncio
+async def test_delete_pages(
+    service: NativeTopicService,
+):
+    # Given: Stored native topic
+    topic = v2
+    await service.save(topic)
+    # And: Stored native page
+    page_service = service.native_page_service_factory.create(
+        topic.language, topic.level, topic.native_language, topic.id
+    )
+    value_create = DefinitionGuessCreate(
+        language=Language.EN,
+        level=Level.A1,
+        order=1,
+        type=PageType.DEFINITION_GUESS,
+        phrase="Runway",
+        definition="This is a specially prepared long, flat surface at an airport where aircraft accelerate to take off or decelerate after landing.",
+        sentences=[
+            Sentence(
+                text_with_gap="The pilot brought the jumbo jet down smoothly onto the main ______.",
+                gap_filler_form="runway",
+            )
+        ],
+        alternatives=[],
+        distractors=[],
+        hint="Consider the specific part of an airport where an aeroplane gathers speed to lift off or slows down after touching the ground.",
+        explanation="",
+        image_names=[],
+    )
+    native_value_create = NativeDefinitionGuessBase(
+        native_phrase="xxx", native_definition="xxx", native_sentences=[], native_alternatives=[], native_distractors=[]
+    )
+    native_page = NativeDefinitionGuess.from_page(DefinitionGuess.create(value_create), native_value_create)
+    page = await page_service.create(native_page)
+    assert await page_service.get(page.id)
+    # When: The topic is deleted
+    await service.delete(topic.language, topic.level, topic.native_language, topic.id)
+    # Then: The page is deleted too
+    with pytest.raises(KeyNotExistsException):
+        await page_service.get(page.id)
+
