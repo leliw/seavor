@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Dict, List, Literal, Optional, Self, Union
+from typing import Dict, List, Literal, Optional, Self, Union, override
 from uuid import uuid4
 
 from features.levels import Level
@@ -200,6 +200,25 @@ class GapFillChoiceExercise_v2(BasePage_v2):
                 ),
             ).model_dump(by_alias=True, exclude_none=True)
 
+    @override
+    def get_audio_file_names(self) -> set[str]:
+        ret = set()
+        if self.sentence_audio_file_name:
+            ret.add(self.sentence_audio_file_name)
+        if self.explanation_audio_file_name:
+            ret.add(self.explanation_audio_file_name)
+        if self.hint_audio_file_name:
+            ret.add(self.hint_audio_file_name)
+        if self.distractors_explanation_audio_file_name:
+            for distractor in self.distractors_explanation_audio_file_name.values():
+                ret.add(distractor)
+        return ret
+
+    @override
+    def get_image_file_names(self) -> set[str]:
+        return set()
+
+
 
 GapFillChoiceExercise = GapFillChoiceExercise_v2
 
@@ -267,6 +286,14 @@ class InfoPage_v2(BasePage_v2):
                 target_language=self.language,
                 **self.model_dump(exclude={"language", "v"}),
             ).model_dump(by_alias=True, exclude_none=True)
+
+    @override
+    def get_audio_file_names(self) -> set[str]:
+        return set()
+
+    @override
+    def get_image_file_names(self) -> set[str]:
+        return {self.image_url} if self.image_url else set()
 
 
 InfoPage = InfoPage_v2
