@@ -10,11 +10,11 @@ from features.pages.page_base_model import PageType
 
 
 class LanguageStatus(BaseModel):
-    language: Language
+    language: Language | None = None
 
 
 class LevelStatus(BaseModel):
-    level: Level
+    level: Level | None = None
 
 
 class PageEvaluation(BaseModel):

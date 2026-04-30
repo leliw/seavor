@@ -141,7 +141,7 @@ class NativeInfoPage_v2(InfoPage_v2, NativeInfoPageBase):
         if self.FORMAT_FLAGS.save_new_format:
             return self.model_dump(by_alias=True, exclude_none=True)
         else:
-            return NativeInfoPage_v1(target_language=self.language, **self.model_dump(exclude={"language"})).model_dump(
+            return NativeInfoPage_v1(target_language=self.language, **self.model_dump(exclude={"language", "v"})).model_dump(
                 by_alias=True, exclude_none=True
             )
 

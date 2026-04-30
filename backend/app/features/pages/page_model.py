@@ -265,7 +265,7 @@ class InfoPage_v2(BasePage_v2):
         else:
             return InfoPage_v1(
                 target_language=self.language,
-                **self.model_dump(exclude={"language"}),
+                **self.model_dump(exclude={"language", "v"}),
             ).model_dump(by_alias=True, exclude_none=True)
 
 
