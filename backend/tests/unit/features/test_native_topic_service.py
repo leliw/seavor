@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from ampf.base import BaseAsyncFactory, BaseAsyncStorage
+from ampf.base import BaseAsyncFactory, BaseAsyncStorage, StorageFormatFlags
 from pydantic import ValidationError
 import pytest
 import pytest_asyncio
@@ -64,6 +64,8 @@ async def test_save_old_read_new(service: NativeTopicService, storage_v1: BaseAs
     # Given: A session stored in previous format
     old = v1
     await storage_v1.save(old)
+    # And: An old fromat is stored
+    NativeTopic_v2.FORMAT_FLAGS = StorageFormatFlags(save_new_format=False, migrate_legacy_on_read=False)
     # When: The session is read
     new = await service.get(target_language, level, native_language, old.id)
     # Then: A new format is returned
