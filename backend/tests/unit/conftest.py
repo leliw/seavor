@@ -2,6 +2,7 @@ from io import BytesIO
 from typing import AsyncGenerator
 from uuid import UUID
 
+from ampf.dependency import DependencyRegistry
 import pytest
 import pytest_asyncio
 from ampf.auth import AuthConfig, DefaultUser, TokenExp, Tokens
@@ -10,7 +11,7 @@ from ampf.testing import ApiTestClient
 from app_config import AppConfig
 from app_state import AppState
 from core.users.user_model import User
-from dependencies import get_tts_service, lifespan
+from dependencies import lifespan
 from fastapi import FastAPI
 from features.languages import Language
 from features.levels import Level
@@ -56,7 +57,7 @@ def app(config: AppConfig) -> FastAPI:
     app = main_app
     # Reconfigure the lifespan to use the test server config
     app.router.lifespan_context = lifespan(config)
-    app.dependency_overrides[get_tts_service] = lambda: TtsServiceMock()
+    DependencyRegistry.add(TtsServiceMock(), GttsService)
     return app
 
 

@@ -1,4 +1,3 @@
-from typing import Optional
 from uuid import NAMESPACE_DNS, uuid5
 
 from ampf.base import BaseAsyncFactory
@@ -9,7 +8,7 @@ from .image_model import ImageBlob, ImageMetadata
 
 
 class ImageService:
-    def __init__(self, factory: BaseAsyncFactory, image_gen_service: Optional[BaseImageGenerator] = None):
+    def __init__(self, factory: BaseAsyncFactory, image_gen_service: BaseImageGenerator | None = None):
         self.storage = factory.create_blob_storage("images", clazz=ImageMetadata)
         self.image_gen_service = image_gen_service
 
