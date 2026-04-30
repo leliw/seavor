@@ -17,10 +17,10 @@ from features.levels import Level
 from features.native_pages.native_page_service import NativePageServiceFactory
 from features.pages.page_service import PageServiceFactory
 from features.topics.topic_model import Topic, TopicCreate, TopicType
+from features.topics.topic_service import TopicService
 from haintech.ai import BaseImageGenerator
 from haintech.ai.google_genai import GenAIImageGenerator, GoogleAIModel
 from haintech.ai.prompts import PromptExecutor, PromptService
-from features.topics.topic_service import TopicService
 from integrations.gtts.gtts_service import GttsService
 from main import app as main_app
 from shared.audio_files.audio_file_service import AudioFileService
@@ -65,10 +65,10 @@ def client(app: FastAPI) -> ApiTestClient:  # type: ignore
     with ApiTestClient(app) as client:
         yield client  # type: ignore
 
+
 @pytest.fixture
 def app_state(client: ApiTestClient) -> AppState:
     return client.app.state.app_state  # type: ignore
-
 
 
 @pytest.fixture
@@ -119,17 +119,27 @@ def second_user_headers(client: ApiTestClient, headers: dict[str, str]) -> dict[
 def topic_service(app_state: AppState) -> TopicService:
     return app_state.topic_service
 
+
 @pytest.fixture
 def page_service_factory(app_state: AppState) -> PageServiceFactory:
     return PageServiceFactory(app_state.factory, AudioFileService(app_state.factory, TtsServiceMock()))
 
+
 @pytest.fixture
-def native_page_service_factory(app_state: AppState) -> NativePageServiceFactory:
-    return NativePageServiceFactory(app_state.factory, AudioFileService(app_state.factory, TtsServiceMock()))
+def audio_file_service(app_state: AppState) -> AudioFileService:
+    return AudioFileService(app_state.factory, TtsServiceMock())
+
 
 @pytest.fixture
 def image_service(app_state: AppState) -> ImageService:
-    return ImageService(app_state.factory, None)
+    return ImageService(app_state.factory, ImageGenServiceMock())
+
+
+@pytest.fixture
+def native_page_service_factory(
+    app_state: AppState, audio_file_service: AudioFileService, image_service: ImageService
+) -> NativePageServiceFactory:
+    return NativePageServiceFactory(app_state.factory, audio_file_service, image_service)
 
 
 @pytest.fixture
@@ -138,6 +148,7 @@ def prompt_executor() -> PromptExecutor:
         ai_model=GoogleAIModel(parameters={"temperature": 0.1}),
         prompt_service=PromptService("./app/prompts"),
     )
+
 
 @pytest.fixture
 def prompt_executor_image() -> PromptExecutorImage:

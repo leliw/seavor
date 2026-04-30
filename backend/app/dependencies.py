@@ -258,9 +258,9 @@ AuthorizedTopicDep = Annotated[Topic, Depends(get_topic_for_user)]
 
 
 def get_native_page_service_factory(
-    app_state: AppStateDep, audio_file_service: AudioFileServiceDep
+    app_state: AppStateDep, audio_file_service: AudioFileServiceDep, image_service: ImageServiceDep
 ) -> NativePageServiceFactory:
-    return NativePageServiceFactory(app_state.factory, audio_file_service)
+    return NativePageServiceFactory(app_state.factory, audio_file_service, image_service)
 
 
 NativePageServiceFactoryDep = Annotated[NativePageServiceFactory, Depends(get_native_page_service_factory)]
@@ -325,11 +325,11 @@ def get_workflow_factory(
 
 WorkflowFactoryDep = Annotated[WorkflowFactory, Depends(get_workflow_factory)]
 
-def prompt_executor_image(prompt_service: PromptServiceDep) -> PromptExecutorImage:
+def get_prompt_executor_image(prompt_service: PromptServiceDep) -> PromptExecutorImage:
     return PromptExecutorImage(
         ai_model=GoogleAIModel(parameters={"temperature": 0.5}),
         image_generator=GenAIImageGenerator(model_name="gemini-3.1-flash-image-preview"),
         prompt_service=prompt_service,
     )
 
-PromptExecutorImageDep = Annotated[PromptExecutorImage, Depends(prompt_executor_image)]
+PromptExecutorImageDep = Annotated[PromptExecutorImage, Depends(get_prompt_executor_image)]
