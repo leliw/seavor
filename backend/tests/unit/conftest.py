@@ -118,7 +118,7 @@ def second_user_headers(client: ApiTestClient, headers: dict[str, str]) -> dict[
 
 @pytest.fixture
 def topic_service(app_state: AppState) -> TopicService:
-    return app_state.topic_service
+    return DependencyRegistry.get(TopicService)
 
 
 @pytest.fixture

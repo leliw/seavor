@@ -66,6 +66,6 @@ class NativeTopicService:
         delete_page_tasks = []
         async for page in native_page_service.get_all():
             delete_page_tasks.append(native_page_service.delete(page.id))
-        await asyncio.gather(*delete_page_tasks)
+        await asyncio.gather(*delete_page_tasks, return_exceptions=True)
         storage = self._get_storage(language, level, native_language)
         await storage.delete(id)

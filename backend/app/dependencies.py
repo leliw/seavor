@@ -48,9 +48,10 @@ def lifespan(config: AppConfig):
     DependencyRegistry.register_class(AudioFileService)
     DependencyRegistry.add(GenAIImageGenerator(), BaseImageGenerator)
     DependencyRegistry.register_class(ImageService)
+    DependencyRegistry.register_class(TopicService)
     DependencyRegistry.register_class(PageServiceFactory)
-    DependencyRegistry.register_class(NativePageServiceFactory)
     DependencyRegistry.register_class(NativeTopicService)
+    DependencyRegistry.register_class(NativePageServiceFactory)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -63,7 +64,9 @@ def lifespan(config: AppConfig):
 
 AudioFileServiceDep = Annotated[AudioFileService, Depends(get_dependency(AudioFileService))]
 ImageServiceDep = Annotated[ImageService, Depends(get_dependency(ImageService))]
+TopicServiceDep = Annotated[TopicService, Depends(get_dependency(TopicService))]
 PageServiceFactoryDep = Annotated[PageServiceFactory, Depends(get_dependency(PageServiceFactory))]
+NativeTopicServiceDep = Annotated[NativeTopicService, Depends(get_dependency(NativeTopicService))]
 NativePageServiceFactoryDep = Annotated[NativePageServiceFactory, Depends(get_dependency(NativePageServiceFactory))]
 
 
@@ -100,19 +103,6 @@ def not_production(app_state: AppStateDep) -> bool:
         raise HTTPException(status_code=404, detail="Not found")
     return not app_state.config.production
 
-
-def get_topic_service(app_state: AppStateDep) -> TopicService:
-    return app_state.topic_service
-
-
-TopicServiceDep = Annotated[TopicService, Depends(get_topic_service)]
-
-
-def get_native_topic_service() -> NativeTopicService:
-    return DependencyRegistry.get(NativeTopicService)
-
-
-NativeTopicServiceDep = Annotated[NativeTopicService, Depends(get_native_topic_service)]
 
 
 def get_translator_ai_model(app_state: AppStateDep):

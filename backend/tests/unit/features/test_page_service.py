@@ -1,23 +1,22 @@
 from uuid import uuid4
 
-from ampf.base import BaseAsyncFactory
 import pytest
-
+from ampf.base import BaseAsyncFactory
+from ampf.dependency import DependencyRegistry
 from features.languages import Language
 from features.levels import Level
 from features.pages.definition_guess_model import AnswerOption, DefinitionGuess, DefinitionGuessCreate, Sentence
 from features.pages.page_base_model import PageType
-from features.pages.page_service import PageService
-from shared.audio_files.audio_file_service import AudioFileService
-from tests.unit.conftest import TtsServiceMock
+from features.pages.page_service import PageService, PageServiceFactory
 
 
 @pytest.fixture
 def page_service(
     factory: BaseAsyncFactory,
 ) -> PageService:
-    audio_file_service = AudioFileService(factory, TtsServiceMock())
-    return PageService(factory, audio_file_service, Language.EN, Level.A1, uuid4())
+    page_service_factory = DependencyRegistry.get(PageServiceFactory)
+
+    return page_service_factory.create(Language.EN, Level.A1, uuid4())
 
 
 @pytest.mark.asyncio
@@ -82,4 +81,3 @@ async def test_post_definition_guess(page_service: PageService):
         assert alternative.audio_file_name is not None
     for distractor in value.distractors:
         assert distractor.audio_file_name is not None
-

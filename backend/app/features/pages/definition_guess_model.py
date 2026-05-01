@@ -85,6 +85,8 @@ class DefinitionGuessCreate(BasePageCreate):
 
 
 class DefinitionGuessPatch(BaseModel):
+    type: Literal[PageType.DEFINITION_GUESS] = PageType.DEFINITION_GUESS
+
     phrase: Optional[str] = None
     definition: Optional[str] = None
 
@@ -101,6 +103,8 @@ class DefinitionGuessPatch(BaseModel):
     hint_audio_file_name: Optional[str] = None
     explanation_audio_file_name: Optional[str] = None
 
+    def model_post_init(self, __context):
+        self.__pydantic_fields_set__.add("type")
 
 class DefinitionGuess_v2(BasePage_v2):
     CURRENT_VERSION = 2

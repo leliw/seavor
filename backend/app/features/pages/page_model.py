@@ -48,10 +48,10 @@ class GapFillChoiceExerciseCreate(BasePageCreate):
             self.distractors_explanation_audio_file_name = {
                 k: audio_file_names[v] for k, v in self.distractors_explanation.items()
             }
-            
 
 
 class GapFillChoiceExercisePatch(BaseModel):
+    type: Literal[PageType.GAP_FILL_CHOICE] = PageType.GAP_FILL_CHOICE
     level: Optional[Level] = None
     sentence: Optional[str] = None
     gap_marker: Optional[str] = None
@@ -66,6 +66,8 @@ class GapFillChoiceExercisePatch(BaseModel):
     distractors_explanation_audio_file_name: Optional[Dict[str, str]] = None
     hint_audio_file_name: Optional[str] = None
 
+    def model_post_init(self, __context):
+        self.__pydantic_fields_set__.add("type")
 
 class GapFillChoiceExercise_v1(BasePage_v1):
     type: Literal[PageType.GAP_FILL_CHOICE] = PageType.GAP_FILL_CHOICE
@@ -219,7 +221,6 @@ class GapFillChoiceExercise_v2(BasePage_v2):
         return set()
 
 
-
 GapFillChoiceExercise = GapFillChoiceExercise_v2
 
 
@@ -326,8 +327,11 @@ PageCreate = Annotated[
     Field(discriminator="type"),
 ]
 
-PagePatch = Union[
-    GapFillChoiceExercisePatch,
-    # InfoPagePatch,
-    DefinitionGuessPatch,
+PagePatch = Annotated[
+    Union[
+        GapFillChoiceExercisePatch,
+        # InfoPagePatch,
+        DefinitionGuessPatch,
+    ],
+    Field(discriminator="type"),
 ]
