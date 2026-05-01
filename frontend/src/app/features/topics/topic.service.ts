@@ -47,6 +47,7 @@ export class TopicService {
     getAll(): Observable<Topic[]> {
         return this.httpClient.get<Topic[]>(this.getEndpoint());
     }
+
     getPages(topic_id: string): Observable<PageHeader[]> {
         if (topic_id == "definition-guess") {
             return of([
@@ -58,5 +59,9 @@ export class TopicService {
             ]);
         }
         return this.httpClient.get<PageHeader[]>(`${this.getEndpoint()}/${topic_id}/pages`);
+    }
+
+    delete(topic_id: string): Observable<void> {
+        return this.httpClient.delete<void>(`/api/topics/${this.language()}/${this.level()}/${topic_id}`);
     }
 }

@@ -13,17 +13,39 @@
         display: flex;
         flex-direction: column;
 
+        mat-card-header {
+            ::ng-deep .mat-mdc-card-header-text {
+                width: 100%;
+                margin-left: 0;
+                margin-right: 0;
+            }
+        }
+
+        mat-card-title {
+            display: flex;
+            align-items: center; 
+            justify-content: space-between;
+            width: 100%;
+
+            button[mat-icon-button] {
+                margin-top: -8px;
+                margin-right: -8px;
+            }
+        }
+
         mat-card-content {
             flex-grow: 1;
             aspect-ratio: 4/3;
             overflow: hidden;
             padding: 0.1em 0.2em 0.2em 0.2em;
             cursor: pointer;
+
             div {
                 height: 100%;
                 width: 100%;
                 box-sizing: border-box;
                 position: relative;
+
                 img[fill] {
                     object-fit: cover;
                     object-position: center;
