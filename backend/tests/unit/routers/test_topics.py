@@ -25,7 +25,7 @@ def id(client: ApiTestClient) -> UUID:
 
 
 @pytest.fixture()
-def endpoint(client: ApiTestClient, id) -> str:
+def endpoint(id: UUID) -> str:
     return f"/api/target-languages/en/letter-shuffles/{id}/translations"
 
 
@@ -63,7 +63,7 @@ def test_post_get_put_patch_delete_letter_shuffle_translation(client: ApiTestCli
         assert r[0].language == value.target_language_code
 
 
-def test_post_get(client: ApiTestClient, headers: dict[str, str], topic_create: TopicCreate):
+def test_post_get_delete(client: ApiTestClient, headers: dict[str, str], topic_create: TopicCreate):
     # POST
     r = client.post_typed("/api/topics", 200, Topic, json=topic_create, headers=headers)
     assert r.title == topic_create.title
@@ -72,6 +72,12 @@ def test_post_get(client: ApiTestClient, headers: dict[str, str], topic_create: 
     r = client.get_typed(f"/api/topics/{r.language}/{topic_create.level}/{r.id}", 200, Topic)
     assert r.title == topic_create.title
 
+    # DELETE (unauthorized)
+    client.delete(f"/api/topics/{r.language}/{topic_create.level}/{r.id}", 401)
+    
+    # DELETE (authorized)
+    client.delete(f"/api/topics/{r.language}/{topic_create.level}/{r.id}", 204, headers=headers)
+    client.get(f"/api/topics/{r.language}/{topic_create.level}/{r.id}", 404)
 
 def test_get_topics_unauthorized(client: ApiTestClient, headers: dict[str, str]):
     # Given: One public topic
