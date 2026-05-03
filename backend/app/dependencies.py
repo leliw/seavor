@@ -4,6 +4,7 @@ from uuid import UUID
 
 from ampf.auth import AuthService, InsufficientPermissionsError, TokenPayload
 from ampf.base import BaseEmailSender, EmailTemplate, SmtpEmailSender
+from ampf.dependency import DependencyRegistry, get_dependency
 from app_config import AppConfig
 from app_state import AppState
 from core.roles import Role
@@ -20,18 +21,17 @@ from features.native_topics.native_topic_service import NativeTopicService
 from features.native_topics.native_topic_translator import NativeTopicTranslator
 from features.pages.page_service import PageService, PageServiceFactory
 from features.repetitions.repetition_service import RepetitionService
-from features.teacher.verifier_service import VerifierService
-from features.workflows.workflow_factory import WorkflowFactory
 from features.teacher.teacher_service import TeacherServiceFactory
+from features.teacher.verifier_service import VerifierService
 from features.topics.topic_model import Topic
 from features.topics.topic_service import TopicService
+from features.workflows.workflow_factory import WorkflowFactory
 from haintech.ai import BaseAIModel, BaseImageGenerator
 from haintech.ai.google_genai import GenAIImageGenerator, GoogleAIModel
+from haintech.ai.prompts.prompt_service import PromptService
 from integrations.gtts.gtts_service import GttsService
 from shared.audio_files.audio_file_service import AudioFileService
 from shared.images.image_service import ImageService
-from haintech.ai.prompts.prompt_service import PromptService
-
 from shared.prompts.prompt_executor_image import PromptExecutorImage
 
 load_dotenv()
@@ -40,7 +40,19 @@ _log = logging.getLogger(__name__)
 
 
 def lifespan(config: AppConfig):
+    DependencyRegistry.clear()
     app_state = AppState.create(config)
+    DependencyRegistry.add_all(app_state)
+
+    DependencyRegistry.register_class(GttsService)
+    DependencyRegistry.register_class(AudioFileService)
+    DependencyRegistry.add(GenAIImageGenerator(), BaseImageGenerator)
+    DependencyRegistry.register_class(ImageService)
+    DependencyRegistry.register_class(TopicService)
+    DependencyRegistry.register_class(PageServiceFactory)
+    DependencyRegistry.register_class(NativeTopicService)
+    DependencyRegistry.register_class(NativePageServiceFactory)
+
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         app.state.app_state = app_state
@@ -48,6 +60,14 @@ def lifespan(config: AppConfig):
             yield
 
     return lifespan
+
+
+AudioFileServiceDep = Annotated[AudioFileService, Depends(get_dependency(AudioFileService))]
+ImageServiceDep = Annotated[ImageService, Depends(get_dependency(ImageService))]
+TopicServiceDep = Annotated[TopicService, Depends(get_dependency(TopicService))]
+PageServiceFactoryDep = Annotated[PageServiceFactory, Depends(get_dependency(PageServiceFactory))]
+NativeTopicServiceDep = Annotated[NativeTopicService, Depends(get_dependency(NativeTopicService))]
+NativePageServiceFactoryDep = Annotated[NativePageServiceFactory, Depends(get_dependency(NativePageServiceFactory))]
 
 
 def get_app_state(request: Request) -> AppState:
@@ -78,55 +98,11 @@ def get_prompt_service(app_state: AppStateDep) -> PromptService:
 PromptServiceDep = Annotated[PromptService, Depends(get_prompt_service)]
 
 
-def get_tts_service() -> GttsService:
-    return GttsService()
-
-
-GttsServiceDep = Annotated[GttsService, Depends(get_tts_service)]
-
-
-def get_audio_file_service(app_state: AppStateDep, tts_service: GttsServiceDep) -> AudioFileService:
-    return AudioFileService(app_state.factory, tts_service)
-
-
-AudioFileServiceDep = Annotated[AudioFileService, Depends(get_audio_file_service)]
-
-
-def get_image_generator() -> BaseImageGenerator | None:
-    try:
-        return GenAIImageGenerator()
-    except Exception:
-        return None
-
-
-ImageGeneratorDep = Annotated[BaseImageGenerator | None, Depends(get_image_generator)]
-
-
-def get_image_service(app_state: AppStateDep, image_generator: ImageGeneratorDep) -> ImageService:
-    return ImageService(app_state.factory, image_generator)
-
-
-ImageServiceDep = Annotated[ImageService, Depends(get_image_service)]
-
-
 def not_production(app_state: AppStateDep) -> bool:
     if app_state.config.production:
         raise HTTPException(status_code=404, detail="Not found")
     return not app_state.config.production
 
-
-def get_topic_service(app_state: AppStateDep) -> TopicService:
-    return app_state.topic_service
-
-
-TopicServiceDep = Annotated[TopicService, Depends(get_topic_service)]
-
-
-def get_native_topic_service(app_state: AppStateDep) -> NativeTopicService:
-    return app_state.native_topic_service
-
-
-NativeTopicServiceDep = Annotated[NativeTopicService, Depends(get_native_topic_service)]
 
 
 def get_translator_ai_model(app_state: AppStateDep):
@@ -145,19 +121,12 @@ def get_native_topic_translator(
 NativeTopicTranslatorDep = Annotated[NativeTopicTranslator, Depends(get_native_topic_translator)]
 
 
-def get_page_service_factory(app_state: AppStateDep, audio_file_service: AudioFileServiceDep) -> PageServiceFactory:
-    return PageServiceFactory(app_state.factory, audio_file_service)
-
-
-PageServiceFactoryDep = Annotated[PageServiceFactory, Depends(get_page_service_factory)]
-
-
 def get_page_service(
-    page_service_factory: PageServiceFactoryDep,
     target_language: Language,
     level: Level,
     topic_id: UUID,
 ):
+    page_service_factory = DependencyRegistry.get(PageServiceFactory)
     return page_service_factory.create(target_language, level, topic_id)
 
 
@@ -257,22 +226,13 @@ async def get_topic_for_user(
 AuthorizedTopicDep = Annotated[Topic, Depends(get_topic_for_user)]
 
 
-def get_native_page_service_factory(
-    app_state: AppStateDep, audio_file_service: AudioFileServiceDep
-) -> NativePageServiceFactory:
-    return NativePageServiceFactory(app_state.factory, audio_file_service)
-
-
-NativePageServiceFactoryDep = Annotated[NativePageServiceFactory, Depends(get_native_page_service_factory)]
-
-
 def get_native_page_service(
-    native_page_service_factory: NativePageServiceFactoryDep,
     target_language: Language,
     level: Level,
     native_language: Language,
     topic_id: UUID,
 ):
+    native_page_service_factory = DependencyRegistry.get(NativePageServiceFactory)
     return native_page_service_factory.create(target_language, level, native_language, topic_id)
 
 
@@ -303,13 +263,13 @@ def get_workflow_factory(
     topic_service: TopicServiceDep,
     topic_translator: NativeTopicTranslatorDep,
     native_topic_service: NativeTopicServiceDep,
-    page_service_factory: PageServiceFactoryDep,
     page_translator: NativePageTranslatorDep,
-    native_page_service_factory: NativePageServiceFactoryDep,
     teacher_service_factory: TeacherServiceFactoryDep,
     verifier_service: VerifierServiceDep,
     repetition_service: RepetitionServiceDep,
 ) -> WorkflowFactory:
+    page_service_factory = DependencyRegistry.get(PageServiceFactory)
+    native_page_service_factory = DependencyRegistry.get(NativePageServiceFactory)
     return WorkflowFactory(
         topic_service,
         topic_translator,
@@ -325,11 +285,13 @@ def get_workflow_factory(
 
 WorkflowFactoryDep = Annotated[WorkflowFactory, Depends(get_workflow_factory)]
 
+
 def prompt_executor_image(prompt_service: PromptServiceDep) -> PromptExecutorImage:
     return PromptExecutorImage(
         ai_model=GoogleAIModel(parameters={"temperature": 0.5}),
         image_generator=GenAIImageGenerator(model_name="gemini-3.1-flash-image-preview"),
         prompt_service=prompt_service,
     )
+
 
 PromptExecutorImageDep = Annotated[PromptExecutorImage, Depends(prompt_executor_image)]

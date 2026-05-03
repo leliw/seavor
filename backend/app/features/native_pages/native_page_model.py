@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Self, Union
+from typing import Dict, Optional, Self, Union, override
 
 from features.pages.definition_guess_model import DefinitionGuess_v2
 from features.pages.page_base_model import PageHeader
@@ -105,6 +105,20 @@ class NativeGapFillChoiceExercise_v2(GapFillChoiceExercise_v2, NativeGapFillChoi
                 ),
             ).model_dump(by_alias=True, exclude_none=True)
 
+    @override
+    def get_audio_file_names(self) -> set[str]:
+        ret = super().get_audio_file_names()
+        if self.native_sentence_audio_file_name:
+            ret.add(self.native_sentence_audio_file_name)
+        if self.native_explanation_audio_file_name:
+            ret.add(self.native_explanation_audio_file_name)
+        if self.native_hint_audio_file_name:
+            ret.add(self.native_hint_audio_file_name)
+        if self.native_distractors_explanation_audio_file_name:
+            for distractor in self.native_distractors_explanation_audio_file_name.values():
+                ret.add(distractor)
+        return ret
+
 
 NativeGapFillChoiceExercise = NativeGapFillChoiceExercise_v2
 
@@ -141,19 +155,22 @@ class NativeInfoPage_v2(InfoPage_v2, NativeInfoPageBase):
         if self.FORMAT_FLAGS.save_new_format:
             return self.model_dump(by_alias=True, exclude_none=True)
         else:
-            return NativeInfoPage_v1(target_language=self.language, **self.model_dump(exclude={"language", "v"})).model_dump(
-                by_alias=True, exclude_none=True
-            )
+            return NativeInfoPage_v1(
+                target_language=self.language, **self.model_dump(exclude={"language", "v"})
+            ).model_dump(by_alias=True, exclude_none=True)
 
 
 NativeInfoPage = NativeInfoPage_v2
 
+
 class NativeSentence(BaseModel):
     text: str
+
 
 class NativeAnswerOption(BaseModel):
     value: str
     explanation: Optional[str] = None
+
 
 class NativeDefinitionGuessBase(BaseModel):
     native_phrase: str
@@ -165,6 +182,7 @@ class NativeDefinitionGuessBase(BaseModel):
 
     native_hint: Optional[str] = None
     native_explanation: Optional[str] = None
+
 
 class NativeDefinitionGuess_v2(DefinitionGuess_v2, NativeDefinitionGuessBase):
     pass
@@ -183,6 +201,7 @@ class NativeDefinitionGuess_v2(DefinitionGuess_v2, NativeDefinitionGuessBase):
 
     def to_storage(self):
         return self.model_dump(by_alias=True, exclude_none=True)
+
 
 NativeDefinitionGuess = NativeDefinitionGuess_v2
 

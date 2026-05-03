@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Dict, List, Literal, Optional, Self, Union
+from typing import Dict, List, Literal, Optional, Self, Union, override
 from uuid import uuid4
 
 from features.levels import Level
@@ -48,10 +48,10 @@ class GapFillChoiceExerciseCreate(BasePageCreate):
             self.distractors_explanation_audio_file_name = {
                 k: audio_file_names[v] for k, v in self.distractors_explanation.items()
             }
-            
 
 
 class GapFillChoiceExercisePatch(BaseModel):
+    type: Literal[PageType.GAP_FILL_CHOICE] = PageType.GAP_FILL_CHOICE
     level: Optional[Level] = None
     sentence: Optional[str] = None
     gap_marker: Optional[str] = None
@@ -66,6 +66,8 @@ class GapFillChoiceExercisePatch(BaseModel):
     distractors_explanation_audio_file_name: Optional[Dict[str, str]] = None
     hint_audio_file_name: Optional[str] = None
 
+    def model_post_init(self, __context):
+        self.__pydantic_fields_set__.add("type")
 
 class GapFillChoiceExercise_v1(BasePage_v1):
     type: Literal[PageType.GAP_FILL_CHOICE] = PageType.GAP_FILL_CHOICE
@@ -200,6 +202,24 @@ class GapFillChoiceExercise_v2(BasePage_v2):
                 ),
             ).model_dump(by_alias=True, exclude_none=True)
 
+    @override
+    def get_audio_file_names(self) -> set[str]:
+        ret = set()
+        if self.sentence_audio_file_name:
+            ret.add(self.sentence_audio_file_name)
+        if self.explanation_audio_file_name:
+            ret.add(self.explanation_audio_file_name)
+        if self.hint_audio_file_name:
+            ret.add(self.hint_audio_file_name)
+        if self.distractors_explanation_audio_file_name:
+            for distractor in self.distractors_explanation_audio_file_name.values():
+                ret.add(distractor)
+        return ret
+
+    @override
+    def get_image_file_names(self) -> set[str]:
+        return set()
+
 
 GapFillChoiceExercise = GapFillChoiceExercise_v2
 
@@ -268,6 +288,14 @@ class InfoPage_v2(BasePage_v2):
                 **self.model_dump(exclude={"language", "v"}),
             ).model_dump(by_alias=True, exclude_none=True)
 
+    @override
+    def get_audio_file_names(self) -> set[str]:
+        return set()
+
+    @override
+    def get_image_file_names(self) -> set[str]:
+        return {self.image_url} if self.image_url else set()
+
 
 InfoPage = InfoPage_v2
 
@@ -299,8 +327,11 @@ PageCreate = Annotated[
     Field(discriminator="type"),
 ]
 
-PagePatch = Union[
-    GapFillChoiceExercisePatch,
-    # InfoPagePatch,
-    DefinitionGuessPatch,
+PagePatch = Annotated[
+    Union[
+        GapFillChoiceExercisePatch,
+        # InfoPagePatch,
+        DefinitionGuessPatch,
+    ],
+    Field(discriminator="type"),
 ]

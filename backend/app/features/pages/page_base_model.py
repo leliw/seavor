@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import StrEnum
 from uuid import UUID
@@ -51,7 +52,7 @@ class BasePage_v1(BaseModel):
     updated_at: datetime
 
 
-class BasePage_v2(VersionedBaseModel):
+class BasePage_v2(VersionedBaseModel, ABC):
     """Common fields for ALL page types"""
 
     model_config = ConfigDict(extra="forbid")
@@ -67,5 +68,16 @@ class BasePage_v2(VersionedBaseModel):
     def model_post_init(self, __context):
         super().model_post_init(__context)
         self.__pydantic_fields_set__.add("type")
+
+    @abstractmethod
+    def get_audio_file_names(self) -> set[str]:
+        """Returns all audio file names used in the page"""
+        pass
+
+    @abstractmethod
+    def get_image_file_names(self) -> set[str]:
+        """Returns all image file names used in the page"""
+        pass
+
 
 BasePage = BasePage_v2

@@ -1,8 +1,10 @@
 from typing import List
+from uuid import UUID
 
 from ampf.fastapi import JsonStreamingResponse
-from dependencies import OptionalTokenPayloadDep, TokenPayloadDep, AuthorizedTopicDep, TopicServiceDep
-from fastapi import APIRouter
+from core.roles import Role
+from dependencies import Authorize, AuthorizedTopicDep, OptionalTokenPayloadDep, TokenPayloadDep, TopicServiceDep
+from fastapi import APIRouter, Depends
 from features.languages import Language
 from features.levels import Level
 from features.topics.topic_model import Topic, TopicCreate
@@ -28,6 +30,11 @@ async def post(service: TopicServiceDep, value_create: TopicCreate, token_payloa
 @router.get(ITEM_PATH)
 async def get(topic: AuthorizedTopicDep) -> Topic:
     return topic
+
+
+@router.delete(ITEM_PATH, dependencies=[Depends(Authorize(Role.ADMIN))], status_code=204)
+async def delete(service: TopicServiceDep, target_language: Language, level: Level, topic_id: UUID) -> None:
+    await service.delete(target_language, level, topic_id)
 
 
 router.include_router(topics_pages.router, prefix=f"{ITEM_PATH}/pages")

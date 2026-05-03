@@ -1,17 +1,19 @@
 from typing import Any, AsyncGenerator
 from uuid import UUID
 
-from ampf.base import BaseAsyncFactory
+from ampf.base import BaseAsyncFactory, KeyNotExistsException
 from features.languages import Language
 from features.levels import Level
 from features.native_pages.native_page_model import NativePage, NativePageHeader
 from shared.audio_files.audio_file_service import AudioFileService
+from shared.images.image_service import ImageService
 
 
 class NativePageServiceFactory:
-    def __init__(self, factory: BaseAsyncFactory, audio_file_service: AudioFileService):
+    def __init__(self, factory: BaseAsyncFactory, audio_file_service: AudioFileService, image_service: ImageService):
         self.factory = factory
         self.audio_file_service = audio_file_service
+        self.image_service = image_service
 
     def create(
         self, target_language: Language, level: Level, native_language: Language, topic_id: UUID
@@ -19,6 +21,7 @@ class NativePageServiceFactory:
         return NativePageService(
             factory=self.factory,
             audio_file_service=self.audio_file_service,
+            image_service=self.image_service,
             target_language=target_language,
             level=level,
             native_language=native_language,
@@ -31,6 +34,7 @@ class NativePageService:
         self,
         factory: BaseAsyncFactory,
         audio_file_service: AudioFileService,
+        image_service: ImageService,
         target_language: Language,
         level: Level,
         native_language: Language,
@@ -45,6 +49,7 @@ class NativePageService:
         )
 
         self.audio_file_service = audio_file_service
+        self.image_service = image_service
         self.target_language_code = target_language
 
     async def get_all(self) -> AsyncGenerator[NativePageHeader]:
@@ -62,4 +67,23 @@ class NativePageService:
         return await self.storage.patch(key, value_patch)
 
     async def delete(self, key: UUID) -> None:
+        """Delete a page and all associated audio files and images.
+
+        Args:
+            key: The key of the page to delete.
+
+        Returns:
+            None
+        """
+        page = await self.storage.get(key)
+        for audio_file_name in page.get_audio_file_names():
+            try:
+                self.audio_file_service.delete(audio_file_name)
+            except KeyNotExistsException:
+                pass
+        for image_file_name in page.get_image_file_names():
+            try:
+                self.image_service.delete(image_file_name)
+            except KeyNotExistsException:
+                pass
         await self.storage.delete(key)

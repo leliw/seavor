@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 import re
-from typing import Any, Literal, Optional, Self
+from typing import Any, Literal, Optional, Self, override
 from uuid import uuid4
 
 from features.pages.page_base_model import BasePage_v2, BasePageCreate, PageType
@@ -38,7 +38,7 @@ class DefinitionGuessCreate(BasePageCreate):
 
     phrase_audio_file_name: str | None = None
     definition_audio_file_name: str | None = None
-    hint_audio_file_name: str | None= None
+    hint_audio_file_name: str | None = None
     explanation_audio_file_name: str | None = None
 
     image_names: list[str] | None = None
@@ -83,7 +83,10 @@ class DefinitionGuessCreate(BasePageCreate):
         if self.hint:
             self.hint_audio_file_name = audio_file_names[self.hint]
 
+
 class DefinitionGuessPatch(BaseModel):
+    type: Literal[PageType.DEFINITION_GUESS] = PageType.DEFINITION_GUESS
+
     phrase: Optional[str] = None
     definition: Optional[str] = None
 
@@ -100,6 +103,8 @@ class DefinitionGuessPatch(BaseModel):
     hint_audio_file_name: Optional[str] = None
     explanation_audio_file_name: Optional[str] = None
 
+    def model_post_init(self, __context):
+        self.__pydantic_fields_set__.add("type")
 
 class DefinitionGuess_v2(BasePage_v2):
     CURRENT_VERSION = 2
@@ -145,6 +150,32 @@ class DefinitionGuess_v2(BasePage_v2):
 
     def to_storage(self) -> dict[str, Any]:
         return self.model_dump(by_alias=True, exclude_none=True)
+
+    @override
+    def get_audio_file_names(self) -> set[str]:
+        ret = set()
+        if self.phrase_audio_file_name:
+            ret.add(self.phrase_audio_file_name)
+        if self.definition_audio_file_name:
+            ret.add(self.definition_audio_file_name)
+        if self.hint_audio_file_name:
+            ret.add(self.hint_audio_file_name)
+        if self.explanation_audio_file_name:
+            ret.add(self.explanation_audio_file_name)
+        for sentence in self.sentences:
+            if sentence.audio_file_name:
+                ret.add(sentence.audio_file_name)
+        for alternative in self.alternatives:
+            if alternative.audio_file_name:
+                ret.add(alternative.audio_file_name)
+        for distractor in self.distractors:
+            if distractor.audio_file_name:
+                ret.add(distractor.audio_file_name)
+        return ret
+
+    @override
+    def get_image_file_names(self) -> set[str]:
+        return set(self.image_names) if self.image_names else set()
 
 
 DefinitionGuess = DefinitionGuess_v2

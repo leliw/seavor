@@ -1,15 +1,18 @@
+import asyncio
 from typing import AsyncGenerator, Optional
 from uuid import UUID
 
 from ampf.base import BaseAsyncCollectionStorage, BaseAsyncFactory
 from features.languages import Language
 from features.levels import Level
+from features.native_pages.native_page_service import NativePageServiceFactory
 from features.native_topics.native_topic_model import NativeTopic
 
 
 class NativeTopicService:
-    def __init__(self, factory: BaseAsyncFactory):
+    def __init__(self, factory: BaseAsyncFactory, native_page_service_factory: NativePageServiceFactory):
         self.factory = factory
+        self.native_page_service_factory = native_page_service_factory
 
     def _get_storage(
         self, language: Language, level: Level, native_language: Language
@@ -46,3 +49,23 @@ class NativeTopicService:
     async def get(self, language: Language, level: Level, native_language: Language, id: UUID) -> NativeTopic:
         storage = self._get_storage(language, level, native_language)
         return await storage.get(id)
+
+    async def delete(self, language: Language, level: Level, native_language: Language, id: UUID) -> None:
+        """Delete a native topic and all associated native pages.
+        
+        Args:
+            language: The language of the topic.
+            level: The level of the topic.
+            native_language: The native language of the topic.
+            id: The id of the topic.
+
+        Returns:
+            None
+        """
+        native_page_service = self.native_page_service_factory.create(language, level, native_language, id)
+        delete_page_tasks = []
+        async for page in native_page_service.get_all():
+            delete_page_tasks.append(native_page_service.delete(page.id))
+        await asyncio.gather(*delete_page_tasks, return_exceptions=True)
+        storage = self._get_storage(language, level, native_language)
+        await storage.delete(id)

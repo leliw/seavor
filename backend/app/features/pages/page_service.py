@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from typing import AsyncGenerator
 from uuid import UUID
 
-from ampf.base import BaseAsyncFactory
+from ampf.base import BaseAsyncCollectionStorage, BaseAsyncFactory
 from features.languages import Language
 from features.levels import Level
 from features.pages.definition_guess_model import DefinitionGuess, DefinitionGuessCreate, DefinitionGuessPatch
@@ -20,19 +20,22 @@ from features.pages.page_model import (
 )
 from pydantic import TypeAdapter
 from shared.audio_files.audio_file_service import AudioFileService
+from shared.images.image_service import ImageService
 
 PageAdapter = TypeAdapter(Page)
 
 
 class PageServiceFactory:
-    def __init__(self, factory: BaseAsyncFactory, audio_file_service: AudioFileService):
+    def __init__(self, factory: BaseAsyncFactory, audio_file_service: AudioFileService, image_service: ImageService):
         self.factory = factory
         self.audio_file_service = audio_file_service
+        self.image_service = image_service
 
     def create(self, language: Language, level: Level, topic_id: UUID) -> "PageService":
         return PageService(
             factory=self.factory,
             audio_file_service=self.audio_file_service,
+            image_service=self.image_service,
             language=language,
             level=level,
             topic_id=topic_id,
@@ -44,17 +47,19 @@ class PageService:
         self,
         factory: BaseAsyncFactory,
         audio_file_service: AudioFileService,
+        image_service: ImageService,
         language: Language,
         level: Level,
         topic_id: UUID,
     ):
-        self.storage = (
+        self.storage: BaseAsyncCollectionStorage[Page] = (
             factory.get_collection("target-languages")
             .get_collection(language, "levels")
             .get_collection(level, "topics")
             .get_collection(topic_id, Page)
         )
         self.audio_file_service = audio_file_service
+        self.image_service = image_service
         self.language_code = language
 
     async def get_all(self) -> AsyncGenerator[PageHeader]:
@@ -137,31 +142,23 @@ class PageService:
 
     async def patch(self, uid: UUID, value_patch: PagePatch) -> Page:
         value = await self.storage.get(uid)
-        value.patch(value_patch)
-        await self.storage.put(uid, value)
+        if value.type != value_patch.type:
+            raise ValueError
+        match value.type:
+            case PageType.GAP_FILL_CHOICE:
+                value = await self.storage.patch(uid, value_patch)
+            case PageType.DEFINITION_GUESS:
+                value = await self.storage.patch(uid, value_patch)
+            case _:
+                raise NotImplementedError
         return value
 
     async def delete(self, key: UUID) -> None:
-        exercise_to_delete = await self.storage.get(key)
-        match exercise_to_delete.type:
-            case PageType.GAP_FILL_CHOICE:
-                audio_files_to_delete = []
-                if exercise_to_delete.sentence_audio_file_name:
-                    audio_files_to_delete.append(exercise_to_delete.sentence_audio_file_name)
-                if exercise_to_delete.explanation_audio_file_name:
-                    audio_files_to_delete.append(exercise_to_delete.explanation_audio_file_name)
-                if exercise_to_delete.hint_audio_file_name:
-                    audio_files_to_delete.append(exercise_to_delete.hint_audio_file_name)
-                if exercise_to_delete.distractors_explanation_audio_file_name:
-                    for distractor in exercise_to_delete.distractors_explanation_audio_file_name.items():
-                        if distractor[1]:
-                            audio_files_to_delete.append(distractor[1])
-
-                for file_name in audio_files_to_delete:
-                    self.audio_file_service.delete(name=file_name)
-                # await asyncio.gather(
-                #     *[self.audio_file_service.delete(name=file_name) for file_name in audio_files_to_delete]
-                # )
+        page = await self.storage.get(key)
+        for file_name in page.get_audio_file_names():
+            self.audio_file_service.delete(name=file_name)
+        for image_name in page.get_image_file_names():
+            self.image_service.delete(name=image_name)
         await self.storage.delete(key)
 
     async def add_image_name(self, page_id: UUID, image_name: str) -> Page | None:

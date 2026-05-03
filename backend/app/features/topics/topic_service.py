@@ -1,3 +1,4 @@
+import asyncio
 from typing import AsyncGenerator, Optional
 from uuid import UUID
 
@@ -5,12 +6,21 @@ from ampf.base import BaseAsyncCollectionStorage, BaseAsyncFactory
 from fastapi import HTTPException
 from features.languages import Language
 from features.levels import Level
+from features.native_topics.native_topic_service import NativeTopicService
+from features.pages.page_service import PageServiceFactory
 from features.topics.topic_model import Topic, TopicCreate, TopicType
 
 
 class TopicService:
-    def __init__(self, factory: BaseAsyncFactory):
+    def __init__(
+        self,
+        factory: BaseAsyncFactory,
+        page_service_factory: PageServiceFactory,
+        native_topic_service: NativeTopicService,
+    ):
         self.factory = factory
+        self.page_service_factory = page_service_factory
+        self.native_topic_service = native_topic_service
 
     def _get_storage(self, language: Language, level: Level) -> BaseAsyncCollectionStorage[Topic]:
         return (
@@ -67,3 +77,19 @@ class TopicService:
         )
         await storage.create(value)
         return value
+
+    async def delete(self, language: Language, level: Level, id: UUID) -> None:
+        # Delete native topics
+        delete_ntopic_tasks = []
+        for native_language in Language:
+            delete_ntopic_tasks.append(self.native_topic_service.delete(language, level, native_language, id))
+        await asyncio.gather(*delete_ntopic_tasks, return_exceptions=True)
+        # Delete pages
+        page_service = self.page_service_factory.create(language, level, id)
+        delete_page_tasks = []
+        async for page in page_service.get_all():
+            delete_page_tasks.append(page_service.delete(page.id))
+        await asyncio.gather(*delete_page_tasks, return_exceptions=True)
+        # Delete topic itself
+        storage = self._get_storage(language, level)
+        await storage.delete(id)
