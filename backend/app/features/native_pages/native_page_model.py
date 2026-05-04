@@ -1,6 +1,7 @@
 from typing import Any, Dict, Optional, Self, Union, override
 
 from core.translation_status import TranslationStatus
+from features.languages import Language
 from features.pages.definition_guess_model import DefinitionGuess_v2
 from features.pages.page_base_model import PageHeader
 from features.pages.page_model import (
@@ -125,6 +126,7 @@ NativeGapFillChoiceExercise = NativeGapFillChoiceExercise_v2
 
 
 class NativePageBase(BaseModel):
+    native_language: Language
     translation_status: TranslationStatus = "pending"
     error_message: str | None = None
 

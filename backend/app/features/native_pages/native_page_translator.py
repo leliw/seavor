@@ -44,6 +44,7 @@ class NativePageTranslator:
             NativeInfoPageBase,
             src_language=LANGUAGE_NAMES[src_language],
             dest_language=LANGUAGE_NAMES[dest_language],
+            native_language=dest_language,
             page_title=page.title,
             page_content=page.content,
         )

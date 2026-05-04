@@ -12,6 +12,13 @@ from features.topics.topic_model import Topic, Topic_v2
 
 # fmt: off
 STORAGE_DEF = [
+    CollectionDef("topics", Topic, "id", subcollections=[
+        CollectionDef("translations", NativeTopic, "native_language"),
+        CollectionDef("pages", Page, "id", subcollections=[
+            CollectionDef("translations", NativePage, "native_language")
+        ]),
+    ]),
+
     CollectionDef("target-languages", LanguageStatus, subcollections=[
         CollectionDef("letter-shuffles", LetterShuffleSet, subcollections=[
             CollectionDef("native-languages", LetterShuffleSetTranslation, key="native_language_code")

@@ -58,7 +58,6 @@ class BasePage_v2(VersionedBaseModel, ABC):
     model_config = ConfigDict(extra="forbid")
 
     id: UUID
-    topic_id: UUID | None = None
     language: Language
     level: Level
     order: int

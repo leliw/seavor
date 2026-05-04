@@ -40,31 +40,32 @@ class NativePageService:
         native_language: Language,
         topic_id: UUID,
     ):
-        self.storage = (
+        self.old_storage = (
             factory.get_collection("target-languages")
             .get_collection(target_language, "levels")
             .get_collection(level, "native-languages")
             .get_collection(native_language, "topics")
             .get_collection(topic_id, NativePage)
         )
-
+        self.new_storage = factory.get_collection("topics").get_collection(topic_id, "pages").get_collection(native_language, NativePage)
         self.audio_file_service = audio_file_service
         self.image_service = image_service
         self.target_language_code = target_language
+        self.topic_id = topic_id
 
     async def get_all(self) -> AsyncGenerator[NativePageHeader]:
-        async for value in self.storage.get_all():
+        async for value in self.old_storage.get_all():
             yield NativePageHeader(**value.model_dump())
 
     async def get(self, key: UUID) -> NativePage:
-        return await self.storage.get(key)
+        return await self.old_storage.get(key)
 
     async def create(self, value: NativePage) -> NativePage:
-        await self.storage.create(value)
+        await self.old_storage.create(value)
         return value
 
     async def patch(self, key: UUID, value_patch: dict[str, Any]) -> NativePage:
-        return await self.storage.patch(key, value_patch)
+        return await self.old_storage.patch(key, value_patch)
 
     async def delete(self, key: UUID) -> None:
         """Delete a page and all associated audio files and images.
@@ -75,7 +76,7 @@ class NativePageService:
         Returns:
             None
         """
-        page = await self.storage.get(key)
+        page = await self.old_storage.get(key)
         for audio_file_name in page.get_audio_file_names():
             try:
                 self.audio_file_service.delete(audio_file_name)
@@ -86,4 +87,4 @@ class NativePageService:
                 self.image_service.delete(image_file_name)
             except KeyNotExistsException:
                 pass
-        await self.storage.delete(key)
+        await self.old_storage.delete(key)

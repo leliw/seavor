@@ -52,18 +52,22 @@ class PageService:
         level: Level,
         topic_id: UUID,
     ):
-        self.storage: BaseAsyncCollectionStorage[Page] = (
+        self.old_storage: BaseAsyncCollectionStorage[Page] = (
             factory.get_collection("target-languages")
             .get_collection(language, "levels")
             .get_collection(level, "topics")
             .get_collection(topic_id, Page)
         )
+        self.new_storage: BaseAsyncCollectionStorage[Page] = factory.get_collection("topics").get_collection(
+            topic_id, Page
+        )
         self.audio_file_service = audio_file_service
+        self.topic_id = topic_id
         self.image_service = image_service
         self.language_code = language
 
     async def get_all(self) -> AsyncGenerator[PageHeader]:
-        async for value in self.storage.get_all():
+        async for value in self.old_storage.get_all():
             yield PageHeader(**value.model_dump())
 
     async def post(self, value: PageCreate) -> Page:
@@ -87,7 +91,7 @@ class PageService:
         value_create.set_audio_file_names(text_to_audio)
 
         value = GapFillChoiceExercise.create(value_create)
-        await self.storage.create(value)
+        await self.old_storage.create(value)
         return value
 
     async def post_info(self, value_create: InfoPageCreate) -> Page:
@@ -106,7 +110,7 @@ class PageService:
         # value.title_audio_file_name = audio_file_names[audio_file_index]
         # audio_file_index += 1
         # value.definition_audio_file_name = audio_file_names[audio_file_index]
-        await self.storage.create(value)
+        await self.old_storage.create(value)
         return value
 
     async def post_definition_guess(self, value_create: DefinitionGuessCreate) -> Page:
@@ -121,45 +125,45 @@ class PageService:
         value_create.set_audio_file_names(text_to_audio)
 
         value = DefinitionGuess.create(value_create)
-        await self.storage.create(value)
+        await self.old_storage.create(value)
         return value
 
     async def get(self, key: UUID) -> Page:
-        return await self.storage.get(key)
+        return await self.old_storage.get(key)
 
     async def put(self, key: UUID, value: GapFillChoiceExercisePut) -> None:
         if key != value.id:
             raise ValueError("The key in the path must match the id in the request body.")
 
-        existing_exercise = await self.storage.get(key)
+        existing_exercise = await self.old_storage.get(key)
         updated_exercise = existing_exercise.model_copy(update=value.model_dump(exclude_unset=True))
         updated_exercise.updated_at = datetime.now(timezone.utc)
 
         # For simplicity, audio files are not regenerated on PUT.
         # If audio regeneration is needed, a more complex logic similar to POST would be required.
 
-        await self.storage.put(key, updated_exercise)
+        await self.old_storage.put(key, updated_exercise)
 
     async def patch(self, uid: UUID, value_patch: PagePatch) -> Page:
-        value = await self.storage.get(uid)
+        value = await self.old_storage.get(uid)
         if value.type != value_patch.type:
             raise ValueError
         match value.type:
             case PageType.GAP_FILL_CHOICE:
-                value = await self.storage.patch(uid, value_patch)
+                value = await self.old_storage.patch(uid, value_patch)
             case PageType.DEFINITION_GUESS:
-                value = await self.storage.patch(uid, value_patch)
+                value = await self.old_storage.patch(uid, value_patch)
             case _:
                 raise NotImplementedError
         return value
 
     async def delete(self, key: UUID) -> None:
-        page = await self.storage.get(key)
+        page = await self.old_storage.get(key)
         for file_name in page.get_audio_file_names():
             self.audio_file_service.delete(name=file_name)
         for image_name in page.get_image_file_names():
             self.image_service.delete(name=image_name)
-        await self.storage.delete(key)
+        await self.old_storage.delete(key)
 
     async def add_image_name(self, page_id: UUID, image_name: str) -> Page | None:
         page = await self.get(page_id)
