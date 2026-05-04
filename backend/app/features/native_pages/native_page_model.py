@@ -1,5 +1,6 @@
-from typing import Dict, Optional, Self, Union, override
+from typing import Any, Dict, Optional, Self, Union, override
 
+from core.translation_status import TranslationStatus
 from features.pages.definition_guess_model import DefinitionGuess_v2
 from features.pages.page_base_model import PageHeader
 from features.pages.page_model import (
@@ -8,7 +9,7 @@ from features.pages.page_model import (
     InfoPage_v1,
     InfoPage_v2,
 )
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field, ValidationError, model_validator
 from typing_extensions import Annotated
 
 
@@ -123,7 +124,19 @@ class NativeGapFillChoiceExercise_v2(GapFillChoiceExercise_v2, NativeGapFillChoi
 NativeGapFillChoiceExercise = NativeGapFillChoiceExercise_v2
 
 
-class NativeInfoPageBase(BaseModel):
+class NativePageBase(BaseModel):
+    translation_status: TranslationStatus = "pending"
+    error_message: str | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def infer_status_for_legacy_data(cls, data: Any) -> Any:
+        if isinstance(data, dict) and "translation_status" not in data:
+            data["translation_status"] = "ready"
+        return data
+
+
+class NativeInfoPageBase(NativePageBase):
     native_title: str
     native_content: str  # markdown / HTML / JSON
 
@@ -172,7 +185,7 @@ class NativeAnswerOption(BaseModel):
     explanation: Optional[str] = None
 
 
-class NativeDefinitionGuessBase(BaseModel):
+class NativeDefinitionGuessBase(NativePageBase):
     native_phrase: str
     native_definition: str  # markdown / HTML / JSON
 
