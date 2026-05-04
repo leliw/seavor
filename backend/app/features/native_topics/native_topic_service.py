@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from typing import AsyncGenerator, Optional
 from uuid import UUID
 
@@ -7,6 +8,8 @@ from features.languages import Language
 from features.levels import Level
 from features.native_pages.native_page_service import NativePageServiceFactory
 from features.native_topics.native_topic_model import NativeTopic
+
+_log = logging.getLogger(__name__)
 
 
 class NativeTopicService:
@@ -41,12 +44,24 @@ class NativeTopicService:
             level = value.level
         elif not level:
             raise ValueError("Level is required")
-        storage = self._get_old_storage(value.language, level, value.native_language)
-        await storage.save(value)
+        old_storage = self._get_old_storage(value.language, level, value.native_language)
+        await old_storage.save(value)
+        try:
+            new_storage = self._get_new_storage(value.native_language)
+            await new_storage.save(value)
+        except Exception as e:
+            _log.error(f"Error saving in new storage: {e}")
+            pass
 
     async def create(self, value: NativeTopic) -> NativeTopic:
-        storage = self._get_old_storage(value.language, value.level, value.native_language)
-        await storage.create(value)
+        old_storage = self._get_old_storage(value.language, value.level, value.native_language)
+        await old_storage.create(value)
+        try:
+            new_storage = self._get_new_storage(value.native_language)
+            await new_storage.create(value)
+        except Exception as e:
+            _log.error(f"Error creating in new storage: {e}")
+            pass
         return value
 
     async def get(self, language: Language, level: Level, native_language: Language, id: UUID) -> NativeTopic:
@@ -70,5 +85,11 @@ class NativeTopicService:
         async for page in native_page_service.get_all():
             delete_page_tasks.append(native_page_service.delete(page.id))
         await asyncio.gather(*delete_page_tasks, return_exceptions=True)
-        storage = self._get_old_storage(language, level, native_language)
-        await storage.delete(id)
+        old_storage = self._get_old_storage(language, level, native_language)
+        await old_storage.delete(id)
+        try:
+            new_storage = self._get_new_storage(native_language)
+            await new_storage.delete(id)
+        except Exception as e:
+            _log.error(f"Error deleting in new storage: {e}")
+            pass

@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from datetime import datetime, timezone
 from typing import AsyncGenerator
 from uuid import UUID
@@ -23,6 +24,8 @@ from shared.audio_files.audio_file_service import AudioFileService
 from shared.images.image_service import ImageService
 
 PageAdapter = TypeAdapter(Page)
+
+_log = logging.getLogger(__name__)
 
 
 class PageServiceFactory:
@@ -73,11 +76,18 @@ class PageService:
     async def post(self, value: PageCreate) -> Page:
         match value.type:
             case PageType.GAP_FILL_CHOICE:
-                return await self.post_gap_fill_choice(value)
+                page = await self.post_gap_fill_choice(value)
             case PageType.INFO:
-                return await self.post_info(value)
+                page = await self.post_info(value)
             case PageType.DEFINITION_GUESS:
-                return await self.post_definition_guess(value)
+                page = await self.post_definition_guess(value)
+        await self.old_storage.create(page)
+        try:
+            await self.new_storage.create(page)
+        except Exception as e:
+            _log.error(f"Error creating in new storage: {e}")
+            pass        
+        return page
 
     async def post_gap_fill_choice(self, value_create: GapFillChoiceExerciseCreate) -> Page:
         texts_to_synthesize = value_create.get_texts_to_synthesize()
@@ -89,10 +99,7 @@ class PageService:
         )
         text_to_audio = dict(zip(texts_to_synthesize, audio_file_names))
         value_create.set_audio_file_names(text_to_audio)
-
-        value = GapFillChoiceExercise.create(value_create)
-        await self.old_storage.create(value)
-        return value
+        return GapFillChoiceExercise.create(value_create)
 
     async def post_info(self, value_create: InfoPageCreate) -> Page:
         value = InfoPage.create(value_create)
@@ -110,7 +117,6 @@ class PageService:
         # value.title_audio_file_name = audio_file_names[audio_file_index]
         # audio_file_index += 1
         # value.definition_audio_file_name = audio_file_names[audio_file_index]
-        await self.old_storage.create(value)
         return value
 
     async def post_definition_guess(self, value_create: DefinitionGuessCreate) -> Page:
@@ -123,10 +129,7 @@ class PageService:
         )
         text_to_audio = dict(zip(texts_to_synthesize, audio_file_names))
         value_create.set_audio_file_names(text_to_audio)
-
-        value = DefinitionGuess.create(value_create)
-        await self.old_storage.create(value)
-        return value
+        return DefinitionGuess.create(value_create)
 
     async def get(self, key: UUID) -> Page:
         return await self.old_storage.get(key)
@@ -143,6 +146,11 @@ class PageService:
         # If audio regeneration is needed, a more complex logic similar to POST would be required.
 
         await self.old_storage.put(key, updated_exercise)
+        try:
+            await self.new_storage.put(key, updated_exercise)
+        except Exception as e:
+            _log.error(f"Error putting in new storage: {e}")
+            pass   
 
     async def patch(self, uid: UUID, value_patch: PagePatch) -> Page:
         value = await self.old_storage.get(uid)
@@ -150,11 +158,17 @@ class PageService:
             raise ValueError
         match value.type:
             case PageType.GAP_FILL_CHOICE:
-                value = await self.old_storage.patch(uid, value_patch)
+                pass
             case PageType.DEFINITION_GUESS:
-                value = await self.old_storage.patch(uid, value_patch)
+                pass
             case _:
                 raise NotImplementedError
+        value = await self.old_storage.patch(uid, value_patch)
+        try:
+            await self.new_storage.patch(uid, value_patch)
+        except Exception as e:
+            _log.error(f"Error patching in new storage: {e}")
+            pass 
         return value
 
     async def delete(self, key: UUID) -> None:
@@ -164,6 +178,12 @@ class PageService:
         for image_name in page.get_image_file_names():
             self.image_service.delete(name=image_name)
         await self.old_storage.delete(key)
+        try:
+            await self.new_storage.delete(key)
+        except Exception as e:
+            _log.error(f"Error deleting in new storage: {e}")
+            pass
+
 
     async def add_image_name(self, page_id: UUID, image_name: str) -> Page | None:
         page = await self.get(page_id)
