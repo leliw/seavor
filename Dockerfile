@@ -53,9 +53,6 @@
     # Switch to non-root user.
     USER appuser
 
-    # Copy data
-    COPY ./backend/data /data/
-
     # Run the application.
     ENV DATA_DIR=/data
     VOLUME [ "/data" ]

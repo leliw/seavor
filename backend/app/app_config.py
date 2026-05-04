@@ -15,7 +15,7 @@ class AppConfig(BaseSettings):
     version: str = __version__
     production: bool = True
     data_dir: str = "./data/"
-    prompt_dir: str = "./app/prompts/"
+    prompt_dir: str = "./prompts/"
 
     gcp_root_storage: Optional[str] = None
     gcp_bucket_name: Optional[str] = None
@@ -24,6 +24,8 @@ class AppConfig(BaseSettings):
     default_user: DefaultUser = DefaultUser(username="admin", password="")
     smtp: SmtpConfig = SmtpConfig()
     reset_password_mail: ResetPasswordMailConfig = ResetPasswordMailConfig()
+
+    google_api_key: str  # Google GenAI API key
 
     @field_validator("auth", mode="after")
     @classmethod

@@ -42,6 +42,7 @@ _log = logging.getLogger(__name__)
 def lifespan(config: AppConfig):
     DependencyRegistry.clear()
     app_state = AppState.create(config)
+    DependencyRegistry.add(app_state)
     DependencyRegistry.add_all(app_state)
 
     DependencyRegistry.register_class(GttsService)
@@ -62,40 +63,16 @@ def lifespan(config: AppConfig):
     return lifespan
 
 
+AppStateDep = Annotated[AppState, Depends(get_dependency(AppState))]
+AppConfigDep = Annotated[AppConfig, Depends(get_dependency(AppConfig))]
+UserServiceDep = Annotated[UserService, Depends(get_dependency(UserService))]
 AudioFileServiceDep = Annotated[AudioFileService, Depends(get_dependency(AudioFileService))]
 ImageServiceDep = Annotated[ImageService, Depends(get_dependency(ImageService))]
 TopicServiceDep = Annotated[TopicService, Depends(get_dependency(TopicService))]
 PageServiceFactoryDep = Annotated[PageServiceFactory, Depends(get_dependency(PageServiceFactory))]
 NativeTopicServiceDep = Annotated[NativeTopicService, Depends(get_dependency(NativeTopicService))]
 NativePageServiceFactoryDep = Annotated[NativePageServiceFactory, Depends(get_dependency(NativePageServiceFactory))]
-
-
-def get_app_state(request: Request) -> AppState:
-    return request.app.state.app_state
-
-
-AppStateDep = Annotated[AppState, Depends(get_app_state)]
-
-
-def get_app_config(app_state: AppStateDep) -> AppConfig:
-    return app_state.config
-
-
-AppConfigDep = Annotated[AppConfig, Depends(get_app_config)]
-
-
-def get_user_service(app_state: AppStateDep) -> UserService:
-    return app_state.user_service
-
-
-UserServiceDep = Annotated[UserService, Depends(get_user_service)]
-
-
-def get_prompt_service(app_state: AppStateDep) -> PromptService:
-    return app_state.prompt_service
-
-
-PromptServiceDep = Annotated[PromptService, Depends(get_prompt_service)]
+PromptServiceDep = Annotated[PromptService, Depends(get_dependency(PromptService))]
 
 
 def not_production(app_state: AppStateDep) -> bool:
@@ -104,9 +81,8 @@ def not_production(app_state: AppStateDep) -> bool:
     return not app_state.config.production
 
 
-
-def get_translator_ai_model(app_state: AppStateDep):
-    return GoogleAIModel(model_name="gemini-2.5-flash-lite", parameters={"temperature": 0.0})
+def get_translator_ai_model(app_config: AppConfigDep):
+    return GoogleAIModel(model_name="gemini-2.5-flash-lite", parameters={"temperature": 0.0}, api_key=app_config.google_api_key)
 
 
 TranslatorAIModelDep = Annotated[BaseAIModel, Depends(get_translator_ai_model)]
@@ -239,20 +215,20 @@ def get_native_page_service(
 NativePageServiceDep = Annotated[NativePageService, Depends(get_native_page_service)]
 
 
-def get_teacher_service_factory(prompt_service: PromptServiceDep) -> TeacherServiceFactory:
+def get_teacher_service_factory(app_config: AppConfigDep, prompt_service: PromptServiceDep) -> TeacherServiceFactory:
     return TeacherServiceFactory(
         prompt_service=prompt_service,
-        ai_model=GoogleAIModel(parameters={"temperature": 0.1}),
+        ai_model=GoogleAIModel(parameters={"temperature": 0.1}, api_key=app_config.google_api_key),
     )
 
 
 TeacherServiceFactoryDep = Annotated[TeacherServiceFactory, Depends(get_teacher_service_factory)]
 
 
-def get_verifier_service(prompt_service: PromptServiceDep) -> VerifierService:
+def get_verifier_service(app_config: AppConfigDep, prompt_service: PromptServiceDep) -> VerifierService:
     return VerifierService(
         prompt_service=prompt_service,
-        ai_model=GoogleAIModel(parameters={"temperature": 0.1}),
+        ai_model=GoogleAIModel(parameters={"temperature": 0.1}, api_key=app_config.google_api_key),
     )
 
 
@@ -286,10 +262,10 @@ def get_workflow_factory(
 WorkflowFactoryDep = Annotated[WorkflowFactory, Depends(get_workflow_factory)]
 
 
-def prompt_executor_image(prompt_service: PromptServiceDep) -> PromptExecutorImage:
+def prompt_executor_image(app_config: AppConfigDep, prompt_service: PromptServiceDep) -> PromptExecutorImage:
     return PromptExecutorImage(
-        ai_model=GoogleAIModel(parameters={"temperature": 0.5}),
-        image_generator=GenAIImageGenerator(model_name="gemini-3.1-flash-image-preview"),
+        ai_model=GoogleAIModel(parameters={"temperature": 0.5}, api_key=app_config.google_api_key),
+        image_generator=GenAIImageGenerator(model_name="gemini-3.1-flash-image-preview", api_key=app_config.google_api_key),
         prompt_service=prompt_service,
     )
 
