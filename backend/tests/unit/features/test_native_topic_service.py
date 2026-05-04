@@ -1,12 +1,10 @@
 from datetime import datetime
 from uuid import uuid4
 
-from ampf.base import BaseAsyncFactory, BaseAsyncStorage, KeyNotExistsException, StorageFormatFlags
-from ampf.dependency import DependencyRegistry
-from pydantic import ValidationError
 import pytest
 import pytest_asyncio
-
+from ampf.base import BaseAsyncFactory, BaseAsyncStorage, KeyNotExistsException, StorageFormatFlags
+from ampf.dependency import DependencyRegistry
 from features.languages import Language
 from features.levels import Level
 from features.native_pages.native_page_model import NativeDefinitionGuess, NativeDefinitionGuessBase
@@ -15,6 +13,7 @@ from features.native_topics.native_topic_service import NativeTopicService
 from features.pages.definition_guess_model import DefinitionGuess, DefinitionGuessCreate, Sentence
 from features.pages.page_base_model import PageType
 from features.topics.topic_model import TopicType
+from pydantic import ValidationError
 
 target_language = Language.EN
 level = Level.A1
@@ -60,7 +59,7 @@ def service(factory: BaseAsyncFactory):
 
 @pytest_asyncio.fixture
 async def storage_v2(service: NativeTopicService):
-    return service._get_storage(target_language, level, native_language)
+    return service._get_old_storage(target_language, level, native_language)
 
 
 @pytest.mark.asyncio
@@ -151,7 +150,12 @@ async def test_delete_pages(
         image_names=[],
     )
     native_value_create = NativeDefinitionGuessBase(
-        native_phrase="xxx", native_definition="xxx", native_sentences=[], native_alternatives=[], native_distractors=[]
+        native_language=Language.PL,
+        native_phrase="xxx",
+        native_definition="xxx",
+        native_sentences=[],
+        native_alternatives=[],
+        native_distractors=[],
     )
     native_page = NativeDefinitionGuess.from_page(DefinitionGuess.create(value_create), native_value_create)
     page = await page_service.create(native_page)
@@ -161,4 +165,3 @@ async def test_delete_pages(
     # Then: The page is deleted too
     with pytest.raises(KeyNotExistsException):
         await page_service.get(page.id)
-

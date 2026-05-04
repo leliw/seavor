@@ -1,14 +1,14 @@
 from datetime import datetime
-from typing import List, Optional, Self
+from typing import Any, List, Optional, Self
 from uuid import UUID, uuid5
 
 from ampf.base import VersionedBaseModel
-
+from core.translation_status import TranslationStatus
 from features.languages import Language
 from features.letter_shuffles.letter_shuffle_translation_model import LetterShuffleSetTranslation
 from features.levels import Level
 from features.topics.topic_model import Topic, TopicHeader, TopicType
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, model_validator
 
 
 class NativeTopic_v1(BaseModel):
@@ -33,7 +33,7 @@ class NativeTopic_v1(BaseModel):
         if len(self.levels) > 1:
             raise ValueError("Level is not unique")
         return self.levels[0]
-    
+
     @classmethod
     def from_letter_shuffle_translation(cls, level: Level, value: LetterShuffleSetTranslation) -> "NativeTopic_v1":
         return cls(
@@ -57,6 +57,16 @@ class NativeTopicBase(BaseModel):
     native_language: Language
     native_title: str
     native_description: str
+
+    translation_status: TranslationStatus = "pending"
+    error_message: str | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def infer_status_for_legacy_data(cls, data: Any) -> Any:
+        if isinstance(data, dict) and "translation_status" not in data:
+            data["translation_status"] = "ready"
+        return data
 
 
 class NativeTopicHeader(TopicHeader, NativeTopicBase):
@@ -85,7 +95,7 @@ class NativeTopic_v2(Topic, NativeTopicBase, VersionedBaseModel):
             content_type=v1.content_type,
             language=v1.target_language_code,
             level=v1.level,
-            type=TopicType.LETTER_SHUFFLE if v1.content_type=="letter-shuffle" else TopicType.GRAMMAR,
+            type=TopicType.LETTER_SHUFFLE if v1.content_type == "letter-shuffle" else TopicType.GRAMMAR,
             title=v1.target_title,
             description=v1.target_description,
             native_language=v1.native_language_code,

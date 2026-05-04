@@ -47,7 +47,12 @@ async def test_delete_native_page(
         definition_audio_file_name=await audio_file_service.generate_and_upload("xxx", Language.EN),
     )
     native_value_create = NativeDefinitionGuessBase(
-        native_phrase="xxx", native_definition="xxx", native_sentences=[], native_alternatives=[], native_distractors=[]
+        native_language=Language.PL,
+        native_phrase="xxx",
+        native_definition="xxx",
+        native_sentences=[],
+        native_alternatives=[],
+        native_distractors=[],
     )
     native_page = NativeDefinitionGuess.from_page(DefinitionGuess.create(value_create), native_value_create)
     native_page = await native_page_service.create(native_page)

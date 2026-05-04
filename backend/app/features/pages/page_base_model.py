@@ -61,11 +61,12 @@ class BasePage_v2(VersionedBaseModel, ABC):
     language: Language
     level: Level
     order: int
-    type: PageType  # literal below will override this
+    type: PageType  # subclasses will override this
     created_at: datetime
     updated_at: datetime
 
     def model_post_init(self, __context):
+        """ Enforce default type value as send by user (for patch() methods)"""
         super().model_post_init(__context)
         self.__pydantic_fields_set__.add("type")
 
