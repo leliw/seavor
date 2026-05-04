@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from typing import AsyncGenerator, Optional
 from uuid import UUID
 
@@ -10,6 +11,8 @@ from features.native_topics.native_topic_service import NativeTopicService
 from features.pages.page_service import PageServiceFactory
 from features.topics.topic_model import Topic, TopicCreate, TopicType
 
+_log = logging.getLogger(__name__)
+
 
 class TopicService:
     def __init__(
@@ -19,10 +22,11 @@ class TopicService:
         native_topic_service: NativeTopicService,
     ):
         self.factory = factory
+        self._new_storage = self.factory.get_collection(Topic)
         self.page_service_factory = page_service_factory
         self.native_topic_service = native_topic_service
 
-    def _get_storage(self, language: Language, level: Level) -> BaseAsyncCollectionStorage[Topic]:
+    def _get_old_storage(self, language: Language, level: Level) -> BaseAsyncCollectionStorage[Topic]:
         return (
             self.factory.get_collection("target-languages")
             .get_collection(language, "levels")
@@ -30,26 +34,36 @@ class TopicService:
         )
 
     async def get_list(self, language: Language, level: Level, username: str | None = None) -> AsyncGenerator[Topic]:
-        storage = self._get_storage(language, level)
+        storage = self._get_old_storage(language, level)
         async for topic in storage.get_all():
             if topic.private and topic.username != username:
                 continue
             yield topic
 
     async def save(self, value: Topic, level: Optional[Level] = None) -> None:
-        storage = self._get_storage(value.language, value.level)
+        storage = self._get_old_storage(value.language, value.level)
         await storage.save(value)
+        try:
+            await self._new_storage.save(value)
+        except Exception as e:
+            _log.error(f"Error saving in new storage: {e}")
+            pass
 
     async def create(self, value_create: TopicCreate, username: str | None = None) -> Topic:
         value = Topic.create(value_create, username)
         language = value.language
         level = value_create.level
-        storage = self._get_storage(language, level)
+        storage = self._get_old_storage(language, level)
         await storage.create(value)
+        try:
+            await self._new_storage.create(value)
+        except Exception as e:
+            _log.error(f"Error creating in new storage: {e}")
+            pass
         return value
 
     async def get(self, language: Language, level: Level, id: UUID) -> Topic:
-        storage = self._get_storage(language, level)
+        storage = self._get_old_storage(language, level)
         topic = await storage.get(id)
         return topic
 
@@ -60,7 +74,7 @@ class TopicService:
         return topic
 
     async def get_or_create_default_topic(self, language: Language, level: Level, username: str) -> Topic:
-        storage = self._get_storage(language, level)
+        storage = self._get_old_storage(language, level)
         async for topic in storage.where("username", "==", username).get_all():
             if topic.private and topic.title == "Default":
                 return topic
@@ -91,5 +105,11 @@ class TopicService:
             delete_page_tasks.append(page_service.delete(page.id))
         await asyncio.gather(*delete_page_tasks, return_exceptions=True)
         # Delete topic itself
-        storage = self._get_storage(language, level)
+        storage = self._get_old_storage(language, level)
         await storage.delete(id)
+        try:
+            await self._new_storage.delete(id)
+        except Exception as e:
+            _log.error(f"Error deleting in new storage: {e}")
+            pass
+

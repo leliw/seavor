@@ -55,7 +55,7 @@ class DefinitionGuessWorkflow(BaseWorkflow):
         if ctx.content is None:
             raise ValueError("Content is required")
         page_service = self.page_service_factory.create(ctx.language, ctx.level, ctx.required_topic.id)
-        page = await page_service.post_definition_guess(ctx.content)
+        page = await page_service.post(ctx.content)
         return page
 
     async def _translate_page(self, ctx: DefinitionGuessWorkflowContext) -> NativePage:

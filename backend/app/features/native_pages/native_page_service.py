@@ -1,3 +1,4 @@
+import logging
 from typing import Any, AsyncGenerator
 from uuid import UUID
 
@@ -7,6 +8,8 @@ from features.levels import Level
 from features.native_pages.native_page_model import NativePage, NativePageHeader
 from shared.audio_files.audio_file_service import AudioFileService
 from shared.images.image_service import ImageService
+
+_log = logging.getLogger(__name__)
 
 
 class NativePageServiceFactory:
@@ -47,7 +50,11 @@ class NativePageService:
             .get_collection(native_language, "topics")
             .get_collection(topic_id, NativePage)
         )
-        self.new_storage = factory.get_collection("topics").get_collection(topic_id, "pages").get_collection(native_language, NativePage)
+        self.new_storage = (
+            factory.get_collection("topics")
+            .get_collection(topic_id, "pages")
+            .get_collection(native_language, NativePage)
+        )
         self.audio_file_service = audio_file_service
         self.image_service = image_service
         self.target_language_code = target_language
@@ -62,10 +69,21 @@ class NativePageService:
 
     async def create(self, value: NativePage) -> NativePage:
         await self.old_storage.create(value)
+        try:
+            await self.new_storage.create(value)
+        except Exception as e:
+            _log.error(f"Error creating in new storage: {e}")
+            pass
         return value
 
     async def patch(self, key: UUID, value_patch: dict[str, Any]) -> NativePage:
-        return await self.old_storage.patch(key, value_patch)
+        ret = await self.old_storage.patch(key, value_patch)
+        try:
+            await self.new_storage.patch(key, value_patch)
+        except Exception as e:
+            _log.error(f"Error patching in new storage: {e}")
+            pass
+        return ret
 
     async def delete(self, key: UUID) -> None:
         """Delete a page and all associated audio files and images.
@@ -88,3 +106,8 @@ class NativePageService:
             except KeyNotExistsException:
                 pass
         await self.old_storage.delete(key)
+        try:
+            await self.new_storage.delete(key)
+        except Exception as e:
+            _log.error(f"Error deleting in new storage: {e}")
+            pass
