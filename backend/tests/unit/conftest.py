@@ -2,11 +2,11 @@ from io import BytesIO
 from typing import AsyncGenerator
 from uuid import UUID
 
-from ampf.dependency import DependencyRegistry
 import pytest
 import pytest_asyncio
 from ampf.auth import AuthConfig, DefaultUser, TokenExp, Tokens
 from ampf.base import BaseAsyncFactory, BlobCreate
+from ampf.dependency import DependencyRegistry
 from ampf.testing import ApiTestClient
 from app_config import AppConfig
 from app_state import AppState
@@ -38,6 +38,7 @@ def config(tmp_path) -> AppConfig:
         production=False,
         default_user=DefaultUser(username="test", email="test@test.com", password="test"),
         auth=AuthConfig(jwt_secret_key="test"),
+        google_api_key="test",
     )
     return config
 
@@ -122,11 +123,6 @@ def topic_service(app_state: AppState) -> TopicService:
 
 
 @pytest.fixture
-def page_service_factory(app_state: AppState) -> PageServiceFactory:
-    return PageServiceFactory(app_state.factory, AudioFileService(app_state.factory, TtsServiceMock()))
-
-
-@pytest.fixture
 def audio_file_service(app_state: AppState) -> AudioFileService:
     return AudioFileService(app_state.factory, TtsServiceMock())
 
@@ -134,6 +130,13 @@ def audio_file_service(app_state: AppState) -> AudioFileService:
 @pytest.fixture
 def image_service(app_state: AppState) -> ImageService:
     return ImageService(app_state.factory, ImageGenServiceMock())
+
+
+@pytest.fixture
+def page_service_factory(
+    app_state: AppState, audio_file_service: AudioFileService, image_service: ImageService
+) -> PageServiceFactory:
+    return PageServiceFactory(app_state.factory, audio_file_service, image_service)
 
 
 @pytest.fixture

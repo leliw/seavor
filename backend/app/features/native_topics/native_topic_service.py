@@ -28,7 +28,7 @@ class NativeTopicService:
         )
 
     def _get_new_storage(self, native_language: Language) -> BaseAsyncCollectionStorage[NativeTopic]:
-        return self.factory.get_collection("topics").get_collection(native_language, NativeTopic)
+        return self.factory.get_collection("translations").get_collection(native_language, NativeTopic)
 
     async def get_list(
         self, language: Language, level: Level, native_language: Language, username: str | None = None

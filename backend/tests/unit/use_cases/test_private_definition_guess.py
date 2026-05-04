@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from ampf.testing import ApiTestClient
 from features.languages import Language
 from features.levels import Level
@@ -13,7 +15,11 @@ from haintech.testing import MockerAIModel
 
 
 def test_private_definition_guess(
-    client: ApiTestClient, headers: dict[str, str], second_user_headers: dict[str, str], mocker_ai_model: MockerAIModel
+    client: ApiTestClient,
+    headers: dict[str, str],
+    second_user_headers: dict[str, str],
+    mocker_ai_model: MockerAIModel,
+    tmp_path: Path,
 ):
     mocker_ai_model.add(
         message_containing="Translate the topic",
@@ -56,13 +62,24 @@ def test_private_definition_guess(
         headers=headers,
     )
     assert ntopic.private
-    # And: native private page exists
+
+    # And: Native private page exists
     client.get_typed(
         f"/api/native-topics/{language}/{level}/pl/{r.topic_id}/pages/{r.page_id}",
         200,
         NativeDefinitionGuess,
         headers=headers,
     )
+    # And: All items ar stored in proper paths
+    topic_path = tmp_path / f"topics/{topic.id}.json"
+    assert topic_path.exists()
+    page_path = tmp_path / f"topics/{topic.id}/pages/{r.page_id}.json"
+    assert page_path.exists()
+    ntopic_path = tmp_path / f"translations/pl/topics/{topic.id}.json"
+    assert ntopic_path.exists()
+    npage_path = tmp_path / f"translations/pl/topics/{topic.id}/pages/{r.page_id}.json"
+    assert npage_path.exists()
+
     # And: Repetition is added
     schedule = client.get_typed("/api/repetitions/schedule", 200, RepetitionSchedule, headers=headers)
     # Then: Status is returned

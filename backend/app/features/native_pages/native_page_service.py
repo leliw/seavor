@@ -51,9 +51,9 @@ class NativePageService:
             .get_collection(topic_id, NativePage)
         )
         self.new_storage = (
-            factory.get_collection("topics")
-            .get_collection(topic_id, "pages")
-            .get_collection(native_language, NativePage)
+            factory.get_collection("translations")
+            .get_collection(native_language, "topics")
+            .get_collection(topic_id, NativePage)
         )
         self.audio_file_service = audio_file_service
         self.image_service = image_service

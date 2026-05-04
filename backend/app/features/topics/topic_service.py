@@ -78,19 +78,15 @@ class TopicService:
         async for topic in storage.where("username", "==", username).get_all():
             if topic.private and topic.title == "Default":
                 return topic
-        value = Topic.create(
-            TopicCreate(
-                language=language,
-                level=level,
-                title="Default",
-                description="Various words and phrases",
-                type=TopicType.VOCABULARY,
-                private=True,
-            ),
-            username,
+        value = TopicCreate(
+            language=language,
+            level=level,
+            title="Default",
+            description="Various words and phrases",
+            type=TopicType.VOCABULARY,
+            private=True,
         )
-        await storage.create(value)
-        return value
+        return await self.create(value, username)
 
     async def delete(self, language: Language, level: Level, id: UUID) -> None:
         # Delete native topics
@@ -112,4 +108,3 @@ class TopicService:
         except Exception as e:
             _log.error(f"Error deleting in new storage: {e}")
             pass
-
