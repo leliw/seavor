@@ -59,7 +59,7 @@ module "app" {
     SMTP__USERNAME = "reset-password@leliwa.priv.pl"
     SMTP__USE_SSL  = "True"
 
-    FEATURE_FLAGS = "topic_v2_storage,page_v2_storage"
+    FEATURE_FLAGS = var.feature_flags
   }
 
   env_vars_secrets = {

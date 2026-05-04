@@ -2,6 +2,7 @@ resource "google_cloud_run_v2_service" "app" {
   name                = var.name
   location            = var.region
   ingress             = var.public ? "INGRESS_TRAFFIC_ALL" : "INGRESS_TRAFFIC_INTERNAL_ONLY"
+  invoker_iam_disabled = var.public
   deletion_protection = var.deletion_protection
 
   scaling {

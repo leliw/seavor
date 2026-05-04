@@ -9,7 +9,7 @@ variable "region" {
   default = "europe-west1"
 }
 variable "run_service_account_email" {
-  type = string
+  type    = string
   default = null
 }
 variable "public" {
@@ -25,3 +25,7 @@ variable "max_instances" {
   default = 10
 }
 
+variable "feature_flags" {
+  type    = string
+  default = ""
+}
