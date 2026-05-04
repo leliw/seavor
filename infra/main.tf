@@ -1,6 +1,6 @@
 locals {
   service_name       = "seavor"
-  version            = "0.7.2"
+  version            = "0.8.1"
   container_registry = "europe-west3-docker.pkg.dev/development-428212/docker-eu"
 
   container_image  = "${local.container_registry}/${local.service_name}:${local.version}"

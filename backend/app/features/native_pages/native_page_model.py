@@ -126,7 +126,7 @@ NativeGapFillChoiceExercise = NativeGapFillChoiceExercise_v2
 
 
 class NativePageBase(BaseModel):
-    native_language: Language
+    native_language: Language | None = None
     translation_status: TranslationStatus = "pending"
     error_message: str | None = None
 

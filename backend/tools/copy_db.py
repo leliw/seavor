@@ -7,8 +7,11 @@ from ampf.gcp import GcpAsyncFactory
 from ampf.local import LocalAsyncFactory
 from app_config import AppConfig
 from dotenv import load_dotenv
+from core.users.user_model import UserInDB
 from features.languages import Language
 from pydantic import BaseModel, ValidationError
+from shared.audio_files.audio_file_model import AudioFileMetadata
+from shared.images.image_model import ImageMetadata
 from storage_def import STORAGE_DEF, set_storage_formats
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(name)s | %(levelname)s | %(message)s")
@@ -98,28 +101,29 @@ native_languages = [Language.EN, Language.PL]
 
 
 async def main():
-    config = AppConfig(gcp_bucket_name="test-seavor-9b08fd", gcp_root_storage="projects/test-seavor")
-    set_storage_formats(config.feature_flags)
+    # dest_config = AppConfig(gcp_bucket_name="test-seavor-9b08fd", gcp_root_storage="projects/test-seavor")  # Test
+    dest_config = AppConfig(gcp_bucket_name="prod-seavor-939101", gcp_root_storage="projects/prod-seavor")  # Prod
+    set_storage_formats(dest_config.feature_flags)
     src_factory = LocalAsyncFactory(data_dir)
     src_factory.register_collections(STORAGE_DEF)
-    dest_factory = GcpAsyncFactory(root_storage=config.gcp_root_storage, bucket_name=config.gcp_bucket_name)
+    dest_factory = GcpAsyncFactory(root_storage=dest_config.gcp_root_storage, bucket_name=dest_config.gcp_bucket_name)
     dest_factory.register_collections(STORAGE_DEF)
 
-    _log.info(f"GCP storage root: {config.gcp_root_storage}")
-    _log.info(f"GCP storage bucket: {config.gcp_bucket_name}")
+    _log.info(f"GCP storage root: {dest_config.gcp_root_storage}")
+    _log.info(f"GCP storage bucket: {dest_config.gcp_bucket_name}")
 
-    # src_collection = src_factory.get_collection(UserInDB)
-    # dest_collection = dest_factory.get_collection(UserInDB)
-    # await copy_collection(src_collection, dest_collection)
+    src_collection = src_factory.get_collection(UserInDB)
+    dest_collection = dest_factory.get_collection(UserInDB)
+    await copy_collection(src_collection, dest_collection)
 
     src_collection = src_factory.get_collection("target-languages")
     dest_collection = dest_factory.get_collection("target-languages")
     await copy_collection(src_collection, dest_collection)
 
-    # await asyncio.gather(
-    #     copy_blob_storage(src_factory, dest_factory, "audio-files", AudioFileMetadata, content_type="audio/mpeg"),
-    #     copy_blob_storage(src_factory, dest_factory, "images", ImageMetadata, content_type="image/png"),
-    # )
+    await asyncio.gather(
+        copy_blob_storage(src_factory, dest_factory, "audio-files", AudioFileMetadata, content_type="audio/mpeg"),
+        copy_blob_storage(src_factory, dest_factory, "images", ImageMetadata, content_type="image/png"),
+    )
 
 
 if __name__ == "__main__":
