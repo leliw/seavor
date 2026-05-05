@@ -2,10 +2,11 @@ from functools import cached_property
 from typing import Optional
 
 from ampf.auth import AuthConfig, DefaultUser, ResetPasswordMailConfig, SmtpConfig
-from core.feature_flags import FeatureFlags
 from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from version import __version__
+
+from .feature_flags import FeatureFlags
 
 
 class AppConfig(BaseSettings):

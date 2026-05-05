@@ -1,7 +1,7 @@
 import logging
 
 from ampf.base import KeyNotExistsException
-from app_config import AppConfig
+from core.app_config import AppConfig
 from dependencies import lifespan
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request

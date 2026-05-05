@@ -5,7 +5,7 @@ from uuid import UUID
 from ampf.auth import AuthService, InsufficientPermissionsError, TokenPayload
 from ampf.base import BaseEmailSender, EmailTemplate, SmtpEmailSender
 from ampf.dependency import DependencyRegistry, get_dependency
-from app_config import AppConfig
+from core.app_config import AppConfig
 from app_state import AppState
 from core.roles import Role
 from core.users.user_service import UserService

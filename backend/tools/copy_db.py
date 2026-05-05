@@ -5,7 +5,7 @@ import _set_path as _set_path
 from ampf.base import BaseAsyncCollectionStorage, BaseBlobMetadata, KeyNotExistsException
 from ampf.gcp import GcpAsyncFactory
 from ampf.local import LocalAsyncFactory
-from app_config import AppConfig
+from core.app_config import AppConfig
 from dotenv import load_dotenv
 from core.users.user_model import UserInDB
 from features.languages import Language

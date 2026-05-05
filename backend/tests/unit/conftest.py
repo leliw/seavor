@@ -8,7 +8,7 @@ from ampf.auth import AuthConfig, DefaultUser, TokenExp, Tokens
 from ampf.base import BaseAsyncFactory, BlobCreate
 from ampf.dependency import DependencyRegistry
 from ampf.testing import ApiTestClient
-from app_config import AppConfig
+from core.app_config import AppConfig
 from app_state import AppState
 from core.users.user_model import User
 from dependencies import lifespan

@@ -2,7 +2,7 @@ import logging
 from dataclasses import dataclass
 
 from ampf.base import BaseAsyncCollectionStorage, BaseAsyncFactory
-from app_config import AppConfig
+from core.app_config import AppConfig
 from core.users.user_model import UserInDB
 from core.users.user_service import UserService
 from haintech.ai.prompts.prompt_service import PromptService

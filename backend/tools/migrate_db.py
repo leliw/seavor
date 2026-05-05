@@ -2,7 +2,7 @@ import asyncio
 import logging
 
 import _set_path as _set_path
-from app_config import AppConfig
+from core.app_config import AppConfig
 from dotenv import load_dotenv
 from features.languages import Language
 from features.levels import Level
