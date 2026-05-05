@@ -5,7 +5,7 @@ PORT=4200
 
 cd backend
 PYTHONPATH="app" \
-PROMPT_DIR=""./app/prompts" \
+PROMPT_DIR="./app/prompts" \
 uv run uvicorn app.main:app --reload --port=$API_PORT &
 UVICORN_PID=$!
 cd ../frontend
