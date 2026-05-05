@@ -102,7 +102,7 @@ native_languages = [Language.EN, Language.PL]
 
 async def main():
     # dest_config = AppConfig(gcp_bucket_name="test-seavor-9b08fd", gcp_root_storage="projects/test-seavor")  # Test
-    dest_config = AppConfig(gcp_bucket_name="prod-seavor-939101", gcp_root_storage="projects/prod-seavor")  # Prod
+    dest_config = AppConfig(gcp_bucket_name="prod-seavor-939101", gcp_root_storage="projects/prod-seavor")  # pyright: ignore[reportCallIssue] # Prod
     set_storage_formats(dest_config.feature_flags)
     src_factory = LocalAsyncFactory(data_dir)
     src_factory.register_collections(STORAGE_DEF)

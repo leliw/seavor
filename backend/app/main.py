@@ -27,7 +27,7 @@ _log = logging.getLogger(__name__)
 
 load_dotenv()
 setup_logging()
-app_config = AppConfig()
+app_config = AppConfig() # pyright: ignore[reportCallIssue]
 app = FastAPI(
     title="Seavor",
     version=__version__,
