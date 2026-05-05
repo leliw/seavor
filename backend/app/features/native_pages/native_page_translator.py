@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+from core.translator_ai_model import TranslatorAIModel
 from features.languages import LANGUAGE_NAMES, Language
 from features.native_pages.native_page_model import (
     NativeDefinitionGuess,
@@ -13,12 +14,12 @@ from features.native_pages.native_page_model import (
 from features.pages.definition_guess_model import DefinitionGuess
 from features.pages.page_base_model import PageType
 from features.pages.page_model import GapFillChoiceExercise, InfoPage, Page
-from haintech.ai import AITaskExecutor, BaseAIModel
+from haintech.ai import AITaskExecutor
 from haintech.ai.prompts.prompt_executor import PromptExecutor, PromptService
 
 
 class NativePageTranslator:
-    def __init__(self, ai_model: BaseAIModel, prompt_service: PromptService):
+    def __init__(self, ai_model: TranslatorAIModel, prompt_service: PromptService):
         self.ai_model = ai_model
         self.prompt_executor = PromptExecutor(ai_model, prompt_service)
 

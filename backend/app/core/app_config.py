@@ -28,6 +28,10 @@ class AppConfig(BaseSettings):
 
     google_api_key: str  # Google GenAI API key
 
+    translator_ai_model_name: str = "gemini-2.5-flash-lite"
+    teacher_ai_model_name: str = "gemini-2.5-flash"
+    verifier_ai_model_name: str = "gemini-2.5-flash"
+
     @field_validator("auth", mode="after")
     @classmethod
     def validate_jwt_secret_key(cls, v: AuthConfig) -> AuthConfig:

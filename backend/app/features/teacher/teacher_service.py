@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from core.teacher_ai_model import TeacherAIModel
 from features.languages import LANGUAGE_NAMES, Language
 from features.letter_shuffles.letter_shuffle_model import LetterShuffleItem, LetterShuffleSet, LetterShuffleSetCreate
 from features.letter_shuffles.letter_shuffle_translation_model import (
@@ -20,7 +21,7 @@ class TeacherServiceFactory:
     def __init__(
         self,
         prompt_service: PromptService,
-        ai_model: Optional[BaseAIModel] = None,
+        ai_model: TeacherAIModel | None = None,
     ):
         self.prompt_service = prompt_service
         self.ai_model = ai_model

@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from ampf.base import KeyNotExistsException
+from ampf.dependency import DependencyRegistry
 from features.languages import Language
 from features.levels import Level
 from features.native_pages.native_page_service import NativePageServiceFactory
@@ -45,38 +46,26 @@ class BaseWorkflowContext(BaseModel):
 class BaseWorkflow:
     def __init__(
         self,
-        topic_service: TopicService,
-        topic_translator: NativeTopicTranslator,
-        native_topic_service: NativeTopicService,
-        page_service_factory: PageServiceFactory,
-        page_translator: NativePageTranslator,
-        native_page_service_factory: NativePageServiceFactory,
-        teacher_service_factory: TeacherServiceFactory,
-        verifier_service: VerifierService,
         repetition_service: RepetitionService,
         prompt_executor: PromptExecutor | None = None,
     ):
-        self.topic_service = topic_service
-        self.topic_translator = topic_translator
-        self.native_topic_service = native_topic_service
-        self.page_service_factory = page_service_factory
-        self.page_translator = page_translator
-        self.native_page_service_factory = native_page_service_factory
-        self.teacher_service_factory = teacher_service_factory
-        self.verifier_service = verifier_service
+        self.topic_service = DependencyRegistry.get(TopicService)
+        self.topic_translator = DependencyRegistry.get(NativeTopicTranslator)
+        self.native_topic_service = DependencyRegistry.get(NativeTopicService)
+        self.page_service_factory = DependencyRegistry.get(PageServiceFactory)
+        self.page_translator = DependencyRegistry.get(NativePageTranslator)
+        self.native_page_service_factory = DependencyRegistry.get(NativePageServiceFactory)
+        self.teacher_service_factory = DependencyRegistry.get(TeacherServiceFactory)
+        self.verifier_service = DependencyRegistry.get(VerifierService)
         self.repetition_service = repetition_service
-        self.prompt_executor = prompt_executor or verifier_service.prompt_executor
+        self.prompt_executor = prompt_executor or self.verifier_service.prompt_executor
 
     async def _ensure_topic(self, ctx: BaseWorkflowContext) -> Topic:
-        return await self.topic_service.get_or_create_default_topic(
-            ctx.language, ctx.level, ctx.username
-        )
+        return await self.topic_service.get_or_create_default_topic(ctx.language, ctx.level, ctx.username)
 
     async def _ensure_native_topic(self, ctx: BaseWorkflowContext, topic_id: UUID) -> NativeTopic:
         try:
-            return await self.native_topic_service.get(
-                ctx.language, ctx.level, ctx.native_language, topic_id
-            )
+            return await self.native_topic_service.get(ctx.language, ctx.level, ctx.native_language, topic_id)
         except KeyNotExistsException:
             native_topic = await self.topic_translator.translate_topic_to_native(
                 ctx.language, ctx.level, ctx.native_language, topic_id

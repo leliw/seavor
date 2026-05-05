@@ -5,9 +5,10 @@ from uuid import UUID
 from ampf.auth import AuthService, InsufficientPermissionsError, TokenPayload
 from ampf.base import BaseEmailSender, EmailTemplate, SmtpEmailSender
 from ampf.dependency import DependencyRegistry, get_dependency
-from core.app_config import AppConfig
 from app_state import AppState
+from core.app_config import AppConfig
 from core.roles import Role
+from core.translator_ai_model import TranslatorAIModel
 from core.users.user_service import UserService
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException
@@ -27,7 +28,7 @@ from features.teacher.verifier_service import VerifierService
 from features.topics.topic_model import Topic
 from features.topics.topic_service import TopicService
 from features.workflows.workflow_factory import WorkflowFactory
-from haintech.ai import BaseAIModel, BaseImageGenerator
+from haintech.ai import BaseImageGenerator
 from haintech.ai.google_genai import GenAIImageGenerator, GoogleAIModel
 from haintech.ai.prompts.prompt_service import PromptService
 from integrations.gtts.gtts_service import GttsService
@@ -48,12 +49,17 @@ def lifespan(config: AppConfig):
 
     DependencyRegistry.register_class(GttsService)
     DependencyRegistry.register_class(AudioFileService)
+    DependencyRegistry.register_class(TranslatorAIModel)
     DependencyRegistry.add(GenAIImageGenerator(), BaseImageGenerator)
     DependencyRegistry.register_class(ImageService)
     DependencyRegistry.register_class(TopicService)
     DependencyRegistry.register_class(PageServiceFactory)
     DependencyRegistry.register_class(NativeTopicService)
     DependencyRegistry.register_class(NativePageServiceFactory)
+    DependencyRegistry.register_class(NativeTopicTranslator)
+    DependencyRegistry.register_class(NativePageTranslator)
+    DependencyRegistry.register_class(TeacherServiceFactory)
+    DependencyRegistry.register_class(VerifierService)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -72,32 +78,17 @@ ImageServiceDep = Annotated[ImageService, Depends(get_dependency(ImageService))]
 TopicServiceDep = Annotated[TopicService, Depends(get_dependency(TopicService))]
 PageServiceFactoryDep = Annotated[PageServiceFactory, Depends(get_dependency(PageServiceFactory))]
 NativeTopicServiceDep = Annotated[NativeTopicService, Depends(get_dependency(NativeTopicService))]
+NativeTopicTranslatorDep = Annotated[NativeTopicTranslator, Depends(get_dependency(NativeTopicTranslator))]
 NativePageServiceFactoryDep = Annotated[NativePageServiceFactory, Depends(get_dependency(NativePageServiceFactory))]
+NativePageTranslatorDep = Annotated[NativePageTranslator, Depends(get_dependency(NativePageTranslator))]
 PromptServiceDep = Annotated[PromptService, Depends(get_dependency(PromptService))]
+TeacherServiceFactoryDep = Annotated[TeacherServiceFactory, Depends(get_dependency(TeacherServiceFactory))]
 
 
 def not_production(app_state: AppStateDep) -> bool:
     if app_state.config.production:
         raise HTTPException(status_code=404, detail="Not found")
     return not app_state.config.production
-
-
-def get_translator_ai_model(app_config: AppConfigDep):
-    return GoogleAIModel(
-        model_name="gemini-2.5-flash-lite", parameters={"temperature": 0.0}, api_key=app_config.google_api_key
-    )
-
-
-TranslatorAIModelDep = Annotated[BaseAIModel, Depends(get_translator_ai_model)]
-
-
-def get_native_topic_translator(
-    translator_ai_model: TranslatorAIModelDep, topic_service: TopicServiceDep
-) -> NativeTopicTranslator:
-    return NativeTopicTranslator(translator_ai_model, topic_service)
-
-
-NativeTopicTranslatorDep = Annotated[NativeTopicTranslator, Depends(get_native_topic_translator)]
 
 
 def get_page_service(
@@ -185,15 +176,6 @@ def get_repetition_service(app_state: AppStateDep, token_payload: TokenPayloadDe
 RepetitionServiceDep = Annotated[RepetitionService, Depends(get_repetition_service)]
 
 
-def get_native_topic_page_translator(
-    translator_ai_model: TranslatorAIModelDep, prompt_service: PromptServiceDep
-) -> NativePageTranslator:
-    return NativePageTranslator(translator_ai_model, prompt_service)
-
-
-NativePageTranslatorDep = Annotated[NativePageTranslator, Depends(get_native_topic_page_translator)]
-
-
 async def get_topic_for_user(
     service: TopicServiceDep,
     target_language: Language,
@@ -221,48 +203,10 @@ def get_native_page_service(
 NativePageServiceDep = Annotated[NativePageService, Depends(get_native_page_service)]
 
 
-def get_teacher_service_factory(app_config: AppConfigDep, prompt_service: PromptServiceDep) -> TeacherServiceFactory:
-    return TeacherServiceFactory(
-        prompt_service=prompt_service,
-        ai_model=GoogleAIModel(parameters={"temperature": 0.1}, api_key=app_config.google_api_key),
-    )
-
-
-TeacherServiceFactoryDep = Annotated[TeacherServiceFactory, Depends(get_teacher_service_factory)]
-
-
-def get_verifier_service(app_config: AppConfigDep, prompt_service: PromptServiceDep) -> VerifierService:
-    return VerifierService(
-        prompt_service=prompt_service,
-        ai_model=GoogleAIModel(parameters={"temperature": 0.1}, api_key=app_config.google_api_key),
-    )
-
-
-VerifierServiceDep = Annotated[VerifierService, Depends(get_verifier_service)]
-
-
 def get_workflow_factory(
-    topic_service: TopicServiceDep,
-    topic_translator: NativeTopicTranslatorDep,
-    native_topic_service: NativeTopicServiceDep,
-    page_translator: NativePageTranslatorDep,
-    teacher_service_factory: TeacherServiceFactoryDep,
-    verifier_service: VerifierServiceDep,
     repetition_service: RepetitionServiceDep,
 ) -> WorkflowFactory:
-    page_service_factory = DependencyRegistry.get(PageServiceFactory)
-    native_page_service_factory = DependencyRegistry.get(NativePageServiceFactory)
-    return WorkflowFactory(
-        topic_service,
-        topic_translator,
-        native_topic_service,
-        page_service_factory,
-        page_translator,
-        native_page_service_factory,
-        teacher_service_factory,
-        verifier_service,
-        repetition_service,
-    )
+    return WorkflowFactory(repetition_service)
 
 
 WorkflowFactoryDep = Annotated[WorkflowFactory, Depends(get_workflow_factory)]

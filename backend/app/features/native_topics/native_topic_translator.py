@@ -1,15 +1,16 @@
 from typing import Dict
 from uuid import UUID
 
+from core.translator_ai_model import TranslatorAIModel
 from features.languages import LANGUAGE_NAMES, Language
 from features.levels import Level
 from features.native_topics.native_topic_model import NativeTopic
 from features.topics.topic_service import TopicService
-from haintech.ai import AITaskExecutor, BaseAIModel
+from haintech.ai import AITaskExecutor
 
 
 class NativeTopicTranslator:
-    def __init__(self, ai_model: BaseAIModel, service: TopicService):
+    def __init__(self, ai_model: TranslatorAIModel, service: TopicService):
         self.service = service
         self.ai_model = ai_model
 
