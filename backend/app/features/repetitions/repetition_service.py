@@ -1,6 +1,6 @@
 import asyncio
-from datetime import datetime, timedelta, timezone
 import logging
+from datetime import datetime, timedelta, timezone
 from typing import AsyncGenerator
 from uuid import UUID
 
@@ -23,12 +23,17 @@ _log = logging.getLogger(__name__)
 
 
 class RepetitionService:
-    def __init__(self, language_storage: BaseAsyncCollectionStorage):
+    def __init__(
+        self,
+        language_storage: BaseAsyncCollectionStorage[LanguageStatus],
+        new_storage: BaseAsyncCollectionStorage[RepetitionCard],
+    ):
         self.language_storage = language_storage
+        self.new_storage = new_storage
         self.scheduler = RepetitionScheduler()
 
     async def get_all(self) -> AsyncGenerator[RepetitionCardHeader]:
-        async for language in self.language_storage.decorated.keys():
+        async for language in self.language_storage.keys():
             try:
                 async for repetition in self.get_all_by_language(Language(language)):
                     yield repetition
@@ -37,7 +42,7 @@ class RepetitionService:
 
     async def get_all_by_language(self, language: Language) -> AsyncGenerator[RepetitionCardHeader]:
         level_storage = self.language_storage.get_collection(language, "levels")
-        async for level in level_storage.decorated.keys():
+        async for level in level_storage.keys():
             try:
                 async for repetition in self.get_all_by_level(language, Level(level)):
                     yield repetition
@@ -47,18 +52,22 @@ class RepetitionService:
     async def get_all_by_level(self, language: Language, level: Level) -> AsyncGenerator[RepetitionCardHeader]:
         level_storage = self.language_storage.get_collection(language, "levels")
         repetition_storage = level_storage.get_collection(level, RepetitionCard)
-        async for repetition in repetition_storage.decorated.get_all():
+        async for repetition in repetition_storage.get_all():
             yield repetition
 
     async def create(self, value_create: RepetitionCardCreate) -> RepetitionCard:
         level_storage = self.language_storage.get_collection(value_create.language, "levels")
         repetition_storage = level_storage.get_collection(value_create.level, RepetitionCard)
         value = self.scheduler.update_repetition_card_due(value_create)
-        await asyncio.gather(
-            self.language_storage.decorated.save(LanguageStatus(language=value_create.language)),
-            level_storage.decorated.save(LevelStatus(level=value_create.level)),
-            repetition_storage.decorated.create(value),
-        )
+        for res in await asyncio.gather(
+            self.language_storage.save(LanguageStatus(language=value_create.language)),
+            level_storage.save(LevelStatus(level=value_create.level)),
+            repetition_storage.create(value),
+            self.new_storage.create(value),
+            return_exceptions=True,
+        ):
+            if isinstance(res, Exception):
+                _log.warning(f"Error creating repetition card: {res}")
         return value
 
     async def evaluate(
@@ -67,10 +76,16 @@ class RepetitionService:
         level_storage = self.language_storage.get_collection(language, "levels")
         repetition_storage = level_storage.get_collection(level, RepetitionCard)
         try:
-            value = await repetition_storage.decorated.get(RepetitionCard.get_id(topic_id, page_id))
+            value = await repetition_storage.get(RepetitionCard.get_id(topic_id, page_id))
             value.evaluations.append(evaluation)
             self.scheduler.update_repetition_card_due(value)
-            await repetition_storage.decorated.save(value)
+            for res in await asyncio.gather(
+                repetition_storage.save(value),
+                self.new_storage.save(value),
+                return_exceptions=True,
+            ):
+                if isinstance(res, Exception):
+                    _log.warning(f"Error saving repetition card: {res}")
             return value
         except KeyNotExistsException:
             return await self.create(
