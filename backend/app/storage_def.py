@@ -39,6 +39,8 @@ STORAGE_DEF = [
     ]),          
     CollectionDef("users", UserInDB, "username", subcollections=[
         CollectionDef("settings", UserSettings, key="id"),
+        CollectionDef("repetitions", RepetitionCard, "id"),
+        
         CollectionDef("languages", LanguageStatus, subcollections=[
             CollectionDef("levels", LevelStatus, subcollections=[
                 CollectionDef("repetitions", RepetitionCard, "id"),

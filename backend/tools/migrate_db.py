@@ -9,6 +9,7 @@ from features.levels import Level
 from features.native_pages.native_page_model import NativePage
 from features.native_topics.native_topic_model import NativeTopic
 from features.pages.page_model import Page
+from features.repetitions.repetition_model import RepetitionCard
 from features.topics.topic_model import Topic
 from storage_def import STORAGE_DEF, set_storage_formats
 
@@ -85,6 +86,23 @@ async def main():
                         _log.debug(" Native Page: %s/%s/%s/%s", language, level, topic_id, page_id)
                         value = await old_pstorage.get(page_id)
                         await new_pstorage.save(value)
+
+    # Repetitions
+    user_storage = factory.get_collection("users")
+    async for username in user_storage.keys():
+        _log.debug("User: %s", username)
+        new_storage = user_storage.get_collection(username, RepetitionCard)
+        for language in target_languages:
+            for level in Level:
+                old_storage = (
+                    user_storage.get_collection(username, "languages")
+                    .get_collection(language, "levels")
+                    .get_collection(level, RepetitionCard)
+                )
+                async for card_id in old_storage.keys():
+                    _log.debug("Repetition: %s/%s/%s", language, level, card_id)
+                    value = await old_storage.get(card_id)
+                    await new_storage.save(value)
 
 
 if __name__ == "__main__":

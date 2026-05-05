@@ -10,7 +10,7 @@ from app_state import AppState
 from core.roles import Role
 from core.users.user_service import UserService
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.concurrency import asynccontextmanager
 from fastapi.security import OAuth2PasswordBearer
 from features.languages import Language
@@ -20,6 +20,7 @@ from features.native_pages.native_page_translator import NativePageTranslator
 from features.native_topics.native_topic_service import NativeTopicService
 from features.native_topics.native_topic_translator import NativeTopicTranslator
 from features.pages.page_service import PageService, PageServiceFactory
+from features.repetitions.repetition_model import RepetitionCard
 from features.repetitions.repetition_service import RepetitionService
 from features.teacher.teacher_service import TeacherServiceFactory
 from features.teacher.verifier_service import VerifierService
@@ -82,7 +83,9 @@ def not_production(app_state: AppStateDep) -> bool:
 
 
 def get_translator_ai_model(app_config: AppConfigDep):
-    return GoogleAIModel(model_name="gemini-2.5-flash-lite", parameters={"temperature": 0.0}, api_key=app_config.google_api_key)
+    return GoogleAIModel(
+        model_name="gemini-2.5-flash-lite", parameters={"temperature": 0.0}, api_key=app_config.google_api_key
+    )
 
 
 TranslatorAIModelDep = Annotated[BaseAIModel, Depends(get_translator_ai_model)]
@@ -173,7 +176,10 @@ class Authorize:
 
 
 def get_repetition_service(app_state: AppStateDep, token_payload: TokenPayloadDep) -> RepetitionService:
-    return RepetitionService(app_state.user_storage.get_collection(token_payload.sub, "languages"))
+    return RepetitionService(
+        app_state.user_storage.get_collection(token_payload.sub, "languages"),
+        app_state.user_storage.get_collection(token_payload.sub, RepetitionCard),
+    )
 
 
 RepetitionServiceDep = Annotated[RepetitionService, Depends(get_repetition_service)]
@@ -265,7 +271,9 @@ WorkflowFactoryDep = Annotated[WorkflowFactory, Depends(get_workflow_factory)]
 def prompt_executor_image(app_config: AppConfigDep, prompt_service: PromptServiceDep) -> PromptExecutorImage:
     return PromptExecutorImage(
         ai_model=GoogleAIModel(parameters={"temperature": 0.5}, api_key=app_config.google_api_key),
-        image_generator=GenAIImageGenerator(model_name="gemini-3.1-flash-image-preview", api_key=app_config.google_api_key),
+        image_generator=GenAIImageGenerator(
+            model_name="gemini-3.1-flash-image-preview", api_key=app_config.google_api_key
+        ),
         prompt_service=prompt_service,
     )
 

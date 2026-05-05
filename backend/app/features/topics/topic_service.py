@@ -3,7 +3,7 @@ import logging
 from typing import AsyncGenerator, Optional
 from uuid import UUID
 
-from ampf.base import BaseAsyncCollectionStorage, BaseAsyncFactory
+from ampf.base import BaseAsyncCollectionStorage, BaseAsyncFactory, KeyNotExistsException
 from fastapi import HTTPException
 from features.languages import Language
 from features.levels import Level
@@ -22,7 +22,7 @@ class TopicService:
         native_topic_service: NativeTopicService,
     ):
         self.factory = factory
-        self._new_storage = self.factory.get_collection(Topic)
+        self.new_storage = self.factory.get_collection(Topic)
         self.page_service_factory = page_service_factory
         self.native_topic_service = native_topic_service
 
@@ -44,7 +44,7 @@ class TopicService:
         storage = self._get_old_storage(value.language, value.level)
         await storage.save(value)
         try:
-            await self._new_storage.save(value)
+            await self.new_storage.save(value)
         except Exception as e:
             _log.error(f"Error saving in new storage: {e}")
             pass
@@ -56,15 +56,18 @@ class TopicService:
         storage = self._get_old_storage(language, level)
         await storage.create(value)
         try:
-            await self._new_storage.create(value)
+            await self.new_storage.create(value)
         except Exception as e:
             _log.error(f"Error creating in new storage: {e}")
             pass
         return value
 
     async def get(self, language: Language, level: Level, id: UUID) -> Topic:
-        storage = self._get_old_storage(language, level)
-        topic = await storage.get(id)
+        try:
+            topic = await self.new_storage.get(id)
+        except KeyNotExistsException:
+            storage = self._get_old_storage(language, level)
+            topic = await storage.get(id)
         return topic
 
     async def get_for_user(self, language: Language, level: Level, id: UUID, username: str | None = None) -> Topic:
@@ -104,7 +107,7 @@ class TopicService:
         storage = self._get_old_storage(language, level)
         await storage.delete(id)
         try:
-            await self._new_storage.delete(id)
+            await self.new_storage.delete(id)
         except Exception as e:
             _log.error(f"Error deleting in new storage: {e}")
             pass
