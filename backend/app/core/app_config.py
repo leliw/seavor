@@ -1,7 +1,10 @@
 from functools import cached_property
-from typing import Optional
+from typing import Literal, Optional, Type
 
 from ampf.auth import AuthConfig, DefaultUser, ResetPasswordMailConfig, SmtpConfig
+from ampf.processors.background_runner import BackgroundRunner
+from ampf.processors.pubsub_push_runner import PubsubPushRunner
+from ampf.processors.task_model import TaskRunner
 from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from version import __version__
@@ -31,6 +34,9 @@ class AppConfig(BaseSettings):
     translator_ai_model_name: str = "gemini-2.5-flash-lite"
     teacher_ai_model_name: str = "gemini-2.5-flash"
     verifier_ai_model_name: str = "gemini-2.5-flash"
+
+    task_runner: Literal["Background", "PubsubPush"] = "Background"
+    teacher_topic: str = "teacher"
 
     @field_validator("auth", mode="after")
     @classmethod
@@ -64,6 +70,16 @@ class AppConfig(BaseSettings):
         # Only fields defined in FeatureFlags are considered, others are ignored
         data = {field_name: field_name in enabled for field_name in FeatureFlags.model_fields}
         return FeatureFlags.model_validate(data)
+
+    @cached_property
+    def task_runner_type(self) -> Type[TaskRunner]:
+        match self.task_runner:
+            case "Background":
+                return BackgroundRunner
+            case "PubsubPush":
+                return PubsubPushRunner
+            case _:
+                raise ValueError(f"Unknown task runner type: {self.task_runner}")
 
 
 class ClientConfig(BaseModel):

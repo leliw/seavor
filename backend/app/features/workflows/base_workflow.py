@@ -2,6 +2,7 @@ from uuid import UUID
 
 from ampf.base import KeyNotExistsException
 from ampf.dependency import DependencyRegistry
+from ampf.processors.task_model import TaskRunner
 from features.languages import Language
 from features.levels import Level
 from features.native_pages.native_page_service import NativePageServiceFactory
@@ -12,7 +13,7 @@ from features.native_topics.native_topic_translator import NativeTopicTranslator
 from features.pages.page_model import Page
 from features.pages.page_service import PageServiceFactory
 from features.repetitions.repetition_model import RepetitionCard, RepetitionCardCreate
-from features.repetitions.repetition_service import RepetitionService
+from features.repetitions.repetition_service import RepetitionServiceFactory
 from features.teacher.teacher_service import TeacherServiceFactory
 from features.teacher.verifier_service import VerifierService
 from features.topics.topic_model import Topic
@@ -46,9 +47,9 @@ class BaseWorkflowContext(BaseModel):
 class BaseWorkflow:
     def __init__(
         self,
-        repetition_service: RepetitionService,
         prompt_executor: PromptExecutor | None = None,
     ):
+        self.task_runner = DependencyRegistry.get(TaskRunner)
         self.topic_service = DependencyRegistry.get(TopicService)
         self.topic_translator = DependencyRegistry.get(NativeTopicTranslator)
         self.native_topic_service = DependencyRegistry.get(NativeTopicService)
@@ -57,7 +58,7 @@ class BaseWorkflow:
         self.native_page_service_factory = DependencyRegistry.get(NativePageServiceFactory)
         self.teacher_service_factory = DependencyRegistry.get(TeacherServiceFactory)
         self.verifier_service = DependencyRegistry.get(VerifierService)
-        self.repetition_service = repetition_service
+        self.repetition_service_factory = DependencyRegistry.get(RepetitionServiceFactory)
         self.prompt_executor = prompt_executor or self.verifier_service.prompt_executor
 
     async def _ensure_topic(self, ctx: BaseWorkflowContext) -> Topic:
@@ -73,10 +74,11 @@ class BaseWorkflow:
             return await self.native_topic_service.create(native_topic)
 
     async def _create_repetition_card(self, ctx: BaseWorkflowContext) -> RepetitionCard:
+        repetition_service = self.repetition_service_factory.create(ctx.username)
         repetition_card_create = RepetitionCardCreate(
             language=ctx.language,
             level=ctx.level,
             topic_id=ctx.required_topic.id,
             page_id=ctx.required_page.id,
         )
-        return await self.repetition_service.create(repetition_card_create)
+        return await repetition_service.create(repetition_card_create)
