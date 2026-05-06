@@ -53,6 +53,9 @@ class RepetitionService:
             except Exception as e:
                 _log.warning(e)
 
+    async def get(self, id: UUID) -> RepetitionCard:
+        return await self.new_storage.get(id)
+
     async def get_all_by_language(self, language: Language) -> AsyncGenerator[RepetitionCardHeader]:
         level_storage = self.language_storage.get_collection(language, "levels")
         async for level in level_storage.keys():

@@ -1,6 +1,8 @@
+import asyncio
 from pathlib import Path
 
 from ampf.testing import ApiTestClient
+import pytest
 from features.languages import Language
 from features.levels import Level
 from features.native_pages.native_page_model import NativeDefinitionGuess
@@ -11,10 +13,14 @@ from features.teacher.teacher_model import TeacherDefinitionGuessCreate
 from features.topics.topic_model import Topic
 from haintech.testing import MockerAIModel
 
+from features.workflows.base_workflow import BaseWorkflowContext, WorkflowStatus
+
 # User can add their own private definition guess:
 
 
-def test_private_definition_guess(
+@pytest.mark.timeout(10)
+@pytest.mark.asyncio
+async def test_private_definition_guess(
     client: ApiTestClient,
     headers: dict[str, str],
     second_user_headers: dict[str, str],
@@ -44,9 +50,13 @@ def test_private_definition_guess(
     level = Level.A1
     definition_guess_create = TeacherDefinitionGuessCreate(language=language, level=level, phrase="Hello")
     # When: Add the phrase
-    r = client.post_typed(
-        "/api/teacher/definition-guess", 201, RepetitionCard, headers=headers, json=definition_guess_create
-    )
+    ctx = client.post_typed("/api/teacher/definition-guess", 201, BaseWorkflowContext, headers=headers, json=definition_guess_create)
+    # And: Wait until it is processed
+    while ctx.status != WorkflowStatus.COMPLETED:
+        await asyncio.sleep(1)
+        ctx = client.get_typed(f"/api/teacher/{ctx.id}", 200, BaseWorkflowContext, headers=headers)
+    assert ctx.repetition_card
+    r = client.get_typed(f"/api/repetitions/{ctx.repetition_card.id}", 200, RepetitionCard, headers=headers)
     # Then: A private topic exists
     topic = client.get_typed(f"/api/topics/{language}/{level}/{r.topic_id}", 200, Topic, headers=headers)
     assert topic.private
@@ -70,7 +80,7 @@ def test_private_definition_guess(
         NativeDefinitionGuess,
         headers=headers,
     )
-    # And: All items ar stored in proper paths
+    # And: All items are stored in proper paths
     topic_path = tmp_path / f"topics/{topic.id}.json"
     assert topic_path.exists()
     page_path = tmp_path / f"topics/{topic.id}/pages/{r.page_id}.json"

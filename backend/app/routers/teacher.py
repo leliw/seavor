@@ -1,23 +1,42 @@
 import logging
+from uuid import UUID
 
+from ampf.processors.task_registry import TaskRegistry
 from dependencies import (
     Authorize,
+    TaskRunnerDep,
     TokenPayloadDep,
     WorkflowFactoryDep,
 )
 from fastapi import APIRouter, Depends
-from features.repetitions.repetition_model import RepetitionCard
 from features.teacher.teacher_model import TeacherDefinitionGuessCreate
+from features.workflows.base_workflow import BaseWorkflowContext
+from features.workflows.definition_guess_workflow import DefinitionGuessWorkflowContext
+from features.workflows.workflow_factory import WorkflowFactory
 
 _log = logging.getLogger(__name__)
 router = APIRouter(tags=["Teacher features"], dependencies=[Depends(Authorize())])
 
 
+@TaskRegistry.register("teacher", DefinitionGuessWorkflowContext)
+async def processor(workflow_factory: WorkflowFactory, payload: DefinitionGuessWorkflowContext) -> None:
+    workflow = workflow_factory.create_for_context(payload)
+    await workflow.run(payload.id)
+
+
 @router.post("/definition-guess", status_code=201)
 async def post(
     workflow_factory: WorkflowFactoryDep,
+    task_runner: TaskRunnerDep,
     token_payload: TokenPayloadDep,
     body: TeacherDefinitionGuessCreate,
-) -> RepetitionCard:
+) -> BaseWorkflowContext:
     _log.debug("Payload: %s", body.model_dump())
-    return await workflow_factory.create_definition_guess_workflow().execute(body, token_payload.sub)
+    ctx = await workflow_factory.create_definition_guess_workflow(task_runner).create(body, token_payload.sub)
+    await task_runner.run_async("teacher", ctx)
+    return ctx
+
+
+@router.get("/{id}")
+async def get(workflow_factory: WorkflowFactoryDep, token_payload: TokenPayloadDep, id: UUID) -> BaseWorkflowContext:
+    return await workflow_factory.get(id)

@@ -1,6 +1,8 @@
-from uuid import UUID
+from enum import StrEnum
+from typing import Any
+from uuid import UUID, uuid4
 
-from ampf.base import KeyNotExistsException
+from ampf.base import BaseAsyncCollectionStorage, KeyNotExistsException
 from ampf.dependency import DependencyRegistry
 from ampf.processors.task_model import TaskRunner
 from features.languages import Language
@@ -19,10 +21,30 @@ from features.teacher.verifier_service import VerifierService
 from features.topics.topic_model import Topic
 from features.topics.topic_service import TopicService
 from haintech.ai.prompts import PromptExecutor
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+
+class WorkflowStatus(StrEnum):
+    PENDING = "pending"
+    RUNNING = "running"
+    STEP_COMPLETED = "step_completed"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELED = "canceled"
+
+
+class WorkflowType(StrEnum):
+    DEFINITION_GUESS = "definition-guess"
 
 
 class BaseWorkflowContext(BaseModel):
+    id: UUID = Field(default_factory=uuid4)
+    type: WorkflowType
+    current_step: int = 0
+    total_steps: int = 1
+    status: WorkflowStatus = WorkflowStatus.PENDING
+    error: str | None = None
+
     language: Language
     level: Level
     native_language: Language
@@ -30,6 +52,8 @@ class BaseWorkflowContext(BaseModel):
 
     topic: Topic | None = None
     page: Page | None = None
+    native_page: Page | None = None
+    repetition_card: RepetitionCard | None = None
 
     @property
     def required_topic(self) -> Topic:
@@ -43,13 +67,19 @@ class BaseWorkflowContext(BaseModel):
             raise ValueError("Page is required")
         return self.page
 
+    def model_post_init(self, __context: Any) -> None:
+        self.__pydantic_fields_set__.add("type")
 
-class BaseWorkflow:
+
+class BaseWorkflow[T: BaseWorkflowContext]:
     def __init__(
         self,
+        storage: BaseAsyncCollectionStorage[T],
+        task_runner: TaskRunner | None = None,
         prompt_executor: PromptExecutor | None = None,
     ):
-        self.task_runner = DependencyRegistry.get(TaskRunner)
+        self.storage = storage
+        self.task_runner = task_runner or DependencyRegistry.get(TaskRunner)
         self.topic_service = DependencyRegistry.get(TopicService)
         self.topic_translator = DependencyRegistry.get(NativeTopicTranslator)
         self.native_topic_service = DependencyRegistry.get(NativeTopicService)
