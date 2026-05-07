@@ -1,8 +1,8 @@
 import asyncio
 from pathlib import Path
 
-from ampf.testing import ApiTestClient
 import pytest
+from ampf.testing import ApiTestClient
 from features.languages import Language
 from features.levels import Level
 from features.native_pages.native_page_model import NativeDefinitionGuess
@@ -11,9 +11,8 @@ from features.pages.definition_guess_model import DefinitionGuess
 from features.repetitions.repetition_model import RepetitionCard, RepetitionSchedule
 from features.teacher.teacher_model import TeacherDefinitionGuessCreate
 from features.topics.topic_model import Topic
+from features.workflows.base_task import TaskHeader, TaskStatus
 from haintech.testing import MockerAIModel
-
-from features.workflows.base_workflow import BaseWorkflowContext, WorkflowStatus
 
 # User can add their own private definition guess:
 
@@ -50,13 +49,13 @@ async def test_private_definition_guess(
     level = Level.A1
     definition_guess_create = TeacherDefinitionGuessCreate(language=language, level=level, phrase="Hello")
     # When: Add the phrase
-    ctx = client.post_typed("/api/teacher/definition-guess", 202, BaseWorkflowContext, headers=headers, json=definition_guess_create)
+    ctx = client.post_typed("/api/teacher/definition-guess", 202, TaskHeader, headers=headers, json=definition_guess_create)
     # And: Wait until it is processed
-    while ctx.status != WorkflowStatus.COMPLETED:
+    while ctx.status != TaskStatus.COMPLETED:
         await asyncio.sleep(1)
-        ctx = client.get_typed(f"/api/teacher/{ctx.id}", 200, BaseWorkflowContext, headers=headers)
-    assert ctx.repetition_card
-    r = client.get_typed(f"/api/repetitions/{ctx.repetition_card.id}", 200, RepetitionCard, headers=headers)
+        ctx = client.get_typed(f"/api/teacher/{ctx.id}", 200, TaskHeader, headers=headers)
+    assert ctx.result_id is not None
+    r = client.get_typed(f"/api/repetitions/{ctx.result_id}", 200, RepetitionCard, headers=headers)
     # Then: A private topic exists
     topic = client.get_typed(f"/api/topics/{language}/{level}/{r.topic_id}", 200, Topic, headers=headers)
     assert topic.private

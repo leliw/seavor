@@ -1,18 +1,21 @@
 import logging
-from typing import Awaitable, Callable, Self
+from typing import Awaitable, Callable, Literal, Self
 from uuid import UUID
 
-from ampf.processors.task_model import TaskRunner
 from ampf.processors.pubsub_runner import PubsubRunner
+from ampf.processors.task_model import TaskRunner
 from features.pages.definition_guess_model import DefinitionGuessCreate
 from features.teacher.teacher_model import TeacherDefinitionGuessCreate
-from features.workflows.base_workflow import BaseWorkflow, BaseWorkflowContext, WorkflowStatus, WorkflowType
+from pydantic import computed_field
+
+from .base_task import TaskStatus
+from .base_workflow import BaseWorkflow, BaseWorkflowContext, TaskType
 
 _log = logging.getLogger(__name__)
 
 
 class DefinitionGuessWorkflowContext(BaseWorkflowContext):
-    type: WorkflowType = WorkflowType.DEFINITION_GUESS
+    type: Literal[TaskType.DEFINITION_GUESS] = TaskType.DEFINITION_GUESS
 
     phrase: str
     content: DefinitionGuessCreate | None = None
@@ -20,6 +23,16 @@ class DefinitionGuessWorkflowContext(BaseWorkflowContext):
     @classmethod
     def create(cls, body: TeacherDefinitionGuessCreate, username: str) -> Self:
         return cls(**body.model_dump(), username=username)
+
+    @computed_field
+    @property
+    def name(self) -> str | None:
+        return f"Definition guess for '{self.phrase}'"
+
+    @computed_field
+    @property
+    def result_id(self) -> str | None:
+        return str(self.repetition_card.id) if self.repetition_card else None
 
 
 class DefinitionGuessWorkflow(BaseWorkflow[DefinitionGuessWorkflowContext]):
@@ -37,16 +50,16 @@ class DefinitionGuessWorkflow(BaseWorkflow[DefinitionGuessWorkflowContext]):
     async def create(self, body: TeacherDefinitionGuessCreate, username: str) -> DefinitionGuessWorkflowContext:
         snapshot = DefinitionGuessWorkflowContext.create(body, username)
         snapshot.total_steps = len(self._steps)
-        snapshot.status = WorkflowStatus.PENDING
+        snapshot.status = TaskStatus.PENDING
         await self.storage.create(snapshot)
         return snapshot
 
     async def run(self, ctx_id: UUID) -> DefinitionGuessWorkflowContext:
         ctx = await self.storage.get(ctx_id)
-        if ctx.status in [WorkflowStatus.COMPLETED, WorkflowStatus.FAILED, WorkflowStatus.CANCELED]:
+        if ctx.status in [TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.CANCELED]:
             return ctx
         try:
-            ctx.status = WorkflowStatus.RUNNING
+            ctx.status = TaskStatus.RUNNING
             await self.storage.patch(ctx_id, {"status": ctx.status})
             while ctx.current_step < ctx.total_steps:
                 ctx = await self.execute_step(ctx.current_step, ctx)
@@ -56,12 +69,12 @@ class DefinitionGuessWorkflow(BaseWorkflow[DefinitionGuessWorkflowContext]):
                     if self.should_checkpoint(ctx):
                         await self.task_runner.run_async("teacher", ctx)
                         return ctx
-            ctx.status = WorkflowStatus.COMPLETED
+            ctx.status = TaskStatus.COMPLETED
             await self.storage.patch(ctx_id, {"status": ctx.status})
             return ctx
         except Exception as e:
-            ctx.status = WorkflowStatus.FAILED
-            ctx.error = str(e)
+            ctx.status = TaskStatus.FAILED
+            ctx.error_message = str(e)
             await self.storage.save(ctx)
             raise
 

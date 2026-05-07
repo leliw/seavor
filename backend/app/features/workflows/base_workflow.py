@@ -1,6 +1,6 @@
 from enum import StrEnum
 from typing import Any
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from ampf.base import BaseAsyncCollectionStorage, KeyNotExistsException
 from ampf.dependency import DependencyRegistry
@@ -22,28 +22,20 @@ from features.teacher.verifier_service import VerifierService
 from features.topics.topic_model import Topic
 from features.topics.topic_service import TopicService
 from haintech.ai.prompts import PromptExecutor
-from pydantic import BaseModel, Field
+from pydantic import computed_field
+
+from .base_task import BaseTask
 
 
-class WorkflowStatus(StrEnum):
-    PENDING = "PENDING"
-    RUNNING = "RUNNING"
-    COMPLETED = "COMPLETED"
-    FAILED = "FAILED"
-    CANCELED = "CANCELED"
-
-
-class WorkflowType(StrEnum):
+class TaskType(StrEnum):
     DEFINITION_GUESS = "definition-guess"
+    OTHER_TASK = "other-task"
 
 
-class BaseWorkflowContext(BaseModel):
-    id: UUID = Field(default_factory=uuid4)
-    type: WorkflowType
+class BaseWorkflowContext(BaseTask):
+    type: TaskType
     current_step: int = 0
     total_steps: int = 1
-    status: WorkflowStatus = WorkflowStatus.PENDING
-    error: str | None = None
 
     language: Language
     level: Level
@@ -54,6 +46,11 @@ class BaseWorkflowContext(BaseModel):
     page: Page | None = None
     native_page: NativePage | None = None
     repetition_card: RepetitionCard | None = None
+
+    @computed_field
+    @property
+    def progress(self) -> int | None:
+        return 100 * self.current_step // self.total_steps if self.total_steps else None
 
     @property
     def required_topic(self) -> Topic:

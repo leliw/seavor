@@ -10,7 +10,7 @@ from dependencies import (
 )
 from fastapi import APIRouter, Depends
 from features.teacher.teacher_model import TeacherDefinitionGuessCreate
-from features.workflows.base_workflow import BaseWorkflowContext
+from features.workflows.base_task import TaskHeader
 from features.workflows.definition_guess_workflow import DefinitionGuessWorkflowContext
 from features.workflows.workflow_factory import WorkflowFactory
 
@@ -30,13 +30,14 @@ async def post(
     task_runner: TaskRunnerDep,
     token_payload: TokenPayloadDep,
     body: TeacherDefinitionGuessCreate,
-) -> BaseWorkflowContext:
+) -> TaskHeader:
     _log.debug("Payload: %s", body.model_dump())
     ctx = await workflow_factory.create_definition_guess_workflow(task_runner).create(body, token_payload.sub)
     await task_runner.run_async("teacher", ctx)
-    return ctx
+    return TaskHeader.from_task(ctx)
 
 
 @router.get("/{id}")
-async def get(workflow_factory: WorkflowFactoryDep, token_payload: TokenPayloadDep, id: UUID) -> BaseWorkflowContext:
-    return await workflow_factory.get(id)
+async def get(workflow_factory: WorkflowFactoryDep, token_payload: TokenPayloadDep, id: UUID) -> TaskHeader:
+    task = await workflow_factory.get(id)
+    return TaskHeader.from_task(task)
