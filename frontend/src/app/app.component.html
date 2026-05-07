@@ -1,1 +1,4 @@
+@if (taskService.activeTasks().length > 0) {
+<mat-progress-bar mode="determinate" [value]="taskService.totalProgress()" class="global-loader"></mat-progress-bar>
+}
 <router-outlet />
