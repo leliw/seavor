@@ -7,6 +7,7 @@ from ampf.dependency import DependencyRegistry
 from ampf.processors.task_model import TaskRunner
 from features.languages import Language
 from features.levels import Level
+from features.native_pages.native_page_model import NativePage
 from features.native_pages.native_page_service import NativePageServiceFactory
 from features.native_pages.native_page_translator import NativePageTranslator
 from features.native_topics.native_topic_model import NativeTopic
@@ -25,12 +26,11 @@ from pydantic import BaseModel, Field
 
 
 class WorkflowStatus(StrEnum):
-    PENDING = "pending"
-    RUNNING = "running"
-    STEP_COMPLETED = "step_completed"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    CANCELED = "canceled"
+    PENDING = "PENDING"
+    RUNNING = "RUNNING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    CANCELED = "CANCELED"
 
 
 class WorkflowType(StrEnum):
@@ -52,7 +52,7 @@ class BaseWorkflowContext(BaseModel):
 
     topic: Topic | None = None
     page: Page | None = None
-    native_page: Page | None = None
+    native_page: NativePage | None = None
     repetition_card: RepetitionCard | None = None
 
     @property

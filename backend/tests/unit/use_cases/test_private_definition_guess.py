@@ -50,7 +50,7 @@ async def test_private_definition_guess(
     level = Level.A1
     definition_guess_create = TeacherDefinitionGuessCreate(language=language, level=level, phrase="Hello")
     # When: Add the phrase
-    ctx = client.post_typed("/api/teacher/definition-guess", 201, BaseWorkflowContext, headers=headers, json=definition_guess_create)
+    ctx = client.post_typed("/api/teacher/definition-guess", 202, BaseWorkflowContext, headers=headers, json=definition_guess_create)
     # And: Wait until it is processed
     while ctx.status != WorkflowStatus.COMPLETED:
         await asyncio.sleep(1)

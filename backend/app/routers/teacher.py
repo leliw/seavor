@@ -24,7 +24,7 @@ async def processor(workflow_factory: WorkflowFactory, payload: DefinitionGuessW
     await workflow.run(payload.id)
 
 
-@router.post("/definition-guess", status_code=201)
+@router.post("/definition-guess", status_code=202)
 async def post(
     workflow_factory: WorkflowFactoryDep,
     task_runner: TaskRunnerDep,
