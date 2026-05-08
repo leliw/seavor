@@ -11,8 +11,9 @@ from features.pages.definition_guess_model import DefinitionGuess
 from features.repetitions.repetition_model import RepetitionCard, RepetitionSchedule
 from features.teacher.teacher_model import TeacherDefinitionGuessCreate
 from features.topics.topic_model import Topic
-from features.workflows.base_task import TaskHeader, TaskStatus
+from ampf.tasks import TaskHeader, TaskStatus
 from haintech.testing import MockerAIModel
+from tests.mocker_image_generator import *
 
 # User can add their own private definition guess:
 
@@ -24,6 +25,7 @@ async def test_private_definition_guess(
     headers: dict[str, str],
     second_user_headers: dict[str, str],
     mocker_ai_model: MockerAIModel,
+    mocker_image_generator: MockerImageGenerator,
     tmp_path: Path,
 ):
     mocker_ai_model.add(
@@ -42,14 +44,20 @@ async def test_private_definition_guess(
         message_containing="Translate definition guess exercise to student's native language:",
         response='{\n  "native_phrase": "Witaj",\n  "native_definition": "Powszechne wyra\u017cenie u\u017cywane do powitania kogo\u015b lub, w j\u0119zyku angielskim, tak\u017ce do odebrania telefonu.",\n  "native_sentences": [\n    {\n      "text": "Wesz\u0142a do pokoju i powiedzia\u0142a: \'____, wszystkim!\'"\n    },\n    {\n      "text": "Kiedy zadzwoni\u0142 telefon, odebra\u0142 go i po prostu powiedzia\u0142: \'____?\'"\n    },\n    {\n      "text": "To dobre maniery, \u017ceby powiedzie\u0107 ____, kiedy poznajesz kogo\u015b nowego."\n    }\n  ],\n  "native_alternatives": [\n    {\n      "value": "Cze\u015b\u0107",\n      "explanation": "To bardziej nieformalne powitanie, cz\u0119sto u\u017cywane w\u015br\u00f3d przyjaci\u00f3\u0142 lub w swobodnych okoliczno\u015bciach, podczas gdy \'Witaj\' jest nieco bardziej formalne lub uroczyste, cho\u0107 r\u00f3wnie\u017c uniwersalne."\n    },\n    {\n      "value": "Dzie\u0144 dobry/popo\u0142udnie/wiecz\u00f3r",\n      "explanation": "Te powitania s\u0105 bardziej formalne i specyficzne dla pory dnia, zmieniaj\u0105 si\u0119 w zale\u017cno\u015bci od tego, jaka jest godzina, w przeciwie\u0144stwie do \'Witaj\', kt\u00f3re jest odpowiednie o ka\u017cdej porze."\n    },\n    {\n      "value": "Jak si\u0119 masz?",\n      "explanation": "To bardzo tradycyjne i formalne powitanie, szczeg\u00f3lnie powszechne przy pierwszym spotkaniu z kim\u015b, i cz\u0119sto nie oczekuje dos\u0142ownej odpowiedzi na pytanie \'jak\'."\n    }\n  ],\n  "native_distractors": [\n    {\n      "value": "Do widzenia",\n      "explanation": "To wyra\u017cenie jest u\u017cywane na po\u017cegnanie, czyli jest ca\u0142kowitym przeciwie\u0144stwem powitania."\n    },\n    {\n      "value": "Przepraszam",\n      "explanation": "U\u017cywa si\u0119 tego, aby uprzejmie zwr\u00f3ci\u0107 czyj\u0105\u015b uwag\u0119 lub przeprosi\u0107, a nie zainicjowa\u0107 powitanie."\n    },\n    {\n      "value": "Prosz\u0119",\n      "explanation": "To s\u0142owo jest u\u017cywane do uprzejmej pro\u015bby lub podkre\u015blenia zaproszenia, a nie jako samodzielne powitanie."\n    }\n  ],\n  "native_hint": "To, co m\u00f3wisz, kiedy po raz pierwszy kogo\u015b spotykasz lub odbierasz telefon, prosty spos\u00f3b na potwierdzenie czyjej\u015b obecno\u015bci.",\n  "native_explanation": null\n}',
     )
-
+    mocker_ai_model.add(
+        message_containing='Please generate an image prompt',
+        response='{"image_prompt": "A person, gender-neutral, is navigating a dynamic and slightly unpredictable environment, like an obstacle course or a path with unexpected, playful elements. They are in an active, alert stance, perhaps on the balls of their feet, with a focused and ready expression. The scene should convey a sense of constant vigilance and readiness for minor surprises or changes, preventing them from becoming too relaxed. The background could be a vibrant, engaging setting, like a game show stage or a fantastical training ground. No text or words in the image."}',
+    )
+    mocker_image_generator.add(response=b"Mocked image bytes")
     # with mocker_ai_model.record():
     # Given: A phrase from user
     language = Language.EN
     level = Level.A1
     definition_guess_create = TeacherDefinitionGuessCreate(language=language, level=level, phrase="Hello")
     # When: Add the phrase
-    ctx = client.post_typed("/api/teacher/definition-guess", 202, TaskHeader, headers=headers, json=definition_guess_create)
+    ctx = client.post_typed(
+        "/api/teacher/definition-guess", 202, TaskHeader, headers=headers, json=definition_guess_create
+    )
     # And: Wait until it is processed
     while ctx.status != TaskStatus.COMPLETED:
         await asyncio.sleep(1)
@@ -60,9 +68,11 @@ async def test_private_definition_guess(
     topic = client.get_typed(f"/api/topics/{language}/{level}/{r.topic_id}", 200, Topic, headers=headers)
     assert topic.private
     # And: A definition in this topic exists
-    client.get_typed(
+    page = client.get_typed(
         f"/api/topics/{language}/{level}/{r.topic_id}/pages/{r.page_id}", 200, DefinitionGuess, headers=headers
     )
+    # And: Image is generated and stored in page
+    assert page.image_names
     # And: Native private topic exists
     ntopic = client.get_typed(
         f"/api/native-topics/{language}/{level}/pl/{r.topic_id}",
@@ -73,12 +83,14 @@ async def test_private_definition_guess(
     assert ntopic.private
 
     # And: Native private page exists
-    client.get_typed(
+    npage = client.get_typed(
         f"/api/native-topics/{language}/{level}/pl/{r.topic_id}/pages/{r.page_id}",
         200,
         NativeDefinitionGuess,
         headers=headers,
     )
+    # And: Image is generated and stored in native page
+    assert npage.image_names
     # And: All items are stored in proper paths
     topic_path = tmp_path / f"topics/{topic.id}.json"
     assert topic_path.exists()

@@ -5,8 +5,8 @@ from uuid import UUID
 from ampf.auth import AuthService, InsufficientPermissionsError, TokenPayload
 from ampf.base import BaseAsyncCollectionStorage, BaseEmailSender, EmailTemplate, SmtpEmailSender
 from ampf.dependency import DependencyRegistry, get_dependency
-from ampf.processors.background_runner import BackgroundRunner
-from ampf.processors.task_model import ManagedTaskRunner, TaskRunner
+from ampf.tasks import ManagedTaskRunner, TaskRunner
+from ampf.tasks.background_runner import BackgroundRunner
 from app_state import AppState
 from core.app_config import AppConfig
 from core.roles import Role
@@ -66,6 +66,7 @@ def lifespan(config: AppConfig):
     DependencyRegistry.register_class(VerifierService)
     DependencyRegistry.register_class(RepetitionServiceFactory)
     DependencyRegistry.register_class(WorkflowFactory)
+    DependencyRegistry.register(get_prompt_executor_image)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -91,6 +92,7 @@ PromptServiceDep = Annotated[PromptService, Depends(get_dependency(PromptService
 TeacherServiceFactoryDep = Annotated[TeacherServiceFactory, Depends(get_dependency(TeacherServiceFactory))]
 RepetitionServiceFactoryDep = Annotated[RepetitionServiceFactory, Depends(get_dependency(RepetitionServiceFactory))]
 WorkflowFactoryDep = Annotated[WorkflowFactory, Depends(get_dependency(WorkflowFactory))]
+PromptExecutorImageDep = Annotated[PromptExecutorImage, Depends(get_dependency(PromptExecutorImage))]
 
 
 def not_production(app_state: AppStateDep) -> bool:
@@ -220,7 +222,7 @@ def get_task_runner(app_state: AppStateDep, background_tasks: BackgroundTasks) -
 TaskRunnerDep = Annotated[TaskRunner, Depends(get_task_runner)]
 
 
-def prompt_executor_image(app_config: AppConfigDep, prompt_service: PromptServiceDep) -> PromptExecutorImage:
+def get_prompt_executor_image(app_config: AppConfigDep, prompt_service: PromptServiceDep) -> PromptExecutorImage:
     return PromptExecutorImage(
         ai_model=GoogleAIModel(parameters={"temperature": 0.5}, api_key=app_config.google_api_key),
         image_generator=GenAIImageGenerator(
@@ -228,6 +230,3 @@ def prompt_executor_image(app_config: AppConfigDep, prompt_service: PromptServic
         ),
         prompt_service=prompt_service,
     )
-
-
-PromptExecutorImageDep = Annotated[PromptExecutorImage, Depends(prompt_executor_image)]

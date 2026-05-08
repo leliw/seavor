@@ -1,14 +1,19 @@
 import logging
 from typing import Awaitable, Callable, Literal, Self
-from uuid import UUID
+from uuid import NAMESPACE_DNS, UUID, uuid5
 
-from ampf.processors.pubsub_runner import PubsubRunner
-from ampf.processors.task_model import TaskRunner
+from ampf.dependency import DependencyRegistry
+from ampf.tasks.pubsub_runner import PubsubRunner
+from ampf.tasks import TaskRunner, TaskStatus
 from features.pages.definition_guess_model import DefinitionGuessCreate
+from features.pages.page_base_model import PageType
 from features.teacher.teacher_model import TeacherDefinitionGuessCreate
 from pydantic import computed_field
 
-from .base_task import TaskStatus
+from shared.images.image_model import ImageBlob, ImageMetadata
+from shared.images.image_service import ImageService
+from shared.prompts.prompt_executor_image import PromptExecutorImage
+
 from .base_workflow import BaseWorkflow, BaseWorkflowContext, TaskType
 
 _log = logging.getLogger(__name__)
@@ -19,15 +24,11 @@ class DefinitionGuessWorkflowContext(BaseWorkflowContext):
 
     phrase: str
     content: DefinitionGuessCreate | None = None
+    image_name: str | None = None
 
     @classmethod
     def create(cls, body: TeacherDefinitionGuessCreate, username: str) -> Self:
-        return cls(**body.model_dump(), username=username)
-
-    @computed_field
-    @property
-    def name(self) -> str | None:
-        return f"Definition guess for '{self.phrase}'"
+        return cls(**body.model_dump(), username=username, name=f"Definition guess for '{body.phrase}'")
 
     @computed_field
     @property
@@ -43,6 +44,7 @@ class DefinitionGuessWorkflow(BaseWorkflow[DefinitionGuessWorkflowContext]):
             self.generate_content,
             self.create_page,
             self.translate_page,
+            self.generate_image,
             self.create_repetition_card,
         ]
         self._checkpoint_steps = {1, 3}
@@ -145,4 +147,36 @@ class DefinitionGuessWorkflow(BaseWorkflow[DefinitionGuessWorkflowContext]):
         if ctx.repetition_card is not None:
             return ctx
         ctx.repetition_card = await self._create_repetition_card(ctx)
+        return ctx
+
+    async def generate_image(self, ctx: DefinitionGuessWorkflowContext) -> DefinitionGuessWorkflowContext:
+        if ctx.image_name is not None:
+            return ctx
+
+        if ctx.content is None:
+            raise ValueError("Content is required")
+        prompt_executor_image = DependencyRegistry.get(PromptExecutorImage)
+        blob_create = await prompt_executor_image.execute_image_prompt_async(
+            "picture_generator", topic=ctx.required_topic, content=ctx.required_page
+        )
+        if not blob_create:
+            return ctx
+        name = uuid5(NAMESPACE_DNS, f"{ctx.language.value}-{ctx.phrase}").hex
+        blob = ImageBlob(
+            name=name,
+            content=blob_create.content,
+            metadata=ImageMetadata(
+                **blob_create.metadata.model_dump(),
+                language=ctx.language.value,
+                text=ctx.phrase,
+                description=ctx.content.definition,
+            ),
+        )
+        image_service = DependencyRegistry.get(ImageService)
+        await image_service.upload(blob)
+        if ctx.required_page.type != PageType.DEFINITION_GUESS:
+            raise ValueError(f"Unsupported page type: {ctx.required_page.type}")
+        ctx.image_name = blob.name
+        page_service = self.page_service_factory.create(ctx.language, ctx.level, ctx.required_topic.id)
+        await page_service.add_image_name(ctx.required_page.id, blob.name)
         return ctx
