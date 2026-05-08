@@ -4,7 +4,7 @@ from uuid import UUID
 
 from ampf.base import BaseAsyncCollectionStorage, KeyNotExistsException
 from ampf.dependency import DependencyRegistry
-from ampf.processors.task_model import TaskRunner
+from ampf.tasks import BaseTask, TaskRunner
 from features.languages import Language
 from features.levels import Level
 from features.native_pages.native_page_model import NativePage
@@ -24,8 +24,6 @@ from features.topics.topic_service import TopicService
 from haintech.ai.prompts import PromptExecutor
 from pydantic import computed_field
 
-from .base_task import BaseTask
-
 
 class TaskType(StrEnum):
     DEFINITION_GUESS = "definition-guess"
@@ -33,7 +31,6 @@ class TaskType(StrEnum):
 
 
 class BaseWorkflowContext(BaseTask):
-    type: TaskType
     current_step: int = 0
     total_steps: int = 1
 

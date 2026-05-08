@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from typing import Type
 
 from ampf.base import BaseAsyncCollectionStorage, BaseAsyncFactory
-from ampf.processors.pubsub_push_runner import PubsubRunner
-from ampf.processors.task_model import ManagedTaskRunner, TaskRunner
+from ampf.tasks import ManagedTaskRunner, TaskRunner
+from ampf.tasks.pubsub_push_runner import PubsubRunner
 from core.app_config import AppConfig
 from core.users.user_model import UserInDB
 from core.users.user_service import UserService

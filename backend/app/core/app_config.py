@@ -2,9 +2,9 @@ from functools import cached_property
 from typing import Literal, Optional, Type
 
 from ampf.auth import AuthConfig, DefaultUser, ResetPasswordMailConfig, SmtpConfig
-from ampf.processors.background_runner import BackgroundRunner
-from ampf.processors.pubsub_push_runner import PubsubPushRunner
-from ampf.processors.task_model import TaskRunner
+from ampf.tasks import TaskRunner
+from ampf.tasks.background_runner import BackgroundRunner
+from ampf.tasks.pubsub_push_runner import PubsubPushRunner
 from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from version import __version__

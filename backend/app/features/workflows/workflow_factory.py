@@ -2,7 +2,7 @@ from typing import Annotated, Union
 from uuid import UUID
 
 from ampf.base import BaseAsyncFactory
-from ampf.processors.task_model import TaskRunner
+from ampf.tasks import TaskRunner
 from features.workflows.definition_guess_workflow import DefinitionGuessWorkflow, DefinitionGuessWorkflowContext
 from pydantic import Field
 

@@ -1,7 +1,7 @@
 import logging
 from uuid import UUID
 
-from ampf.processors.task_registry import TaskRegistry
+from ampf.tasks import TaskHeader, TaskRegistry
 from dependencies import (
     Authorize,
     TaskRunnerDep,
@@ -10,7 +10,6 @@ from dependencies import (
 )
 from fastapi import APIRouter, Depends
 from features.teacher.teacher_model import TeacherDefinitionGuessCreate
-from features.workflows.base_task import TaskHeader
 from features.workflows.definition_guess_workflow import DefinitionGuessWorkflowContext
 from features.workflows.workflow_factory import WorkflowFactory
 
