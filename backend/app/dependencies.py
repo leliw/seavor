@@ -10,6 +10,7 @@ from ampf.tasks.background_runner import BackgroundRunner
 from app_state import AppState
 from core.app_config import AppConfig
 from core.roles import Role
+from core.teacher_ai_model import TeacherAIModel
 from core.translator_ai_model import TranslatorAIModel
 from core.users.user_model import UserInDB
 from core.users.user_service import UserService
@@ -54,6 +55,7 @@ def lifespan(config: AppConfig):
     DependencyRegistry.register_class(GttsService)
     DependencyRegistry.register_class(AudioFileService)
     DependencyRegistry.register_class(TranslatorAIModel)
+    DependencyRegistry.register_class(TeacherAIModel)
     DependencyRegistry.add(GenAIImageGenerator(), BaseImageGenerator)
     DependencyRegistry.register_class(ImageService)
     DependencyRegistry.register_class(TopicService)
