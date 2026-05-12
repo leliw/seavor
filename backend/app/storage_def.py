@@ -9,9 +9,11 @@ from features.native_topics.native_topic_model import NativeTopic
 from features.pages.page_model import GapFillChoiceExercise_v2, InfoPage_v2, Page
 from features.repetitions.repetition_model import LanguageStatus, LevelStatus, RepetitionCard
 from features.topics.topic_model import Topic, Topic_v2
+from features.workflows.workflow_factory import WorkflowContext
 
 # fmt: off
 STORAGE_DEF = [
+    CollectionDef("workflows", WorkflowContext),
     CollectionDef("topics", Topic, "id", subcollections=[
         CollectionDef("pages", Page, "id"),
     ]),
@@ -49,6 +51,7 @@ STORAGE_DEF = [
     ])
 ]
 # fmt: on
+
 
 def set_storage_formats(feature_flags: FeatureFlags):
     Topic_v2.FORMAT_FLAGS = StorageFormatFlags(

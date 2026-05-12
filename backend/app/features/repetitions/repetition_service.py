@@ -1,10 +1,12 @@
 import asyncio
 import logging
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import AsyncGenerator
 from uuid import UUID
 
 from ampf.base import BaseAsyncCollectionStorage, KeyNotExistsException
+from core.users.user_model import UserInDB
 from features.languages import Language
 from features.levels import Level
 from features.repetitions.repetition_scheduler import RepetitionScheduler
@@ -20,6 +22,17 @@ from .repetition_model import (
 )
 
 _log = logging.getLogger(__name__)
+
+
+@dataclass
+class RepetitionServiceFactory:
+    user_storage: BaseAsyncCollectionStorage[UserInDB]
+
+    def create(self, username: str) -> "RepetitionService":
+        return RepetitionService(
+            self.user_storage.get_collection(username, "languages"),
+            self.user_storage.get_collection(username, RepetitionCard),
+        )
 
 
 class RepetitionService:
@@ -39,6 +52,9 @@ class RepetitionService:
                     yield repetition
             except Exception as e:
                 _log.warning(e)
+
+    async def get(self, id: UUID) -> RepetitionCard:
+        return await self.new_storage.get(id)
 
     async def get_all_by_language(self, language: Language) -> AsyncGenerator[RepetitionCardHeader]:
         level_storage = self.language_storage.get_collection(language, "levels")

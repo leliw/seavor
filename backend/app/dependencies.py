@@ -3,15 +3,20 @@ from typing import Annotated
 from uuid import UUID
 
 from ampf.auth import AuthService, InsufficientPermissionsError, TokenPayload
-from ampf.base import BaseEmailSender, EmailTemplate, SmtpEmailSender
+from ampf.base import BaseAsyncCollectionStorage, BaseEmailSender, EmailTemplate, SmtpEmailSender
 from ampf.dependency import DependencyRegistry, get_dependency
+from ampf.tasks import ManagedTaskRunner, TaskRunner
+from ampf.tasks.background_runner import BackgroundRunner
 from app_state import AppState
 from core.app_config import AppConfig
 from core.roles import Role
+from core.teacher_ai_model import TeacherAIModel
 from core.translator_ai_model import TranslatorAIModel
+from core.users.user_model import UserInDB
 from core.users.user_service import UserService
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.background import BackgroundTasks
 from fastapi.concurrency import asynccontextmanager
 from fastapi.security import OAuth2PasswordBearer
 from features.languages import Language
@@ -21,8 +26,7 @@ from features.native_pages.native_page_translator import NativePageTranslator
 from features.native_topics.native_topic_service import NativeTopicService
 from features.native_topics.native_topic_translator import NativeTopicTranslator
 from features.pages.page_service import PageService, PageServiceFactory
-from features.repetitions.repetition_model import RepetitionCard
-from features.repetitions.repetition_service import RepetitionService
+from features.repetitions.repetition_service import RepetitionService, RepetitionServiceFactory
 from features.teacher.teacher_service import TeacherServiceFactory
 from features.teacher.verifier_service import VerifierService
 from features.topics.topic_model import Topic
@@ -46,10 +50,12 @@ def lifespan(config: AppConfig):
     app_state = AppState.create(config)
     DependencyRegistry.add(app_state)
     DependencyRegistry.add_all(app_state)
-
+    DependencyRegistry.add(app_state.user_storage, BaseAsyncCollectionStorage[UserInDB])
+    DependencyRegistry.add(app_state.task_runner, TaskRunner)
     DependencyRegistry.register_class(GttsService)
     DependencyRegistry.register_class(AudioFileService)
     DependencyRegistry.register_class(TranslatorAIModel)
+    DependencyRegistry.register_class(TeacherAIModel)
     DependencyRegistry.add(GenAIImageGenerator(), BaseImageGenerator)
     DependencyRegistry.register_class(ImageService)
     DependencyRegistry.register_class(TopicService)
@@ -60,11 +66,14 @@ def lifespan(config: AppConfig):
     DependencyRegistry.register_class(NativePageTranslator)
     DependencyRegistry.register_class(TeacherServiceFactory)
     DependencyRegistry.register_class(VerifierService)
+    DependencyRegistry.register_class(RepetitionServiceFactory)
+    DependencyRegistry.register_class(WorkflowFactory)
+    DependencyRegistry.register(get_prompt_executor_image)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         app.state.app_state = app_state
-        async with app_state:
+        async with app_state.manage_lifecycle(app):
             yield
 
     return lifespan
@@ -83,6 +92,9 @@ NativePageServiceFactoryDep = Annotated[NativePageServiceFactory, Depends(get_de
 NativePageTranslatorDep = Annotated[NativePageTranslator, Depends(get_dependency(NativePageTranslator))]
 PromptServiceDep = Annotated[PromptService, Depends(get_dependency(PromptService))]
 TeacherServiceFactoryDep = Annotated[TeacherServiceFactory, Depends(get_dependency(TeacherServiceFactory))]
+RepetitionServiceFactoryDep = Annotated[RepetitionServiceFactory, Depends(get_dependency(RepetitionServiceFactory))]
+WorkflowFactoryDep = Annotated[WorkflowFactory, Depends(get_dependency(WorkflowFactory))]
+PromptExecutorImageDep = Annotated[PromptExecutorImage, Depends(get_dependency(PromptExecutorImage))]
 
 
 def not_production(app_state: AppStateDep) -> bool:
@@ -132,8 +144,6 @@ def get_auth_service(app_state: AppStateDep) -> AuthService:
 
 
 AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
-
-
 AuthTokenDep = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="api/login"))]
 OptionalAuthTokenDep = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="api/login", auto_error=False))]
 
@@ -166,14 +176,13 @@ class Authorize:
             raise InsufficientPermissionsError()
 
 
-def get_repetition_service(app_state: AppStateDep, token_payload: TokenPayloadDep) -> RepetitionService:
-    return RepetitionService(
-        app_state.user_storage.get_collection(token_payload.sub, "languages"),
-        app_state.user_storage.get_collection(token_payload.sub, RepetitionCard),
-    )
+def get_repetition_service_dep(
+    repetition_service_factory: RepetitionServiceFactoryDep, token_payload: TokenPayloadDep
+) -> RepetitionService:
+    return repetition_service_factory.create(token_payload.sub)
 
 
-RepetitionServiceDep = Annotated[RepetitionService, Depends(get_repetition_service)]
+RepetitionServiceDep = Annotated[RepetitionService, Depends(get_repetition_service_dep)]
 
 
 async def get_topic_for_user(
@@ -203,16 +212,19 @@ def get_native_page_service(
 NativePageServiceDep = Annotated[NativePageService, Depends(get_native_page_service)]
 
 
-def get_workflow_factory(
-    repetition_service: RepetitionServiceDep,
-) -> WorkflowFactory:
-    return WorkflowFactory(repetition_service)
+def get_task_runner(app_state: AppStateDep, background_tasks: BackgroundTasks) -> TaskRunner:
+    if isinstance(app_state.task_runner, ManagedTaskRunner):
+        return app_state.task_runner
+    elif app_state.task_runner == BackgroundRunner:
+        return BackgroundRunner(background_tasks)
+    else:
+        return app_state.task_runner.create()
 
 
-WorkflowFactoryDep = Annotated[WorkflowFactory, Depends(get_workflow_factory)]
+TaskRunnerDep = Annotated[TaskRunner, Depends(get_task_runner)]
 
 
-def prompt_executor_image(app_config: AppConfigDep, prompt_service: PromptServiceDep) -> PromptExecutorImage:
+def get_prompt_executor_image(app_config: AppConfigDep, prompt_service: PromptServiceDep) -> PromptExecutorImage:
     return PromptExecutorImage(
         ai_model=GoogleAIModel(parameters={"temperature": 0.5}, api_key=app_config.google_api_key),
         image_generator=GenAIImageGenerator(
@@ -220,6 +232,3 @@ def prompt_executor_image(app_config: AppConfigDep, prompt_service: PromptServic
         ),
         prompt_service=prompt_service,
     )
-
-
-PromptExecutorImageDep = Annotated[PromptExecutorImage, Depends(prompt_executor_image)]

@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
-import { effect, Injectable, untracked } from '@angular/core';
+import { effect, inject, Injectable, untracked } from '@angular/core';
 import { BehaviorSubject, catchError, combineLatest, interval, map, Observable, of, startWith, tap } from 'rxjs';
 
 import { isAfter, parseISO } from 'date-fns';
 import { AuthStateService } from '../../core/auth/auth-state.service';
+import { TaskService } from '../../shared/task.service';
 
 export interface RepetitionCardHeader {
   id: string;
@@ -12,7 +13,7 @@ export interface RepetitionCardHeader {
   topic_id: string;
   page_id: string;
   type: string;
-  due: string
+  due: string;
 }
 
 interface RepetitionSchedule {
@@ -56,6 +57,8 @@ export class RepetitionService {
     })
   );
 
+  private taskService = inject(TaskService);
+
   constructor(private httpClient: HttpClient, authStateService: AuthStateService) {
     effect(() => {
       if (authStateService.isAuthenticated()) {
@@ -92,5 +95,10 @@ export class RepetitionService {
           return of({});
         })
       );
+  }
+
+  pollCreatingTaskStatus(task_id: string): void {
+    this.taskService.pollTaskStatus(task_id)
+      .subscribe({ complete: () => this.getSchedule().subscribe() })
   }
 }

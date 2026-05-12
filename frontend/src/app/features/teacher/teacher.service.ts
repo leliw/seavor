@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { RepetitionCardHeader } from '../repetitions/repetition.service';
+import { BaseTask } from '../../shared/task.service';
 
 export interface TeacherDefinitionGuessCreate {
   language: string;
@@ -13,12 +13,12 @@ export interface TeacherDefinitionGuessCreate {
 @Injectable({
   providedIn: 'root',
 })
-export class TeacherServiceService {
+export class TeacherService {
   private readonly http = inject(HttpClient);
   private readonly endpoint = '/api/teacher/definition-guess';
 
-  post(body: TeacherDefinitionGuessCreate): Observable<RepetitionCardHeader> {
-    return this.http.post<RepetitionCardHeader>(this.endpoint, body);
+  post(body: TeacherDefinitionGuessCreate): Observable<BaseTask> {
+    return this.http.post<BaseTask>(this.endpoint, body);
   }
 
 }

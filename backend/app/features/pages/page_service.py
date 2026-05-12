@@ -5,8 +5,10 @@ from typing import AsyncGenerator
 from uuid import UUID
 
 from ampf.base import BaseAsyncCollectionStorage, BaseAsyncFactory
+from ampf.dependency import DependencyRegistry
 from features.languages import Language
 from features.levels import Level
+from features.native_pages.native_page_service import NativePageServiceFactory
 from features.pages.definition_guess_model import DefinitionGuess, DefinitionGuessCreate, DefinitionGuessPatch
 from features.pages.page_base_model import PageHeader, PageType
 from features.pages.page_model import (
@@ -69,6 +71,8 @@ class PageService:
         self.image_service = image_service
         self.language_code = language
 
+        self.native_page_service_factory = DependencyRegistry.get(NativePageServiceFactory)
+
     async def get_all(self) -> AsyncGenerator[PageHeader]:
         async for value in self.old_storage.get_all():
             yield PageHeader(**value.model_dump())
@@ -86,7 +90,7 @@ class PageService:
             await self.new_storage.create(page)
         except Exception as e:
             _log.error(f"Error creating in new storage: {e}")
-            pass        
+            pass
         return page
 
     async def post_gap_fill_choice(self, value_create: GapFillChoiceExerciseCreate) -> Page:
@@ -150,7 +154,7 @@ class PageService:
             await self.new_storage.put(key, updated_exercise)
         except Exception as e:
             _log.error(f"Error putting in new storage: {e}")
-            pass   
+            pass
 
     async def patch(self, uid: UUID, value_patch: PagePatch) -> Page:
         value = await self.old_storage.get(uid)
@@ -168,7 +172,19 @@ class PageService:
             await self.new_storage.patch(uid, value_patch)
         except Exception as e:
             _log.error(f"Error patching in new storage: {e}")
-            pass 
+            pass
+        for native_language in Language:
+            native_page_service = self. native_page_service_factory.create(
+                target_language=value.language,
+                level=value.level,
+                native_language=native_language,
+                topic_id=self.topic_id,
+            )
+            try:
+                await native_page_service.patch(uid, value_patch.model_dump(exclude_unset=True))
+            except Exception as e:
+                _log.error(f"Error patching native page: {e}")
+                pass
         return value
 
     async def delete(self, key: UUID) -> None:
@@ -183,7 +199,6 @@ class PageService:
         except Exception as e:
             _log.error(f"Error deleting in new storage: {e}")
             pass
-
 
     async def add_image_name(self, page_id: UUID, image_name: str) -> Page | None:
         page = await self.get(page_id)
