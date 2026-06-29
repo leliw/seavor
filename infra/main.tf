@@ -1,91 +1,56 @@
 locals {
-  service_name       = "seavor"
-  version            = "0.9.1"
-  container_registry = "europe-west3-docker.pkg.dev/development-428212/docker-eu"
+  app_name = "seavor"
 
-  container_image           = "${local.container_registry}/${local.service_name}:${local.version}"
-  run_service_account_email = var.run_service_account_email != null ? var.run_service_account_email : "${data.google_project.current.number}-compute@developer.gserviceaccount.com"
-  name_prefix               = "${var.environment}-${local.service_name}"
-  bucket_name               = "${local.name_prefix}-${random_id.bucket_suffix.hex}"
-  firestore_prefix          = "projects/${local.name_prefix}"
-  create_app                = var.environment != "it" && var.environment != "local"
-  teacher_topic             = "${local.name_prefix}-teacher"
-  labels = {
-    environment = var.environment
+  name_prefix = "${var.environment}-${local.app_name}"
+  env_prefix  = upper(replace(local.name_prefix, "-", "_"))
+  create_app  = !contains(["it", "local", "dev"], var.environment)
+
+  env_vars = {
+    FEATURE_FLAGS               = var.feature_flags
+    DEFAULT_USER__EMAIL         = "marcin.leliwa@gmail.com"
+    SMTP__HOST                  = "s14.cyber-folks.pl"
+    SMTP__PORT                  = 465
+    SMTP__USERNAME              = "reset-password@leliwa.priv.pl"
+    SMTP__USE_SSL               = "True"
+    RESET_PASSWORD_MAIL__SENDER = "reset-password@leliwa.priv.pl"
   }
 }
 
-data "google_project" "current" {
+module "bucket" {
+  source      = "./modules/storage_bucket"
+  project_id  = var.project_id
+  name_prefix = local.name_prefix
+  region      = var.region
+  environment = var.environment
 }
 
-resource "random_id" "bucket_suffix" {
-  byte_length = 3
-}
-
-resource "google_storage_bucket" "main" {
-  project                     = var.project_id
-  name                        = local.bucket_name
-  location                    = var.region
-  storage_class               = "STANDARD"
-  force_destroy               = var.environment != "prod"
-  uniform_bucket_level_access = true
-
-
-  lifecycle_rule {
-    action { type = "Delete" }
-    condition {
-      age        = 90
-      with_state = "ANY"
-    }
-  }
-}
-
-module "teacher_topic" {
-  source = "./modules/pubsub-topic-with-dlq"
-
-  topic_name                 = local.teacher_topic
-  subscription_name_suffix   = local.create_app ? "push" : "sub"
-  push_endpoint              = try("${module.app[0].service_url}/pub-sub/teacher", null)
-  max_delivery_attempts      = 5
-  ack_deadline_seconds       = 600
-  create_dlq                 = true
-  labels                     = local.labels
-  push_service_account_email = local.run_service_account_email
+module "session_secret_key" {
+  source  = "./modules/secret_password"
+  id      = "${local.env_prefix}_SESSION_SECRET_KEY"
+  length  = 64
+  special = false
 }
 
 module "app" {
-  count  = local.create_app ? 1 : 0
-  source = "./modules/cloud_run_service"
-
-  name                      = "${local.name_prefix}-app"
-  project_id                = var.project_id
-  container_image           = local.container_image
-  run_service_account_email = local.run_service_account_email
-  region                    = var.region
-  public                    = var.public
-
-  env_vars_plain = {
-    WORKERS          = 4
-    GCP_ROOT_STORAGE = local.firestore_prefix
-    GCP_BUCKET_NAME  = google_storage_bucket.main.name
-    TEACHER_TOPIC    = module.teacher_topic.topic_name
-
-    DEFAULT_USER__USERNAME = "marcin.leliwa@gmail.com"
-    DEFAULT_USER__EMAIL    = "marcin.leliwa@gmail.com"
-
-    SMTP__HOST     = "s14.cyber-folks.pl"
-    SMTP__PORT     = 465
-    SMTP__USERNAME = "reset-password@leliwa.priv.pl"
-    SMTP__USE_SSL  = "True"
-
-    FEATURE_FLAGS = var.feature_flags
-  }
-
+  source         = "./services/app"
+  create_app     = local.create_app
+  image_tag      = var.image_tag
+  project_id     = var.project_id
+  name_prefix    = local.name_prefix
+  region         = var.region
+  environment    = var.environment
+  public         = var.public
+  custom_domain  = var.custom_domain
+  bucket_name    = module.bucket.name
+  env_vars_plain = local.env_vars
   env_vars_secrets = {
-    AUTH__JWT_SECRET_KEY   = "AUTH__JWT_SECRET_KEY"
-    DEFAULT_USER__PASSWORD = "DEFAULT_USER__PASSWORD"
-    SMTP__PASSWORD         = "CYBER_FOLKS__SMTP__PASSWORD"
-    GOOGLE_API_KEY         = "SEAVOR_GOOGLE_API_KEY"
+    AUTH__JWT_SECRET_KEY       = "AUTH__JWT_SECRET_KEY"
+    DEFAULT_USER__PASSWORD     = "DEFAULT_USER__PASSWORD"
+    SMTP__PASSWORD             = "CYBER_FOLKS__SMTP__PASSWORD"
+    GOOGLE_API_KEY             = "SEAVOR_GOOGLE_API_KEY"
+    SESSION_SECRET_KEY         = module.session_secret_key.id
+    GOOGLE_OAUTH_CLIENT_ID     = "GOOGLE_OAUTH_CLIENT_ID"
+    GOOGLE_OAUTH_CLIENT_SECRET = "GOOGLE_OAUTH_CLIENT_SECRET"
   }
-
 }
+

@@ -6,20 +6,17 @@ locals {
 
   effective_labels = merge(
     {
-      managed_by = "terraform"
-      component  = "pubsub"
+      environment = var.environment
+      managed_by  = "terraform"
+      component   = "pubsub"
     },
     var.labels
   )
 }
 
-# Data source to fetch project number (required for IAM)
-data "google_project" "current" {
-}
-
 # Main topic
 resource "google_pubsub_topic" "main" {
-  project = data.google_project.current.project_id
+  project = var.project_id
   name    = local.topic_full_name
   labels  = local.effective_labels
 }
@@ -27,14 +24,14 @@ resource "google_pubsub_topic" "main" {
 # Dead Letter Topic (optional)
 resource "google_pubsub_topic" "dlq" {
   count   = var.create_dlq ? 1 : 0
-  project = data.google_project.current.project_id
+  project = var.project_id
   name    = local.dlq_topic_name
   labels  = merge(local.effective_labels, { purpose = "dead-letter" })
 }
 
 # Main subscription (pull or push)
 resource "google_pubsub_subscription" "main" {
-  project = data.google_project.current.project_id
+  project = var.project_id
   name    = local.subscription_full_name
   topic   = google_pubsub_topic.main.id
 
@@ -72,7 +69,7 @@ resource "google_pubsub_subscription" "main" {
 # Optional pull subscription on DLQ – for manual debugging / replay
 resource "google_pubsub_subscription" "dlq_inspect" {
   count   = var.create_dlq ? 1 : 0
-  project = data.google_project.current.project_id
+  project = var.project_id
   name    = local.dlq_subscription_name
   topic   = google_pubsub_topic.dlq[0].id
   labels  = merge(local.effective_labels, { purpose = "dlq-inspect" })
@@ -81,7 +78,7 @@ resource "google_pubsub_subscription" "dlq_inspect" {
 # IAM – Pub/Sub service agent must be able to publish to DLQ
 resource "google_pubsub_topic_iam_member" "dlq_publisher" {
   count   = var.create_dlq ? 1 : 0
-  project = data.google_project.current.project_id
+  project = var.project_id
   topic   = google_pubsub_topic.dlq[0].name
   role    = "roles/pubsub.publisher"
   member  = "serviceAccount:service-${data.google_project.current.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
@@ -94,18 +91,13 @@ resource "time_sleep" "pubsub_sub_wait" {
 }
 
 resource "google_pubsub_subscription_iam_member" "subscriber" {
-  count        = (var.create_dlq || var.push_endpoint != null) ? 1 : 0
-  project      = data.google_project.current.project_id
-  subscription = google_pubsub_subscription.main.name
+  project      = var.project_id
+  subscription = local.subscription_full_name
   role         = "roles/pubsub.subscriber"
   member       = "serviceAccount:service-${data.google_project.current.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
   depends_on   = [time_sleep.pubsub_sub_wait]
 }
 
-resource "google_service_account_iam_member" "pubsub_token_creator" {
-  count              = var.push_service_account_email != null ? 1 : 0
-  service_account_id = "projects/${data.google_project.current.project_id}/serviceAccounts/${var.push_service_account_email}"
-  role               = "roles/iam.serviceAccountTokenCreator"
-  member             = "serviceAccount:service-${data.google_project.current.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-  depends_on         = [time_sleep.pubsub_sub_wait]
+# Data source do pobrania project number (potrzebne do IAM)
+data "google_project" "current" {
 }

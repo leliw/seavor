@@ -3,3 +3,6 @@
 *.tfstate.*
 *.tfvars
 !example.tfvars
+env/*/.env**
+env/*/.*_credentials.*
+!env/*/*.tfvars

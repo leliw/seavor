@@ -1,6 +1,22 @@
+variable "project_id" {
+  type        = string
+  description = "ID projektu GCP"
+}
+
+variable "region" {
+  type        = string
+  default     = "europe-west1"
+  description = "Region (głównie dla IAM i ewentualnych future features)"
+}
+
 variable "topic_name" {
   type        = string
   description = "Name of the main topic"
+}
+
+variable "environment" {
+  type        = string
+  description = "dev / stg / prod – dodawane do nazw"
 }
 
 variable "create_dlq" {
