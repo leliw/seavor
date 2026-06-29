@@ -64,9 +64,9 @@
         }
         @if (showSignInOut()) {
         @if (authService.isAuthenticated()) {
-        <a mat-list-item (click)="logout()">
-            <mat-icon matListItemIcon>logout</mat-icon>
-            <span matListItemTitle i18n>Sign out</span>
+        <a mat-list-item [matMenuTriggerFor]="menu">
+            <mat-icon matListItemIcon>more_vert</mat-icon>
+            <span matListItemTitle i18n>More</span>
         </a>
         } @else {
         <a mat-list-item routerLink="/login">
@@ -77,3 +77,20 @@
         }
     </mat-nav-list>
 </mat-toolbar>
+
+<mat-menu #menu="matMenu">
+    @if (authStateService.hasRole("admin")) {
+    <button mat-menu-item routerLink="/users" routerLinkActive="active-link">
+        <mat-icon>manage_accounts</mat-icon>
+        <span>Users</span>
+    </button>
+    }
+    <button mat-menu-item routerLink="/change-password" routerLinkActive="active-link">
+        <mat-icon>key</mat-icon>
+        <span>Change password</span>
+    </button>
+    <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Sign out</span>
+    </button>
+</mat-menu>

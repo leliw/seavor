@@ -11,13 +11,14 @@ export const authGuard: CanActivateFn = (route, state) => {
 
     if (!authStateService.isAuthenticated()) {
         const authService = inject(AuthService);
-        authService.redirectUrl = state.url
+        authService.redirectUrl = state.url;
         router.navigate(['/login']);
         return false;
-    } else if (route.data['roles'] && !authStateService.hasAnyRole(route.data['roles'])()) {
+    } else if (route.data['roles'] && !authStateService.hasAnyRole(route.data['roles'])) {
         snackBar.open($localize`Permission denied`, $localize`Close`);
         router.navigate(['/']);
         return false;
-    } else
+    } else {
         return true;
+    }
 };

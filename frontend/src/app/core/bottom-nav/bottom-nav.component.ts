@@ -7,49 +7,53 @@ import { RouterModule } from '@angular/router';
 import { RepetitionService } from '../../features/repetitions/repetition.service';
 import { AuthService } from '../auth/auth.service';
 import { CommonModule } from '@angular/common';
+import { MatMenuModule } from "@angular/material/menu";
+import { AuthStateService } from '../auth/auth-state.service';
 
 
 @Component({
-  selector: 'app-bottom-nav',
-  imports: [
-    CommonModule,
-    RouterModule,
-    MatToolbarModule,
-    MatListModule,
-    MatIconModule,
-    MatBadgeModule,
-  ],
-  templateUrl: './bottom-nav.component.html',
-  styleUrl: './bottom-nav.component.scss',
+    selector: 'app-bottom-nav',
+    imports: [
+        CommonModule,
+        RouterModule,
+        MatToolbarModule,
+        MatListModule,
+        MatIconModule,
+        MatBadgeModule,
+        MatMenuModule
+    ],
+    templateUrl: './bottom-nav.component.html',
+    styleUrl: './bottom-nav.component.scss',
 })
 export class BottomNavComponent {
-  showHome = input(true);
-  showRepetitions = input(false);
-  showLearningLanguage = input(false);
-  showSettings = input(false);
+    showHome = input(true);
+    showRepetitions = input(false);
+    showLearningLanguage = input(false);
+    showSettings = input(false);
 
-  showNextPage = input(false);
-  showPreviousPage = input(false);
-  showCheck = input(false);
-  showHint = input(false);
-  showTranslate = input(false);
-  showAdd = input(false);
-  showSignInOut = input(false);
+    showNextPage = input(false);
+    showPreviousPage = input(false);
+    showCheck = input(false);
+    showHint = input(false);
+    showTranslate = input(false);
+    showAdd = input(false);
+    showSignInOut = input(false);
 
-  disabledHint = input(false);
-  disabledTranslate = input(false);
+    disabledHint = input(false);
+    disabledTranslate = input(false);
 
 
-  nextPage = output();
-  previousPage = output();
-  check = output();
-  hint = output();
-  translate = output();
+    nextPage = output();
+    previousPage = output();
+    check = output();
+    hint = output();
+    translate = output();
 
-  authService = inject(AuthService);
-  repetitionService = inject(RepetitionService);
-
-  logout() {
-    this.authService.logout().subscribe();
-  }
+    authService = inject(AuthService);
+    repetitionService = inject(RepetitionService);
+    authStateService = inject(AuthStateService);
+    
+    logout() {
+        this.authService.logout().subscribe();
+    }
 }

@@ -23,12 +23,6 @@ export class AuthStateService {
     readonly user = this._user.asReadonly();
     readonly roles = this._roles.asReadonly();
 
-    readonly hasAnyRole = (requiredRoles: string[]) =>
-        computed(() => requiredRoles.some(role => this._roles().includes(role)));
-
-    readonly hasAllRoles = (requiredRoles: string[]) =>
-        computed(() => requiredRoles.every(role => this._roles().includes(role)));
-
     setUserData(tokens: Tokens): void {
         const payload = jwtDecode<any>(tokens.access_token);
 
@@ -54,5 +48,15 @@ export class AuthStateService {
 
     getRoles(): string[] {
         return this._roles();
+    }
+
+    hasRole(requiredRole: string): boolean {
+        return this._roles().includes(requiredRole);
+    }
+    hasAnyRole(requiredRoles: string[]): boolean {
+        return requiredRoles.some(role => this._roles().includes(role));
+    }
+    hasAllRoles(requiredRoles: string[]): boolean {
+        return requiredRoles.every(role => this._roles().includes(role));
     }
 }
