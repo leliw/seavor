@@ -1,5 +1,9 @@
-@use 'styles/components/navigation-bar' as *;
-@use 'styles/components/centered-form' as *;
+@use './styles/components/navigation-bar' as *;
+@use './styles/components/centered-form' as *;
+@use './styles/components/cards' as *;
+@use './styles/components/forms' as *;
+@use './styles/components/tables' as *;
+
 /* mobile default */
 :root {
     --app-bar-height: 56px;
@@ -103,8 +107,4 @@ app-root {
     color: rgba(0, 0, 0, 0.54);
     z-index: 200;
     pointer-events: none;
-}
-
-.mat-mdc-card-actions {
-    gap: 0.5rem;
 }

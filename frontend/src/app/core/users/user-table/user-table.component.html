@@ -2,7 +2,7 @@
     <div class="table-filter">
         <mat-form-field>
             <mat-label>Filter</mat-label>
-            <input matInput (keyup)="dataSource.applyFilter($event)" placeholder="Ex. Mia" #input>
+            <input matInput (keyup)="dataSource.applyFilter($event)" placeholder="Filter" #input>
         </mat-form-field>
         <button mat-fab color="primary" [routerLink]="['/users', '__NEW__']">
             <mat-icon>add</mat-icon>
@@ -70,7 +70,7 @@
 
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onClickRow(row)"
-                class="clickable-row">
+                class="clickable">
             </tr>
         </table>
 
