@@ -62,6 +62,13 @@ export class AuthService {
         );
     }
 
+    loginWithExchangeCode(code: string, store_token = false): Observable<Tokens> {
+        this.store_token = store_token;
+        return this.http.get<Tokens>('/api/google/login', { params: { "exchange-code": code } }).pipe(
+            tap((value) => this.authState.setUserData(value))
+        );
+    }
+
     /**
      * Logout user from server, clear data and redirect to login page
      * @returns Observable<void>

@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Component, inject, OnInit } from '@angular/core';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../auth.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
 import { MatButton } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Observable } from 'rxjs';
+import { filter, map, Observable, of, switchMap, take } from 'rxjs';
 import { ConfigService } from '../../config.service';
 
 @Component({
@@ -27,22 +27,50 @@ import { ConfigService } from '../../config.service';
     templateUrl: './login-form.component.html',
     styleUrl: './login-form.component.scss'
 })
-export class LoginFormComponent {
+export class LoginFormComponent implements OnInit{
     credentials = { username: '', password: '' };
     store_token = false;
+    version$: Observable<string> = of("");
 
-    version$: Observable<string>;
+    private configService = inject(ConfigService);
+    private authService = inject(AuthService);
+    private router = inject(Router);
+    private snackBar = inject(MatSnackBar);
+    private activatedRoute = inject(ActivatedRoute);
 
-    constructor(private configService: ConfigService, private authService: AuthService, private router: Router, private snackBar: MatSnackBar) {
-        this.version$ = this.configService.getConfigValue$("version");
-        if (authService.isAuthenticated())
+    constructor() {
+        if (this.authService.isAuthenticated())
             this.router.navigate(['/']);
+        this.store_token = JSON.parse(sessionStorage.getItem('remember_me') ?? 'false');
     }
+
+    ngOnInit(): void {
+        this.version$ = this.configService.getConfigValue$("version");
+        this.activatedRoute.queryParams.pipe(
+            map(params => params['exchange-code']),
+            filter(code => !!code),
+            take(1),
+            switchMap(code => {
+                const rememberMe = JSON.parse(sessionStorage.getItem('remember_me') || 'false');
+                return this.authService.loginWithExchangeCode(code, rememberMe);
+            })
+        ).subscribe({
+            error: (err) => {
+                if (err.status === 401)
+                    this.snackBar.open('Authentication failed', 'Close', { duration: 1500 });
+                else {
+                    console.warn(err.message);
+                    this.snackBar.open(err.message, 'Close');
+                }
+            }
+        });
+    }
+
 
     onSubmit() {
         this.authService.login(this.credentials, this.store_token).subscribe({
             error: (err) => {
-                if (err.status == 401)
+                if (err.status === 401)
                     this.snackBar.open($localize`Wrong username or password`, $localize`Close`, { duration: 1500 });
                 else {
                     console.warn(err.message);
@@ -50,6 +78,12 @@ export class LoginFormComponent {
                 }
             }
         });
+    }
+
+    loginWithGoogle() {
+        sessionStorage.setItem('remember_me', JSON.stringify(this.store_token));
+        const baseUrl = window.location.origin;
+        window.location.href = `/api/google/login?base_url=` + encodeURIComponent(baseUrl);;
     }
 
     continueWithoutAccount() {
