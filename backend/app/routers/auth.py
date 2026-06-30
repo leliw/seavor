@@ -16,6 +16,8 @@ from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 
+from routers import auth_google
+
 router = APIRouter(tags=["Authentication"])
 
 UserFormDataDep = Annotated[OAuth2PasswordRequestForm, Depends()]
@@ -63,3 +65,6 @@ class RoleDto(BaseModel):
 @router.get("/roles")
 def get_roles() -> list[RoleDto]:
     return [RoleDto(name=role.value, description=ROLE_DESCRIPTIONS[role]) for role in Role]
+
+
+router.include_router(auth_google.router, prefix="/google")

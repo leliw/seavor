@@ -9,6 +9,7 @@ const EXCLUDED_ROUTES = [
     '/api/config',
     '/api/login',
     '/api/logout',
+    '/api/google/login',    
     '/api/refresh-token',
     '/api/reset-password-request',
     '/api/reset-password'

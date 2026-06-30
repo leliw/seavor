@@ -9,7 +9,7 @@ mat-card {
 
 .divider {
     text-align: center;
-    margin: 32px 0;
+    margin: 16px 0;
     color: var(--mat-sys-outline);
     position: relative;
 
@@ -28,5 +28,31 @@ mat-card {
         right: 0;
         height: 1px;
         background: var(--mat-sys-outline);
+    }
+}
+
+.google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    margin: 20px 0;
+    border: 1px solid #dadce0 !important;
+    background-color: #ffffff !important;
+    color: #3c4043 !important;
+    font-weight: 500;
+    font-family: Roboto, arial, sans-serif;
+    transition: background-color .218s, border-color .218s, box-shadow .218s;
+
+    &:hover {
+        background-color: #f8f9fa !important;
+        border-color: #dee2e6 !important;
+        box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15) !important;
+    }
+
+    .google-icon {
+        height: 100%;
+        margin-right: 12px;
+        vertical-align: middle;
     }
 }

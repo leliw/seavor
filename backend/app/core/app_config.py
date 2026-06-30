@@ -29,6 +29,10 @@ class AppConfig(BaseSettings):
     smtp: SmtpConfig = SmtpConfig()
     reset_password_mail: ResetPasswordMailConfig = ResetPasswordMailConfig()
 
+    session_secret_key: str | None = None
+    google_oauth_client_id: str | None = None
+    google_oauth_client_secret: str | None = None 
+    
     google_api_key: str  # Google GenAI API key
 
     translator_ai_model_name: str = "gemini-2.5-flash-lite"
