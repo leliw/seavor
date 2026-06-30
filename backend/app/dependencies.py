@@ -3,7 +3,7 @@ from typing import Annotated
 from uuid import UUID
 
 from ampf.auth import AuthService, InsufficientPermissionsError, TokenPayload
-from ampf.base import BaseAsyncCollectionStorage, BaseEmailSender, EmailTemplate, SmtpEmailSender
+from ampf.base import BaseAsyncCollectionStorage, BaseAsyncFactory, BaseEmailSender, EmailTemplate, SmtpEmailSender
 from ampf.dependency import DependencyRegistry, get_dependency
 from ampf.tasks import ManagedTaskRunner, TaskRunner
 from ampf.tasks.background_runner import BackgroundRunner
@@ -81,6 +81,7 @@ def lifespan(config: AppConfig):
 
 AppStateDep = Annotated[AppState, Depends(get_dependency(AppState))]
 AppConfigDep = Annotated[AppConfig, Depends(get_dependency(AppConfig))]
+FactoryDep = Annotated[BaseAsyncFactory, Depends(get_dependency(BaseAsyncFactory))]
 UserServiceDep = Annotated[UserService, Depends(get_dependency(UserService))]
 AudioFileServiceDep = Annotated[AudioFileService, Depends(get_dependency(AudioFileService))]
 ImageServiceDep = Annotated[ImageService, Depends(get_dependency(ImageService))]

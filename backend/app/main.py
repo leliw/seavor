@@ -37,6 +37,10 @@ app = FastAPI(
     openapi_url="/openapi.json" if not app_config.production else None,
 )
 
+if app_config.session_secret_key:
+    from starlette.middleware.sessions import SessionMiddleware
+
+    app.add_middleware(SessionMiddleware, secret_key=app_config.session_secret_key, session_cookie="__session", max_age=1800)
 
 app.include_router(auth.router, prefix="/api")
 app.include_router(config.router, prefix="/api/config")
