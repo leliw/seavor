@@ -18,10 +18,14 @@ output "firebase_dns_records" {
 }
 
 
+resource "random_id" "service_id_suffix" {
+  byte_length = 3
+}
+
 # Firebase Hosting Site
 resource "google_firebase_hosting_site" "main" {
   provider = google-beta
-  site_id  = var.service_id
+  site_id  = "${var.service_id}-${random_id.service_id_suffix.hex}"
   project  = var.project_id
 }
 

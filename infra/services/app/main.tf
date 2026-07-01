@@ -67,7 +67,7 @@ module "app" {
   region                = var.region
   public                = var.public
   cpu_limit             = "1"
-  memory_limit          = "4G"
+  memory_limit          = "512Mi"
   env_vars_plain        = local.env_vars_plain
   env_vars_secrets      = var.env_vars_secrets
 }
