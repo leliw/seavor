@@ -14,11 +14,17 @@ resource "google_storage_bucket" "bucket" {
   force_destroy               = var.environment != "prod"
   uniform_bucket_level_access = true
 
-  lifecycle_rule {
-    action { type = "Delete" }
-    condition {
-      age        = 90
-      with_state = "ANY"
+  dynamic "lifecycle_rule" {
+    for_each = var.environment != "prod" ? [1] : []
+
+    content {
+      action {
+        type = "Delete"
+      }
+      condition {
+        age        = 90
+        with_state = "ANY"
+      }
     }
   }
 }
