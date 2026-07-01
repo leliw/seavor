@@ -2,12 +2,11 @@ import asyncio
 import logging
 
 import _set_path as _set_path
-from ampf.base import BaseAsyncCollectionStorage, BaseBlobMetadata, KeyNotExistsException
+from ampf.base import BaseAsyncCollectionStorage, BaseAsyncFactory, BaseBlobMetadata, KeyNotExistsException
 from ampf.gcp import GcpAsyncFactory
 from ampf.local import LocalAsyncFactory
 from core.app_config import AppConfig
 from dotenv import load_dotenv
-from core.users.user_model import UserInDB
 from features.languages import Language
 from pydantic import BaseModel, ValidationError
 from shared.audio_files.audio_file_model import AudioFileMetadata
@@ -15,6 +14,7 @@ from shared.images.image_model import ImageMetadata
 from storage_def import STORAGE_DEF, set_storage_formats
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(name)s | %(levelname)s | %(message)s")
+logging.getLogger("httpx2").setLevel(logging.WARNING)
 _log = logging.getLogger(__name__)
 _log.setLevel(logging.INFO)
 
@@ -68,8 +68,8 @@ async def copy_storage[T: BaseModel](
 
 
 async def copy_blob_storage[T: BaseBlobMetadata](
-    src_factory: LocalAsyncFactory,
-    dest_factory: GcpAsyncFactory,
+    src_factory: BaseAsyncFactory,
+    dest_factory: BaseAsyncFactory,
     collection_name: str,
     clazz: type[T],
     content_type: str,
@@ -102,9 +102,11 @@ native_languages = [Language.EN, Language.PL]
 
 async def main():
     # dest_config = AppConfig(gcp_bucket_name="test-seavor-9b08fd", gcp_root_storage="projects/test-seavor")  # Test
-    dest_config = AppConfig(gcp_bucket_name="prod-seavor-939101", gcp_root_storage="projects/prod-seavor")  # pyright: ignore[reportCallIssue] # Prod
+    src_config = AppConfig(gcp_bucket_name="production-456612-seavor", gcp_root_storage="projects/prod-seavor")  # pyright: ignore[reportCallIssue] # Prod
+    dest_config = AppConfig(gcp_bucket_name="prod-seavor-f2662b", gcp_root_storage="projects/prod-seavor")  # pyright: ignore[reportCallIssue] # Prod
     set_storage_formats(dest_config.feature_flags)
-    src_factory = LocalAsyncFactory(data_dir)
+    # src_factory = LocalAsyncFactory(data_dir)
+    src_factory = GcpAsyncFactory(root_storage=src_config.gcp_root_storage, bucket_name=src_config.gcp_bucket_name)
     src_factory.register_collections(STORAGE_DEF)
     dest_factory = GcpAsyncFactory(root_storage=dest_config.gcp_root_storage, bucket_name=dest_config.gcp_bucket_name)
     dest_factory.register_collections(STORAGE_DEF)
@@ -112,9 +114,9 @@ async def main():
     _log.info(f"GCP storage root: {dest_config.gcp_root_storage}")
     _log.info(f"GCP storage bucket: {dest_config.gcp_bucket_name}")
 
-    src_collection = src_factory.get_collection(UserInDB)
-    dest_collection = dest_factory.get_collection(UserInDB)
-    await copy_collection(src_collection, dest_collection)
+    # src_collection = src_factory.get_collection(UserInDB)
+    # dest_collection = dest_factory.get_collection(UserInDB)
+    # await copy_collection(src_collection, dest_collection)
 
     src_collection = src_factory.get_collection("target-languages")
     dest_collection = dest_factory.get_collection("target-languages")
