@@ -90,7 +90,7 @@ class BaseWorkflow[T: BaseWorkflowContext]:
 
     async def _ensure_native_topic(self, ctx: BaseWorkflowContext, topic_id: UUID) -> NativeTopic:
         try:
-            return await self.native_topic_service.get(ctx.language, ctx.level, ctx.native_language, topic_id)
+            return await self.native_topic_service.get(ctx.native_language, topic_id)
         except KeyNotExistsException:
             native_topic = await self.topic_translator.translate_topic_to_native(
                 ctx.language, ctx.level, ctx.native_language, topic_id

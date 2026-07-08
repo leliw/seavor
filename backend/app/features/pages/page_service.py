@@ -74,7 +74,7 @@ class PageService:
         self.native_page_service_factory = DependencyRegistry.get(NativePageServiceFactory)
 
     async def get_all(self) -> AsyncGenerator[PageHeader]:
-        async for value in self.old_storage.get_all():
+        async for value in self.new_storage.get_all():
             yield PageHeader(**value.model_dump())
 
     async def post(self, value: PageCreate) -> Page:
@@ -136,13 +136,13 @@ class PageService:
         return DefinitionGuess.create(value_create)
 
     async def get(self, key: UUID) -> Page:
-        return await self.old_storage.get(key)
+        return await self.new_storage.get(key)
 
     async def put(self, key: UUID, value: GapFillChoiceExercisePut) -> None:
         if key != value.id:
             raise ValueError("The key in the path must match the id in the request body.")
 
-        existing_exercise = await self.old_storage.get(key)
+        existing_exercise = await self.new_storage.get(key)
         updated_exercise = existing_exercise.model_copy(update=value.model_dump(exclude_unset=True))
         updated_exercise.updated_at = datetime.now(timezone.utc)
 
@@ -157,7 +157,7 @@ class PageService:
             pass
 
     async def patch(self, uid: UUID, value_patch: PagePatch) -> Page:
-        value = await self.old_storage.get(uid)
+        value = await self.new_storage.get(uid)
         if value.type != value_patch.type:
             raise ValueError
         match value.type:
@@ -169,12 +169,12 @@ class PageService:
                 raise NotImplementedError
         value = await self.old_storage.patch(uid, value_patch)
         try:
-            await self.new_storage.patch(uid, value_patch)
+            value = await self.new_storage.patch(uid, value_patch)
         except Exception as e:
             _log.error(f"Error patching in new storage: {e}")
             pass
         for native_language in Language:
-            native_page_service = self. native_page_service_factory.create(
+            native_page_service = self.native_page_service_factory.create(
                 target_language=value.language,
                 level=value.level,
                 native_language=native_language,
@@ -188,7 +188,7 @@ class PageService:
         return value
 
     async def delete(self, key: UUID) -> None:
-        page = await self.old_storage.get(key)
+        page = await self.new_storage.get(key)
         for file_name in page.get_audio_file_names():
             self.audio_file_service.delete(name=file_name)
         for image_name in page.get_image_file_names():
