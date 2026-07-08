@@ -104,13 +104,9 @@ def not_production(app_state: AppStateDep) -> bool:
     return not app_state.config.production
 
 
-def get_page_service(
-    target_language: Language,
-    level: Level,
-    topic_id: UUID,
-):
+def get_page_service(topic_id: UUID):
     page_service_factory = DependencyRegistry.get(PageServiceFactory)
-    return page_service_factory.create(target_language, level, topic_id)
+    return page_service_factory.create(topic_id)
 
 
 PageServiceDep = Annotated[PageService, Depends(get_page_service)]

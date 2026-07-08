@@ -7,7 +7,6 @@ from uuid import UUID
 from ampf.base import BaseAsyncCollectionStorage, BaseAsyncFactory
 from ampf.dependency import DependencyRegistry
 from features.languages import Language
-from features.levels import Level
 from features.native_pages.native_page_service import NativePageServiceFactory
 from features.pages.definition_guess_model import DefinitionGuess, DefinitionGuessCreate, DefinitionGuessPatch
 from features.pages.page_base_model import PageHeader, PageType
@@ -36,13 +35,11 @@ class PageServiceFactory:
         self.audio_file_service = audio_file_service
         self.image_service = image_service
 
-    def create(self, language: Language, level: Level, topic_id: UUID) -> "PageService":
+    def create(self, topic_id: UUID) -> "PageService":
         return PageService(
             factory=self.factory,
             audio_file_service=self.audio_file_service,
             image_service=self.image_service,
-            language=language,
-            level=level,
             topic_id=topic_id,
         )
 
@@ -53,23 +50,14 @@ class PageService:
         factory: BaseAsyncFactory,
         audio_file_service: AudioFileService,
         image_service: ImageService,
-        language: Language,
-        level: Level,
         topic_id: UUID,
     ):
-        self.old_storage: BaseAsyncCollectionStorage[Page] = (
-            factory.get_collection("target-languages")
-            .get_collection(language, "levels")
-            .get_collection(level, "topics")
-            .get_collection(topic_id, Page)
-        )
         self.new_storage: BaseAsyncCollectionStorage[Page] = factory.get_collection("topics").get_collection(
             topic_id, Page
         )
         self.audio_file_service = audio_file_service
         self.topic_id = topic_id
         self.image_service = image_service
-        self.language_code = language
 
         self.native_page_service_factory = DependencyRegistry.get(NativePageServiceFactory)
 
@@ -85,19 +73,14 @@ class PageService:
                 page = await self.post_info(value)
             case PageType.DEFINITION_GUESS:
                 page = await self.post_definition_guess(value)
-        await self.old_storage.create(page)
-        try:
-            await self.new_storage.create(page)
-        except Exception as e:
-            _log.error(f"Error creating in new storage: {e}")
-            pass
+        await self.new_storage.create(page)
         return page
 
     async def post_gap_fill_choice(self, value_create: GapFillChoiceExerciseCreate) -> Page:
         texts_to_synthesize = value_create.get_texts_to_synthesize()
         audio_file_names = await asyncio.gather(
             *[
-                self.audio_file_service.generate_and_upload(text=text, language=self.language_code)
+                self.audio_file_service.generate_and_upload(text=text, language=value_create.language)
                 for text in texts_to_synthesize
             ]
         )
@@ -127,7 +110,7 @@ class PageService:
         texts_to_synthesize = value_create.get_texts_to_synthesize()
         audio_file_names = await asyncio.gather(
             *[
-                self.audio_file_service.generate_and_upload(text=text, language=self.language_code)
+                self.audio_file_service.generate_and_upload(text=text, language=value_create.language)
                 for text in texts_to_synthesize
             ]
         )
@@ -149,12 +132,7 @@ class PageService:
         # For simplicity, audio files are not regenerated on PUT.
         # If audio regeneration is needed, a more complex logic similar to POST would be required.
 
-        await self.old_storage.put(key, updated_exercise)
-        try:
-            await self.new_storage.put(key, updated_exercise)
-        except Exception as e:
-            _log.error(f"Error putting in new storage: {e}")
-            pass
+        await self.new_storage.put(key, updated_exercise)
 
     async def patch(self, uid: UUID, value_patch: PagePatch) -> Page:
         value = await self.new_storage.get(uid)
@@ -167,12 +145,7 @@ class PageService:
                 pass
             case _:
                 raise NotImplementedError
-        value = await self.old_storage.patch(uid, value_patch)
-        try:
-            value = await self.new_storage.patch(uid, value_patch)
-        except Exception as e:
-            _log.error(f"Error patching in new storage: {e}")
-            pass
+        value = await self.new_storage.patch(uid, value_patch)
         for native_language in Language:
             native_page_service = self.native_page_service_factory.create(
                 target_language=value.language,
@@ -193,12 +166,7 @@ class PageService:
             self.audio_file_service.delete(name=file_name)
         for image_name in page.get_image_file_names():
             self.image_service.delete(name=image_name)
-        await self.old_storage.delete(key)
-        try:
-            await self.new_storage.delete(key)
-        except Exception as e:
-            _log.error(f"Error deleting in new storage: {e}")
-            pass
+        await self.new_storage.delete(key)
 
     async def add_image_name(self, page_id: UUID, image_name: str) -> Page | None:
         page = await self.get(page_id)

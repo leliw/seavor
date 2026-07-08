@@ -24,7 +24,7 @@ async def test_delete_topic(
     )
     topic = await topic_service.create(topic_create)
     # And: Stored pages
-    page_service = topic_service.page_service_factory.create(topic.language, topic.level, topic.id)
+    page_service = topic_service.page_service_factory.create(topic.id)
     page_create = InfoPageCreate(
         language=Language.EN,
         level=Level.A1,

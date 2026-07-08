@@ -99,7 +99,7 @@ class TopicService:
             delete_ntopic_tasks.append(self.native_topic_service.delete(language, level, native_language, id))
         await asyncio.gather(*delete_ntopic_tasks, return_exceptions=True)
         # Delete pages
-        page_service = self.page_service_factory.create(language, level, id)
+        page_service = self.page_service_factory.create(id)
         delete_page_tasks = []
         async for page in page_service.get_all():
             delete_page_tasks.append(page_service.delete(page.id))

@@ -23,7 +23,7 @@ class PageImageWorkflow:
     prompt_executor_image: PromptExecutorImage
 
     async def execute(self, language: Language, level: Level, topic_id: UUID, page_id: UUID) -> None:
-        page_service = self.page_service_factory.create(language=language, level=level, topic_id=topic_id)
+        page_service = self.page_service_factory.create(topic_id=topic_id)
         topic = await self.topic_service.get(language=language, level=level, id=topic_id)
         page = await page_service.get(page_id)
         if page.type == PageType.DEFINITION_GUESS:
