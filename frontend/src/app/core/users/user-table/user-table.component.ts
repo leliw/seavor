@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -36,6 +36,7 @@ import { BottomNavComponent } from "../../bottom-nav/bottom-nav.component";
     BottomNavComponent
 ],
     templateUrl: './user-table.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './user-table.component.scss'
 })
 export class UserTableComponent implements AfterViewInit {

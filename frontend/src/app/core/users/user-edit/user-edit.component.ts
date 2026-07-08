@@ -1,5 +1,5 @@
 import { CommonModule, Location } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -35,6 +35,7 @@ import { RoleDto, RoleService } from '../../auth/role.service';
     MatProgressSpinnerModule,
 ],
     templateUrl: './user-edit.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./user-edit.component.scss']
 })
 export class UserEditComponent implements OnInit {

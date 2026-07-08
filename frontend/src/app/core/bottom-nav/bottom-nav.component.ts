@@ -1,4 +1,4 @@
-import { Component, inject, input, output } from '@angular/core';
+import { Component, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from "@angular/material/list";
@@ -23,6 +23,7 @@ import { AuthStateService } from '../auth/auth-state.service';
         MatMenuModule
     ],
     templateUrl: './bottom-nav.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './bottom-nav.component.scss',
 })
 export class BottomNavComponent {

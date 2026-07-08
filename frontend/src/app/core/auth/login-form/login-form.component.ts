@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../auth.service';
 import { MatCardModule } from '@angular/material/card';
@@ -26,6 +26,7 @@ import { FullscreenLoaderService } from '../../../shared/fullscreen-loader.servi
         RouterModule,
     ],
     templateUrl: './login-form.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './login-form.component.scss'
 })
 export class LoginFormComponent implements OnInit, OnDestroy {

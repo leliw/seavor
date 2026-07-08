@@ -1,4 +1,4 @@
-import { Component, effect, input, OnDestroy, signal } from '@angular/core';
+import { Component, effect, input, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
     MatIconModule,
 
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './play-audio-button.component.html',
 })
 export class PlayAudioButtonComponent implements OnDestroy {

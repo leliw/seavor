@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -21,6 +21,7 @@ import { User, UserService } from '../../users/user.service';
         MatButtonModule,
     ],
     templateUrl: './change-password-form.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './change-password-form.component.scss'
 })
 export class ChangePasswordFormComponent implements OnInit {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from "@angular/material/icon";
@@ -30,6 +30,7 @@ import { DefinitionGuessService } from '../../definition-guess/definition-guess.
     RouterModule,
   ],
   templateUrl: './repetition-view.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './repetition-view.component.scss',
 })
 export class RepetitionViewComponent {

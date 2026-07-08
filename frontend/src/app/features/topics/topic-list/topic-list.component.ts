@@ -1,5 +1,5 @@
 import { NgOptimizedImage } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
@@ -27,6 +27,7 @@ import { Topic, TopicService } from '../topic.service';
         MatMenuModule,
     ],
     templateUrl: './topic-list.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './topic-list.component.scss',
 })
 export class TopicListComponent implements OnInit {
