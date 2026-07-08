@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, Input, OnInit, output } from '@angular/core';
+import { Component, effect, inject, input, Input, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatRadioChange, MatRadioModule } from '@angular/material/radio';
@@ -17,6 +17,7 @@ import { BottomNavComponent } from "../../core/bottom-nav/bottom-nav.component";
     BottomNavComponent
 ],
     templateUrl: './gap-fill-choice.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './gap-fill-choice.component.scss',
 })
 export class GapFillChoiceComponent implements OnInit {

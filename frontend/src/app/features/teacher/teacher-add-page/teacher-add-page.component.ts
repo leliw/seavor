@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from "@angular/material/icon";
@@ -19,6 +19,7 @@ import { TeacherDefinitionGuessCreate, TeacherService } from '../teacher.service
     MatInputModule
   ],
   templateUrl: './teacher-add-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './teacher-add-page.component.scss',
 })
 export class TeacherAddPageComponent {

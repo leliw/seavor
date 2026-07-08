@@ -1,5 +1,5 @@
 import { NgOptimizedImage } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from "@angular/material/button";
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -25,6 +25,7 @@ import { BottomNavComponent } from "../../core/bottom-nav/bottom-nav.component";
     BottomNavComponent
 ],
     templateUrl: './letter-shuffle.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './letter-shuffle.component.scss'
 })
 export class LetterShuffleComponent implements OnInit {

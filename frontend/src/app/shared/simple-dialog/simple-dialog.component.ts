@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 
@@ -13,6 +13,7 @@ export interface DialogData {
     selector: 'app-simple-dialog',
     imports: [MatDialogModule, MatButtonModule],
     templateUrl: './simple-dialog.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './simple-dialog.component.scss'
 })
 export class SimpleDialogComponent {

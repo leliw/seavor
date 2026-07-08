@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -21,6 +21,7 @@ interface Level {
         MatIconModule,
     ],
     templateUrl: './learning-language-selector.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './learning-language-selector.component.scss'
 })
 export class LearningLanguageSelectorComponent {

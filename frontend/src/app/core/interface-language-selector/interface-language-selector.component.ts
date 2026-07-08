@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,6 +16,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
         MatSnackBarModule,
     ],
     templateUrl: './interface-language-selector.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './interface-language-selector.component.scss'
 })
 export class InterfaceLanguageSelectorComponent {

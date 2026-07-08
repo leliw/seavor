@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterModule } from '@angular/router';
@@ -19,6 +19,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MatButtonModule,
 ],
   templateUrl: './reset-password-form.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './reset-password-form.component.scss'
 })
 export class ResetPasswordFormComponent {

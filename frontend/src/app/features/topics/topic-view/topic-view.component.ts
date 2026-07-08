@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { PageHeader, TopicService } from '../topic.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -16,6 +16,7 @@ import { DefinitionGuessComponent } from "../../definition-guess/definition-gues
         InfoPageComponent,
         DefinitionGuessComponent,],
     templateUrl: './topic-view.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './topic-view.component.scss',
 })
 export class TopicViewComponent {

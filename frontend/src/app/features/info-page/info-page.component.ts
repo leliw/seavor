@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, output } from '@angular/core';
+import { Component, effect, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -28,6 +28,7 @@ import { BottomNavComponent } from "../../core/bottom-nav/bottom-nav.component";
     BottomNavComponent
 ],
     templateUrl: './info-page.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './info-page.component.scss',
 })
 export class InfoPageComponent {

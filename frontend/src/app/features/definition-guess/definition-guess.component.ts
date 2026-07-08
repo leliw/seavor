@@ -1,5 +1,5 @@
 import { NgOptimizedImage } from '@angular/common';
-import { ChangeDetectorRef, Component, effect, inject, input, output, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, effect, inject, input, output, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatTooltip } from "@angular/material/tooltip";
 import { AuthStateService } from '../../core/auth/auth-state.service';
 import { BottomNavComponent } from "../../core/bottom-nav/bottom-nav.component";
@@ -17,6 +17,7 @@ import { DefinitionGuessExercise, DefinitionGuessService, NativeSentence, Senten
         MatTooltip,
     ],
     templateUrl: './definition-guess.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './definition-guess.component.scss',
 })
 export class DefinitionGuessComponent {
