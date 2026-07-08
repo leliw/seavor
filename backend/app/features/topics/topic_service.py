@@ -34,8 +34,8 @@ class TopicService:
         )
 
     async def get_list(self, language: Language, level: Level, username: str | None = None) -> AsyncGenerator[Topic]:
-        storage = self._get_old_storage(language, level)
-        async for topic in storage.get_all():
+        storage = self.new_storage
+        async for topic in storage.where("language", "==", language).where("level", "==", level).get_all():
             if topic.private and topic.username != username:
                 continue
             yield topic
@@ -77,8 +77,8 @@ class TopicService:
         return topic
 
     async def get_or_create_default_topic(self, language: Language, level: Level, username: str) -> Topic:
-        storage = self._get_old_storage(language, level)
-        async for topic in storage.where("username", "==", username).get_all():
+        storage = self.new_storage
+        async for topic in storage.where("username", "==", username).where("language", "==", language).where("level", "==", level).get_all():
             if topic.private and topic.title == "Default":
                 return topic
         value = TopicCreate(
