@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import pytest
 import pytest_asyncio
-from ampf.base import BaseAsyncFactory, BaseAsyncStorage, KeyNotExistsException, StorageFormatFlags
+from ampf.base import BaseAsyncFactory, BaseAsyncStorage, KeyNotExistsException
 from ampf.dependency import DependencyRegistry
 from features.languages import Language
 from features.levels import Level
@@ -60,25 +60,6 @@ def service(factory: BaseAsyncFactory):
 @pytest_asyncio.fixture
 async def storage_v2(service: NativeTopicService):
     return service._get_old_storage(target_language, level, native_language)
-
-
-@pytest.mark.asyncio
-async def test_save_old_read_new(service: NativeTopicService, storage_v1: BaseAsyncStorage[NativeTopic_v1]):
-    # Given: A session stored in previous format
-    old = v1
-    await storage_v1.save(old)
-    # And: An old fromat is stored
-    NativeTopic_v2.FORMAT_FLAGS = StorageFormatFlags(save_new_format=False, migrate_legacy_on_read=False)
-    # When: The session is read
-    new = await service.get(target_language, level, native_language, old.id)
-    # Then: A new format is returned
-    assert isinstance(new, NativeTopic_v2)
-    # And: The previous version is returned
-    assert new.v == 1
-    # And: The old format is sill stored
-    saved = await storage_v1.get(old.id)
-    assert isinstance(saved, NativeTopic_v1)
-    assert "v" not in saved.model_dump().keys()
 
 
 @pytest.mark.asyncio

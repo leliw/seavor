@@ -38,7 +38,7 @@ async def test_delete_topic(
     native_topic_service = topic_service.native_topic_service
     native_topic = NativeTopic.from_topic(topic, Language.PL, "nt", "nd")
     await native_topic_service.create(native_topic)
-    assert await native_topic_service.get(topic.language, topic.level, Language.PL, native_topic.id)
+    assert await native_topic_service.get(Language.PL, native_topic.id)
     # When: The topic is deleted
     await topic_service.delete(topic.language, topic.level, topic.id)
     # Then: The topic is deleted
@@ -49,5 +49,5 @@ async def test_delete_topic(
         await page_service.get(page.id)
     # And: The native topics are deleted too
     with pytest.raises(KeyNotExistsException):
-        await native_topic_service.get(topic.language, topic.level, Language.PL, native_topic.id)
+        await native_topic_service.get(Language.PL, native_topic.id)
         

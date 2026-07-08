@@ -35,7 +35,8 @@ class TopicService:
 
     async def get_list(self, language: Language, level: Level, username: str | None = None) -> AsyncGenerator[Topic]:
         storage = self.new_storage
-        async for topic in storage.where("language", "==", language).where("level", "==", level).get_all():
+        levels_filter = list(dict.fromkeys([level, Level.ALL]))
+        async for topic in storage.where("language", "==", language).where("level", "in", levels_filter).get_all():
             if topic.private and topic.username != username:
                 continue
             yield topic

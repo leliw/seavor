@@ -35,7 +35,7 @@ async def translate_topic(
 @router.get(ITEM_PATH, dependencies=[Depends(get_topic_for_user)])
 async def get(
     service: NativeTopicServiceDep, target_language: Language, level: Level, native_language: Language, topic_id: UUID) -> NativeTopic:
-    return await service.get(target_language, level, native_language, topic_id)
+    return await service.get(native_language, topic_id)
 
 
 router.include_router(native_topics_pages.router, prefix=f"{ITEM_PATH}/pages")
