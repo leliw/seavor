@@ -20,6 +20,7 @@ locals {
     "roles/logging.logWriter",           # Logi
     "roles/monitoring.metricWriter",     # Metryki
     "roles/cloudtrace.agent",            # Trace'y
+    
     "roles/secretmanager.secretAccessor" # jeśli używasz secretów
   ]
   pubsub_topics = {
