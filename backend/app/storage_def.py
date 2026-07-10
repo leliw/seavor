@@ -1,4 +1,4 @@
-from ampf.base import CollectionDef, StorageFormatFlags
+from ampf.base import CollectionDef
 from core.feature_flags import FeatureFlags
 from core.user_settings.user_settings_model import UserSettings
 from core.users.user_model import UserInDB
@@ -8,7 +8,7 @@ from features.native_pages.native_page_model import NativePage
 from features.native_topics.native_topic_model import NativeTopic
 from features.pages.page_model import Page
 from features.repetitions.repetition_model import LanguageStatus, LevelStatus, RepetitionCard
-from features.topics.topic_model import Topic, Topic_v2
+from features.topics.topic_model import Topic
 from features.workflows.workflow_factory import WorkflowContext
 
 # fmt: off
@@ -54,7 +54,4 @@ STORAGE_DEF = [
 
 
 def set_storage_formats(feature_flags: FeatureFlags):
-    Topic_v2.FORMAT_FLAGS = StorageFormatFlags(
-        save_new_format=feature_flags.topic_v2_storage,
-        migrate_legacy_on_read=feature_flags.topic_v2_migrate,
-    )
+    pass

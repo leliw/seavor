@@ -1,13 +1,12 @@
+import logging
 from datetime import datetime, timezone
 from enum import StrEnum
-import logging
-from typing import List, Optional
 from uuid import UUID, uuid4
 
 from ampf.base import VersionedBaseModel
 from features.languages import Language
 from features.levels import Level
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 _log = logging.getLogger(__name__)
 
@@ -24,7 +23,7 @@ class TopicHeader(BaseModel):
     type: TopicType
     title: str
     description: str
-    image_name: Optional[str] = None
+    image_name: str | None = None
 
 
 class TopicCreate(BaseModel):
@@ -33,80 +32,28 @@ class TopicCreate(BaseModel):
     type: TopicType
     title: str
     description: str
-    image_name: Optional[str] = None
+    image_name: str | None = None
     private: bool = True
 
 
-class Topic_v1(BaseModel):
-    v: int = 1
-    id: UUID
-    content_id: Optional[UUID] = None
-    content_type: Optional[str] = None
-    target_language: Language = Language.EN
-    levels: Optional[List[Level]] = None
-    type: TopicType = TopicType.LETTER_SHUFFLE
-    target_title: str
-    target_description: str
-    image_name: Optional[str] = None
-    created_at: datetime
-    updated_at: datetime
-
-    @property
-    def level(self) -> Level:
-        if not self.levels:
-            return Level.ALL
-        if len(self.levels) > 1:
-            raise ValueError("Level is not unique")
-        return self.levels[0]
-
-    @property
-    def target_language_code(self):
-        return self.target_language.value
-
-    @target_language_code.setter
-    def target_language_code(self, value):
-        self.target_language = Language(value)
-
-    @property
-    def native_language_code(self):
-        return self.native_language.value
-
-    @native_language_code.setter
-    def native_language_code(self, value):
-        self.native_language = Language(value)
-
-    @classmethod
-    def create(cls, value_create: TopicCreate) -> "Topic_v1":
-        return cls(
-            id=uuid4(),
-            target_language=value_create.language,
-            levels=[value_create.level],
-            type=value_create.type,
-            target_title=value_create.title,
-            target_description=value_create.description,
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc),
-        )
-
-
-class Topic_v2(VersionedBaseModel):
+class Topic(VersionedBaseModel):
     CURRENT_VERSION = 2
     id: UUID
     username: str | None = None
-    content_id: Optional[UUID] = None
-    content_type: Optional[str] = None
+    content_id: UUID | None = None
+    content_type: str | None = None
     language: Language
     level: Level
     type: TopicType = TopicType.VOCABULARY
     title: str
     description: str
-    image_name: Optional[str] = None
+    image_name: str | None = None
     private: bool = True
     created_at: datetime
     updated_at: datetime
 
     @classmethod
-    def create(cls, value_create: TopicCreate, username: str | None = None) -> "Topic_v2":
+    def create(cls, value_create: TopicCreate, username: str | None = None) -> "Topic":
         return cls(
             id=uuid4(),
             username=username,
@@ -115,6 +62,7 @@ class Topic_v2(VersionedBaseModel):
             type=value_create.type,
             title=value_create.title,
             description=value_create.description,
+            image_name=value_create.image_name,
             private=value_create.private,
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc),
@@ -122,48 +70,8 @@ class Topic_v2(VersionedBaseModel):
 
     @classmethod
     def from_storage(cls, data: dict):
-        try:
-            return cls.model_validate(data)
-        except ValidationError:
-            try:
-                v1 = Topic_v1.model_validate(data)
-                return cls(
-                    v=v1.v,
-                    id=v1.id,
-                    content_id=v1.content_id,
-                    content_type=v1.content_type,
-                    language=v1.target_language,
-                    level=v1.level,
-                    type=v1.type,
-                    title=v1.target_title,
-                    description=v1.target_description,
-                    image_name=v1.image_name,
-                    private=False,
-                    created_at=v1.created_at,
-                    updated_at=v1.updated_at,
-                )
-            except ValidationError:
-                _log.error(f"Invalid data: {data}")
-                raise ValueError("Invalid data")
+        return cls.model_validate(data)
 
     def to_storage(self):
-        if self.FORMAT_FLAGS.save_new_format:
-            self.v = self.CURRENT_VERSION
-            return self.model_dump(by_alias=True, exclude_none=True)
-        else:
-            return Topic_v1(
-                id=self.id,
-                content_id=self.content_id,
-                content_type=self.content_type,
-                target_language=self.language,
-                levels=[self.level],
-                type=self.type,
-                target_title=self.title,
-                target_description=self.description,
-                image_name=self.image_name,
-                created_at=self.created_at,
-                updated_at=self.updated_at,
-            ).model_dump(by_alias=True, exclude_none=True)
-
-
-Topic = Topic_v2
+        self.v = self.CURRENT_VERSION
+        return self.model_dump(by_alias=True, exclude_none=True)

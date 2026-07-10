@@ -11,7 +11,7 @@ from core.users.user_model import UserInDB
 from core.users.user_service import UserService
 from fastapi import FastAPI
 from haintech.ai.prompts.prompt_service import PromptService
-from storage_def import STORAGE_DEF, set_storage_formats
+from storage_def import STORAGE_DEF
 
 _log = logging.getLogger(__name__)
 
@@ -43,7 +43,6 @@ class AppState:
             raise ValueError("No factory setup!")
 
         factory.register_collections(STORAGE_DEF)
-        set_storage_formats(config.feature_flags)
 
         user_storage = factory.get_collection(UserInDB)
 
