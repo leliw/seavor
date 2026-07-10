@@ -52,7 +52,7 @@ class PageService:
         image_service: ImageService,
         topic_id: UUID,
     ):
-        self.new_storage: BaseAsyncCollectionStorage[Page] = factory.get_collection("topics").get_collection(
+        self.storage: BaseAsyncCollectionStorage[Page] = factory.get_collection("topics").get_collection(
             topic_id, Page
         )
         self.audio_file_service = audio_file_service
@@ -62,7 +62,7 @@ class PageService:
         self.native_page_service_factory = DependencyRegistry.get(NativePageServiceFactory)
 
     async def get_all(self) -> AsyncGenerator[PageHeader]:
-        async for value in self.new_storage.get_all():
+        async for value in self.storage.get_all():
             yield PageHeader(**value.model_dump())
 
     async def post(self, value: PageCreate) -> Page:
@@ -73,7 +73,7 @@ class PageService:
                 page = await self.post_info(value)
             case PageType.DEFINITION_GUESS:
                 page = await self.post_definition_guess(value)
-        await self.new_storage.create(page)
+        await self.storage.create(page)
         return page
 
     async def post_gap_fill_choice(self, value_create: GapFillChoiceExerciseCreate) -> Page:
@@ -119,23 +119,23 @@ class PageService:
         return DefinitionGuess.create(value_create)
 
     async def get(self, key: UUID) -> Page:
-        return await self.new_storage.get(key)
+        return await self.storage.get(key)
 
     async def put(self, key: UUID, value: GapFillChoiceExercisePut) -> None:
         if key != value.id:
             raise ValueError("The key in the path must match the id in the request body.")
 
-        existing_exercise = await self.new_storage.get(key)
+        existing_exercise = await self.storage.get(key)
         updated_exercise = existing_exercise.model_copy(update=value.model_dump(exclude_unset=True))
         updated_exercise.updated_at = datetime.now(timezone.utc)
 
         # For simplicity, audio files are not regenerated on PUT.
         # If audio regeneration is needed, a more complex logic similar to POST would be required.
 
-        await self.new_storage.put(key, updated_exercise)
+        await self.storage.put(key, updated_exercise)
 
     async def patch(self, uid: UUID, value_patch: PagePatch) -> Page:
-        value = await self.new_storage.get(uid)
+        value = await self.storage.get(uid)
         if value.type != value_patch.type:
             raise ValueError
         match value.type:
@@ -145,7 +145,7 @@ class PageService:
                 pass
             case _:
                 raise NotImplementedError
-        value = await self.new_storage.patch(uid, value_patch)
+        value = await self.storage.patch(uid, value_patch)
         for native_language in Language:
             native_page_service = self.native_page_service_factory.create(
                 native_language=native_language, topic_id=self.topic_id
@@ -158,12 +158,12 @@ class PageService:
         return value
 
     async def delete(self, key: UUID) -> None:
-        page = await self.new_storage.get(key)
+        page = await self.storage.get(key)
         for file_name in page.get_audio_file_names():
             self.audio_file_service.delete(name=file_name)
         for image_name in page.get_image_file_names():
             self.image_service.delete(name=image_name)
-        await self.new_storage.delete(key)
+        await self.storage.delete(key)
 
     async def add_image_name(self, page_id: UUID, image_name: str) -> Page | None:
         page = await self.get(page_id)

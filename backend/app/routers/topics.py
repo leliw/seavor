@@ -33,8 +33,8 @@ async def get(topic: AuthorizedTopicDep) -> Topic:
 
 
 @router.delete(ITEM_PATH, dependencies=[Depends(Authorize(Role.ADMIN))], status_code=204)
-async def delete(service: TopicServiceDep, target_language: Language, level: Level, topic_id: UUID) -> None:
-    await service.delete(target_language, level, topic_id)
+async def delete(service: TopicServiceDep, topic_id: UUID) -> None:
+    await service.delete(topic_id)
 
 
 router.include_router(topics_pages.router, prefix=f"{ITEM_PATH}/pages")

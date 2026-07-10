@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from uuid import NAMESPACE_DNS, UUID, uuid5
 
 from ampf.base import KeyNotExistsException
-
 from features.languages import Language
 from features.levels import Level
 from features.native_pages.native_page_service import NativePageServiceFactory
@@ -24,7 +23,7 @@ class PageImageWorkflow:
 
     async def execute(self, language: Language, level: Level, topic_id: UUID, page_id: UUID) -> None:
         page_service = self.page_service_factory.create(topic_id=topic_id)
-        topic = await self.topic_service.get(language=language, level=level, id=topic_id)
+        topic = await self.topic_service.get(topic_id)
         page = await page_service.get(page_id)
         if page.type == PageType.DEFINITION_GUESS:
             text = page.phrase

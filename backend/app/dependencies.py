@@ -20,7 +20,6 @@ from fastapi.background import BackgroundTasks
 from fastapi.concurrency import asynccontextmanager
 from fastapi.security import OAuth2PasswordBearer
 from features.languages import Language
-from features.levels import Level
 from features.native_pages.native_page_service import NativePageService, NativePageServiceFactory
 from features.native_pages.native_page_translator import NativePageTranslator
 from features.native_topics.native_topic_service import NativeTopicService
@@ -184,13 +183,11 @@ RepetitionServiceDep = Annotated[RepetitionService, Depends(get_repetition_servi
 
 async def get_topic_for_user(
     service: TopicServiceDep,
-    target_language: Language,
-    level: Level,
     topic_id: UUID,
     token_payload: OptionalTokenPayloadDep,
 ) -> Topic:
     username = token_payload.sub if token_payload else None
-    return await service.get_for_user(target_language, level, topic_id, username)
+    return await service.get_for_user(topic_id, username)
 
 
 AuthorizedTopicDep = Annotated[Topic, Depends(get_topic_for_user)]

@@ -86,15 +86,13 @@ class BaseWorkflow[T: BaseWorkflowContext]:
         self.prompt_executor = prompt_executor or self.verifier_service.prompt_executor
 
     async def _ensure_topic(self, ctx: BaseWorkflowContext) -> Topic:
-        return await self.topic_service.get_or_create_default_topic(ctx.language, ctx.level, ctx.username)
+        return await self.topic_service.get_or_create_default_topic(ctx.language, ctx.username)
 
     async def _ensure_native_topic(self, ctx: BaseWorkflowContext, topic_id: UUID) -> NativeTopic:
         try:
             return await self.native_topic_service.get(ctx.native_language, topic_id)
         except KeyNotExistsException:
-            native_topic = await self.topic_translator.translate_topic_to_native(
-                ctx.language, ctx.level, ctx.native_language, topic_id
-            )
+            native_topic = await self.topic_translator.translate_topic_to_native(ctx.native_language, topic_id)
             return await self.native_topic_service.create(native_topic)
 
     async def _create_repetition_card(self, ctx: BaseWorkflowContext) -> RepetitionCard:
