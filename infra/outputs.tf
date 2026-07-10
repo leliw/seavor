@@ -6,3 +6,10 @@ output "firebase_dns_records" {
   value       =  module.app.firebase_dns_records
   description = "Changest required in DNS records"
 }
+output "service_account_key" {
+  value     = local.create_app ? null : module.app.service_account_key
+  sensitive = true
+}
+output "env_file" {
+  value = module.app.env_file
+}
