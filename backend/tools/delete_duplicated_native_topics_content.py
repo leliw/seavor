@@ -59,5 +59,6 @@ async def main():
 
 
 if __name__ == "__main__":
-    load_dotenv()
+    # load_dotenv("../infra/env/prod/.env.app", override=True)
+    # load_dotenv(".env.prod")
     asyncio.run(main())
