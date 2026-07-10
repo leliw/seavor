@@ -13,7 +13,7 @@ export interface InfoPage {
   target_language: string;
   level: string;
   order: number;
-  type: string
+  type: string;
   title: string;
   content: string;
   image_url: string | undefined;
@@ -30,10 +30,8 @@ export class InfoPageService {
   constructor(private httpClient: HttpClient, private languageService: LanguageService) { }
 
   getEndpoint(): string {
-    const targetLanguage = this.languageService.getLearningLanguage();
     const nativeLanguage = this.languageService.getInterfaceLanguage();
-    const level = "A1"
-    return `/api/native-topics/${targetLanguage}/${level}/${nativeLanguage}`;
+    return `/api/native-topics/${nativeLanguage}`;
   }
 
   getAll(): Observable<InfoPageHeader[]> {
