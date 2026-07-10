@@ -133,9 +133,7 @@ class DefinitionGuessWorkflow(BaseWorkflow[DefinitionGuessWorkflowContext]):
     async def translate_page(self, ctx: DefinitionGuessWorkflowContext) -> DefinitionGuessWorkflowContext:
         if ctx.native_page is not None:
             return ctx
-        native_page_service = self.native_page_service_factory.create(
-            ctx.language, ctx.level, ctx.native_language, ctx.required_topic.id
-        )
+        native_page_service = self.native_page_service_factory.create(ctx.native_language, ctx.required_topic.id)
         native_page = await self.page_translator.translate_page_to_native(
             ctx.language, ctx.native_language, ctx.required_page
         )

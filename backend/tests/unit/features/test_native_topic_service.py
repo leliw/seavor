@@ -108,9 +108,7 @@ async def test_delete_pages(
     topic = v2
     await service.save(topic)
     # And: Stored native page
-    page_service = service.native_page_service_factory.create(
-        topic.language, topic.level, topic.native_language, topic.id
-    )
+    page_service = service.native_page_service_factory.create(topic.native_language, topic.id)
     value_create = DefinitionGuessCreate(
         language=Language.EN,
         level=Level.A1,

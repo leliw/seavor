@@ -148,10 +148,7 @@ class PageService:
         value = await self.new_storage.patch(uid, value_patch)
         for native_language in Language:
             native_page_service = self.native_page_service_factory.create(
-                target_language=value.language,
-                level=value.level,
-                native_language=native_language,
-                topic_id=self.topic_id,
+                native_language=native_language, topic_id=self.topic_id
             )
             try:
                 await native_page_service.patch(uid, value_patch.model_dump(exclude_unset=True))

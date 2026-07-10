@@ -197,13 +197,11 @@ AuthorizedTopicDep = Annotated[Topic, Depends(get_topic_for_user)]
 
 
 def get_native_page_service(
-    target_language: Language,
-    level: Level,
     native_language: Language,
     topic_id: UUID,
 ):
     native_page_service_factory = DependencyRegistry.get(NativePageServiceFactory)
-    return native_page_service_factory.create(target_language, level, native_language, topic_id)
+    return native_page_service_factory.create(native_language, topic_id)
 
 
 NativePageServiceDep = Annotated[NativePageService, Depends(get_native_page_service)]

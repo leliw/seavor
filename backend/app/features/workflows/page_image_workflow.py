@@ -52,11 +52,8 @@ class PageImageWorkflow:
         page = await page_service.add_image_name(page_id, blob.name)
         if page:
             for native_language in Language:
-                native_page_service = self.native_page_service_factory.create(target_language=language, level=level, native_language=native_language, topic_id=topic_id)
+                native_page_service = self.native_page_service_factory.create(native_language, topic_id)
                 try:
                     await native_page_service.patch(page_id, page.model_dump(include={"image_names"}))
                 except KeyNotExistsException:
                     pass
-
-
-        

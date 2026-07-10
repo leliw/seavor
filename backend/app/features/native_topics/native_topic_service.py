@@ -81,7 +81,7 @@ class NativeTopicService:
         Returns:
             None
         """
-        native_page_service = self.native_page_service_factory.create(language, level, native_language, id)
+        native_page_service = self.native_page_service_factory.create(native_language, id)
         delete_page_tasks = []
         async for page in native_page_service.get_all():
             delete_page_tasks.append(native_page_service.delete(page.id))
