@@ -13,8 +13,6 @@ from dependencies import (
     get_topic_for_user,
 )
 from fastapi import APIRouter, Depends
-from features.languages import Language
-from features.levels import Level
 from features.pages.page_base_model import BasePage
 from features.pages.page_model import (
     Page,
@@ -57,14 +55,14 @@ async def delete(service: PageServiceDep, page_id: UUID) -> None:
 
 @router.post(f"{ITEM_PATH}/evaluate")
 async def evaluate(
-    service: RepetitionServiceDep,
-    target_language: Language,
-    level: Level,
+    service: PageServiceDep,
+    repetition_service: RepetitionServiceDep,
     topic_id: UUID,
     page_id: UUID,
     page_evaluation: PageEvaluation,
 ) -> RepetitionCard:
-    return await service.evaluate(target_language, level, topic_id, page_id, page_evaluation)
+    page = await service.get(page_id)
+    return await repetition_service.evaluate(page.language, page.level, topic_id, page_id, page_evaluation)
 
 
 @router.post(f"{ITEM_PATH}/generate-image")
@@ -75,8 +73,6 @@ async def generate_image(
     image_service: ImageServiceDep,
     prompt_executor_image: PromptExecutorImageDep,
     service: PageServiceDep,
-    target_language: Language,
-    level: Level,
     topic_id: UUID,
     page_id: UUID,
 ) -> Page:
@@ -87,5 +83,5 @@ async def generate_image(
         image_service=image_service,
         prompt_executor_image=prompt_executor_image,
     )
-    await workflow.execute(target_language, level, topic_id, page_id)
+    await workflow.execute(topic_id, page_id)
     return await service.get(page_id)

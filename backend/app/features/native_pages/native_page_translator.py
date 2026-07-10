@@ -23,16 +23,16 @@ class NativePageTranslator:
         self.ai_model = ai_model
         self.prompt_executor = PromptExecutor(ai_model, prompt_service)
 
-    async def translate_page_to_native(self, language: Language, native_language: Language, page: Page) -> NativePage:
+    async def translate_page_to_native(self, native_language: Language, page: Page) -> NativePage:
         match page.type:
             case PageType.GAP_FILL_CHOICE:
-                native = await self._translate(language, native_language, page)
+                native = await self._translate(page.language, native_language, page)
                 return NativeGapFillChoiceExercise.from_page(page, native)
             case PageType.INFO:
-                native = await self._translate_info_page(language, native_language, page)
+                native = await self._translate_info_page(page.language, native_language, page)
                 return NativeInfoPage.from_page(page, native)
             case PageType.DEFINITION_GUESS:
-                native = await self._translate_definition_guess(language, native_language, page)
+                native = await self._translate_definition_guess(page.language, native_language, page)
                 return NativeDefinitionGuess.from_page(page, native)
             case _:
                 raise NotImplementedError(f"Unsupported page type: {page.type}")
@@ -40,7 +40,7 @@ class NativePageTranslator:
     async def _translate_info_page(
         self, src_language: Language, dest_language: Language, page: InfoPage
     ) -> NativeInfoPageBase:
-        return self.prompt_executor.execute_typed(
+        return await self.prompt_executor.execute_typed_async(
             "translate_info_page",
             NativeInfoPageBase,
             src_language=LANGUAGE_NAMES[src_language],
@@ -95,7 +95,7 @@ class NativePageTranslator:
     async def _translate_definition_guess(
         self, language: Language, native_language: Language, definition_guess: DefinitionGuess
     ) -> NativeDefinitionGuessBase:
-        return self.prompt_executor.execute_typed(
+        return await self.prompt_executor.execute_typed_async(
             "translate_definition_guess",
             NativeDefinitionGuessBase,
             language=language,

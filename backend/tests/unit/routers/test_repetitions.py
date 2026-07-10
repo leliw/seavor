@@ -39,12 +39,12 @@ async def test_send_evaluation(
     definition_guess_create: DefinitionGuessCreate,
 ):
     # Given: A topic with definition guess page
-    page = client.post_typed(f"/api/topics/en/A1/{topic_id}/pages", 200, DefinitionGuess, json=definition_guess_create)
+    page = client.post_typed(f"/api/topics/{topic_id}/pages", 200, DefinitionGuess, json=definition_guess_create)
     # And: An page evaluation
     evaluation = PageEvaluation(rating=Rating.Good)
     # When: Send evaluation
     card = client.post_typed(
-        f"/api/topics/en/A1/{topic_id}/pages/{page.id}/evaluate",
+        f"/api/topics/{topic_id}/pages/{page.id}/evaluate",
         200,
         RepetitionCard,
         json=evaluation,
@@ -60,36 +60,6 @@ async def test_send_evaluation(
     assert stored.due is not None
 
 
-@pytest.mark.asyncio
-async def test_send_evaluation_wrong_level(
-    client: ApiTestClient,
-    headers: dict[str, str],
-    factory: BaseAsyncFactory,
-    topic_id: UUID,
-    definition_guess_create: DefinitionGuessCreate,
-):
-    # Given: A topic with definition guess page
-    page = client.post_typed(f"/api/topics/en/A1/{topic_id}/pages", 200, DefinitionGuess, json=definition_guess_create)
-    # And: An page evaluation
-    evaluation = PageEvaluation(rating=Rating.Good)
-    # When: Send evaluation
-    card = client.post_typed(
-        f"/api/topics/en/B1/{topic_id}/pages/{page.id}/evaluate",
-        200,
-        RepetitionCard,
-        json=evaluation,
-        headers=headers,
-    )
-    # Then: Card is returned
-    assert card.due is not None
-    assert card.evaluations[0].rating == evaluation.rating
-    assert card.evaluations[0].evaluated_at is not None
-    # And: It is saved
-    storage = factory.create_storage("users/test/languages/en/levels/B1/repetitions", RepetitionCard, "id")
-    stored = await storage.get(card.id)
-    assert stored.due is not None
-
-
 def test_send_evaluation_again(
     client: ApiTestClient,
     headers: dict[str, str],
@@ -97,10 +67,10 @@ def test_send_evaluation_again(
     definition_guess_create: DefinitionGuessCreate,
 ):
     # Given: A topic with definition guess page
-    page = client.post_typed(f"/api/topics/en/A1/{topic_id}/pages", 200, DefinitionGuess, json=definition_guess_create)
+    page = client.post_typed(f"/api/topics/{topic_id}/pages", 200, DefinitionGuess, json=definition_guess_create)
     # And: An page evaluated once
     client.post_typed(
-        f"/api/topics/en/A1/{topic_id}/pages/{page.id}/evaluate",
+        f"/api/topics/{topic_id}/pages/{page.id}/evaluate",
         200,
         RepetitionCard,
         json=PageEvaluation(rating=Rating.Good),
@@ -108,7 +78,7 @@ def test_send_evaluation_again(
     )
     # When: Send evaluation again
     card = client.post_typed(
-        f"/api/topics/en/A1/{topic_id}/pages/{page.id}/evaluate",
+        f"/api/topics/{topic_id}/pages/{page.id}/evaluate",
         200,
         RepetitionCard,
         json=PageEvaluation(rating=Rating.Again),
@@ -147,11 +117,11 @@ async def test_get_status(
     definition_guess_create: DefinitionGuessCreate,
 ):
     # Given: A topic with definition guess page
-    page = client.post_typed(f"/api/topics/en/A1/{topic_id}/pages", 200, DefinitionGuess, json=definition_guess_create)
+    page = client.post_typed(f"/api/topics/{topic_id}/pages", 200, DefinitionGuess, json=definition_guess_create)
     # And: An page evaluation
     evaluation = PageEvaluation(rating=Rating.Good)
     client.post_typed(
-        f"/api/topics/en/A1/{topic_id}/pages/{page.id}/evaluate",
+        f"/api/topics/{topic_id}/pages/{page.id}/evaluate",
         200,
         RepetitionCard,
         json=evaluation,

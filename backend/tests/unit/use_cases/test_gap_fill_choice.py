@@ -29,7 +29,7 @@ def test_gap_fill_choice(client: ApiTestClient, headers: dict[str, str], topic_c
         hint="Starts with W",
     )
     p = client.post_typed(
-        f"/api/topics/{t.language}/{t.level}/{t.id}/pages",
+        f"/api/topics/{t.id}/pages",
         200,
         GapFillChoiceExercise,
         json=topic_page.model_dump(mode="json"),
@@ -40,7 +40,7 @@ def test_gap_fill_choice(client: ApiTestClient, headers: dict[str, str], topic_c
         message_containing="Semi-modals",
         response='{"title": "Czasowniki półmodalne",  "description": "Czasowniki półmodalne a czyste czasowniki modalne"}',
     )
-    client.post_typed(f"/api/native-topics/{t.language}/{t.level}/pl/{t.id}", 200, NativeTopic)
+    client.post_typed(f"/api/native-topics/pl/{t.id}", 200, NativeTopic)
     mocker_ai_model.add(
         message_containing="Hello World!",
         response="""
@@ -49,7 +49,7 @@ def test_gap_fill_choice(client: ApiTestClient, headers: dict[str, str], topic_c
     )
     # Translate topic page
     np = client.post_typed(
-        f"/api/native-topics/{t.language}/{t.level}/pl/{t.id}/pages/{p.id}", 200, NativeGapFillChoiceExercise
+        f"/api/native-topics/pl/{t.id}/pages/{p.id}", 200, NativeGapFillChoiceExercise
     )
     assert np.native_answer == "Witaj Świecie!"
     assert np.native_explanation == "Powszechne powitanie."

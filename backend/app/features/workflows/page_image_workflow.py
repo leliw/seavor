@@ -3,7 +3,6 @@ from uuid import NAMESPACE_DNS, UUID, uuid5
 
 from ampf.base import KeyNotExistsException
 from features.languages import Language
-from features.levels import Level
 from features.native_pages.native_page_service import NativePageServiceFactory
 from features.pages.page_base_model import PageType
 from features.pages.page_service import PageServiceFactory
@@ -21,7 +20,7 @@ class PageImageWorkflow:
     image_service: ImageService
     prompt_executor_image: PromptExecutorImage
 
-    async def execute(self, language: Language, level: Level, topic_id: UUID, page_id: UUID) -> None:
+    async def execute(self, topic_id: UUID, page_id: UUID) -> None:
         page_service = self.page_service_factory.create(topic_id=topic_id)
         topic = await self.topic_service.get(topic_id)
         page = await page_service.get(page_id)
@@ -36,13 +35,13 @@ class PageImageWorkflow:
         )
         if not blob_create:
             return
-        name = uuid5(NAMESPACE_DNS, f"{language.value}-{text}").hex
+        name = uuid5(NAMESPACE_DNS, f"{page.language.value}-{text}").hex
         blob = ImageBlob(
             name=name,
             content=blob_create.content,
             metadata=ImageMetadata(
                 **blob_create.metadata.model_dump(),
-                language=language.value,
+                language=page.language.value,
                 text=text,
                 description=description,
             ),

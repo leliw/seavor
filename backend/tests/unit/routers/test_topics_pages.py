@@ -37,7 +37,7 @@ def gap_fill_choice_exercise_create() -> GapFillChoiceExerciseCreate:
 
 @pytest.fixture
 def endpoint(topic_id: UUID) -> str:
-    return f"/api/topics/en/A1/{topic_id}/pages"
+    return f"/api/topics/{topic_id}/pages"
 
 
 def test_get_all(client: ApiTestClient, endpoint: str):
