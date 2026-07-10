@@ -6,7 +6,7 @@ from features.letter_shuffles.letter_shuffle_model import LetterShuffleSet
 from features.letter_shuffles.letter_shuffle_translation_model import LetterShuffleSetTranslation
 from features.native_pages.native_page_model import NativePage
 from features.native_topics.native_topic_model import NativeTopic
-from features.pages.page_model import GapFillChoiceExercise_v2, InfoPage_v2, Page
+from features.pages.page_model import Page
 from features.repetitions.repetition_model import LanguageStatus, LevelStatus, RepetitionCard
 from features.topics.topic_model import Topic, Topic_v2
 from features.workflows.workflow_factory import WorkflowContext
@@ -58,9 +58,3 @@ def set_storage_formats(feature_flags: FeatureFlags):
         save_new_format=feature_flags.topic_v2_storage,
         migrate_legacy_on_read=feature_flags.topic_v2_migrate,
     )
-    page_sff = StorageFormatFlags(
-        save_new_format=feature_flags.page_v2_storage,
-        migrate_legacy_on_read=feature_flags.page_v2_migrate,
-    )
-    InfoPage_v2.FORMAT_FLAGS = page_sff
-    GapFillChoiceExercise_v2.FORMAT_FLAGS = page_sff

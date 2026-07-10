@@ -2,9 +2,9 @@ from typing import Annotated, Any, Self, Union, override
 
 from core.translation_status import TranslationStatus
 from features.languages import Language
-from features.pages.definition_guess_model import DefinitionGuess_v2
+from features.pages.definition_guess_model import DefinitionGuess
 from features.pages.page_base_model import PageHeader
-from features.pages.page_model import GapFillChoiceExercise_v2, InfoPage_v2
+from features.pages.page_model import GapFillChoiceExercise, InfoPage
 from pydantic import BaseModel, Field, model_validator
 
 
@@ -14,21 +14,19 @@ class NativePageHeader(PageHeader):
 
 class NativeGapFillChoiceExerciseBase(BaseModel):
     native_answer: str
-    native_explanation: str |  None = None
+    native_explanation: str | None = None
     native_distractors_explanation: dict[str, str] | None = None
-    native_hint: str |  None = None
+    native_hint: str | None = None
 
-    native_sentence_audio_file_name: str |  None = None
-    native_explanation_audio_file_name: str |  None = None
+    native_sentence_audio_file_name: str | None = None
+    native_explanation_audio_file_name: str | None = None
     native_distractors_explanation_audio_file_name: dict[str, str] | None = None
-    native_hint_audio_file_name: str |  None = None
+    native_hint_audio_file_name: str | None = None
 
 
-class NativeGapFillChoiceExercise(GapFillChoiceExercise_v2, NativeGapFillChoiceExerciseBase):
-    pass
-
+class NativeGapFillChoiceExercise(GapFillChoiceExercise, NativeGapFillChoiceExerciseBase):
     @classmethod
-    def from_page(cls, page: GapFillChoiceExercise_v2, native: NativeGapFillChoiceExerciseBase) -> Self:
+    def from_page(cls, page: GapFillChoiceExercise, native: NativeGapFillChoiceExerciseBase) -> Self:
         return cls(**page.model_dump(), **native.model_dump())
 
     @override
@@ -64,9 +62,9 @@ class NativeInfoPageBase(NativePageBase):
     native_content: str  # markdown / HTML / JSON
 
 
-class NativeInfoPage(InfoPage_v2, NativeInfoPageBase):
+class NativeInfoPage(InfoPage, NativeInfoPageBase):
     @classmethod
-    def from_page(cls, page: InfoPage_v2, native: NativeInfoPageBase) -> Self:
+    def from_page(cls, page: InfoPage, native: NativeInfoPageBase) -> Self:
         return cls(**page.model_dump(), **native.model_dump())
 
 
@@ -76,7 +74,7 @@ class NativeSentence(BaseModel):
 
 class NativeAnswerOption(BaseModel):
     value: str
-    explanation: str |  None = None
+    explanation: str | None = None
 
 
 class NativeDefinitionGuessBase(NativePageBase):
@@ -87,25 +85,14 @@ class NativeDefinitionGuessBase(NativePageBase):
     native_alternatives: list[NativeAnswerOption]
     native_distractors: list[NativeAnswerOption]
 
-    native_hint: str |  None = None
-    native_explanation: str |  None = None
+    native_hint: str | None = None
+    native_explanation: str | None = None
 
 
-class NativeDefinitionGuess(DefinitionGuess_v2, NativeDefinitionGuessBase):
+class NativeDefinitionGuess(DefinitionGuess, NativeDefinitionGuessBase):
     @classmethod
-    def from_page(cls, page: DefinitionGuess_v2, native: NativeDefinitionGuessBase) -> Self:
+    def from_page(cls, page: DefinitionGuess, native: NativeDefinitionGuessBase) -> Self:
         return cls(**page.model_dump(), **native.model_dump())
-
-    @classmethod
-    def from_storage(cls, data: dict):
-        if "description" in data:
-            data["definition"] = data.pop("description")
-        if "description_audio_file_name" in data:
-            data["definition_audio_file_name"] = data.pop("description_audio_file_name")
-        return cls.model_validate(data)
-
-    def to_storage(self):
-        return self.model_dump(by_alias=True, exclude_none=True)
 
 
 NativePage = Annotated[
