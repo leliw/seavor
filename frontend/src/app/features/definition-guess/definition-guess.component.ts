@@ -6,15 +6,23 @@ import { BottomNavComponent } from "../../core/bottom-nav/bottom-nav.component";
 import { EvaluationBarComponent } from "../../core/evaluation-bar/evaluation-bar.component";
 import { PlayAudioButtonComponent } from '../../shared/play-audio-button/play-audio-button.component';
 import { DefinitionGuessExercise, DefinitionGuessService, NativeSentence, Sentence } from './definition-guess.service';
+import { MatToolbarModule } from "@angular/material/toolbar";
+import { MatIconModule } from "@angular/material/icon";
+import { MatMenuModule } from "@angular/material/menu";
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
     selector: 'app-definition-guess',
     imports: [
         NgOptimizedImage,
-        BottomNavComponent,
-        EvaluationBarComponent,
         PlayAudioButtonComponent,
         MatTooltip,
+        MatToolbarModule,
+        MatButtonModule,
+        MatIconModule,
+        MatMenuModule,
+        BottomNavComponent,
+        EvaluationBarComponent
     ],
     templateUrl: './definition-guess.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
@@ -23,6 +31,8 @@ import { DefinitionGuessExercise, DefinitionGuessService, NativeSentence, Senten
 export class DefinitionGuessComponent {
     topicId = input.required<string>();
     id = input.required<string>();
+    viewMode = input<boolean>(false);
+
 
     previousPage = output<void>();
     nextPage = output<void>();
@@ -51,11 +61,11 @@ export class DefinitionGuessComponent {
             const topicId = this.topicId();
             const id = this.id();
             this.service.get(topicId, id).subscribe(e => {
-                this.answer = null;
                 this.exercise = e;
                 const sentenceIndex = Math.floor(Math.random() * this.exercise.sentences.length)
                 this.sentence = this.exercise.sentences[sentenceIndex];
                 this.nativeSentence = this.exercise.native_sentences ? this.exercise.native_sentences[sentenceIndex] : undefined;
+                this.answer = this.sentence.text_with_gap.replace(/_{3,}/g, '<b>' + this.sentence.gap_filler_form + '</b>');
                 this.showHint = false;
                 this.native = false;
                 if (this.exercise.image_names) {
@@ -78,7 +88,6 @@ export class DefinitionGuessComponent {
 
 
     async check(): Promise<void> {
-        this.answer = this.sentence.text_with_gap.replace(/_{3,}/g, '<b>' + this.sentence.gap_filler_form + '</b>');
         this.showAnswer = true;
         this.cdr.detectChanges();
         this.definitionAudioButton?.pause();
