@@ -7,7 +7,7 @@ from ampf.dependency import DependencyRegistry
 from features.languages import Language
 from features.levels import Level
 from features.native_pages.native_page_model import NativeDefinitionGuess, NativeDefinitionGuessBase
-from features.native_topics.native_topic_model import NativeTopic_v2
+from features.native_topics.native_topic_model import NativeTopic
 from features.native_topics.native_topic_service import NativeTopicService
 from features.pages.definition_guess_model import DefinitionGuess, DefinitionGuessCreate, Sentence
 from features.pages.page_base_model import PageType
@@ -17,7 +17,7 @@ target_language = Language.EN
 level = Level.A1
 native_language = Language.PL
 
-v2 = NativeTopic_v2(
+v2 = NativeTopic(
     id=uuid4(),
     language=target_language,
     level=level,
