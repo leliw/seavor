@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import AsyncGenerator, Optional
+from typing import AsyncGenerator
 from uuid import UUID
 
 from ampf.base import BaseAsyncFactory
@@ -27,14 +27,13 @@ class TopicService:
         self.native_topic_service = native_topic_service
 
     async def get_list(self, language: Language, level: Level, username: str | None = None) -> AsyncGenerator[Topic]:
-        storage = self.storage
         levels_filter = list(dict.fromkeys([level, Level.ALL]))
-        async for topic in storage.where("language", "==", language).where("level", "in", levels_filter).get_all():
+        async for topic in self.storage.where("language", "==", language).where("level", "in", levels_filter).get_all():
             if topic.private and topic.username != username:
                 continue
             yield topic
 
-    async def save(self, value: Topic, level: Optional[Level] = None) -> None:
+    async def save(self, value: Topic) -> None:
         await self.storage.save(value)
 
     async def create(self, value_create: TopicCreate, username: str | None = None) -> Topic:
