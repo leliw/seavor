@@ -69,15 +69,15 @@ def test_post_get_delete(client: ApiTestClient, headers: dict[str, str], topic_c
     assert r.title == topic_create.title
 
     # GET
-    r = client.get_typed(f"/api/topics/{r.language}/{topic_create.level}/{r.id}", 200, Topic)
+    r = client.get_typed(f"/api/topics/{r.id}", 200, Topic)
     assert r.title == topic_create.title
 
     # DELETE (unauthorized)
-    client.delete(f"/api/topics/{r.language}/{topic_create.level}/{r.id}", 401)
+    client.delete(f"/api/topics/{r.id}", 401)
     
     # DELETE (authorized)
-    client.delete(f"/api/topics/{r.language}/{topic_create.level}/{r.id}", 204, headers=headers)
-    client.get(f"/api/topics/{r.language}/{topic_create.level}/{r.id}", 404)
+    client.delete(f"/api/topics/{r.id}", 204, headers=headers)
+    client.get(f"/api/topics/{r.id}", 404)
 
 def test_get_topics_unauthorized(client: ApiTestClient, headers: dict[str, str]):
     # Given: One public topic
@@ -111,7 +111,7 @@ def test_get_topics_unauthorized(client: ApiTestClient, headers: dict[str, str])
         ),
     )
     # When: Unauthorized user get all topics
-    t = client.get_typed_list("/api/topics/en/A1", 200, Topic)
+    t = client.get_typed_list("/api/topics", 200, Topic, params={"language": "en", "level": "A1"})
     # Then: Only public topic is returned
     assert len(t) == 1
     assert t[0].id == pub.id
@@ -150,6 +150,6 @@ def test_get_topics_authorized(client: ApiTestClient, headers: dict[str, str]):
         ),
     )
     # When: Authorized user get all topics
-    t = client.get_typed_list("/api/topics/en/A1", 200, Topic, headers=headers)
+    t = client.get_typed_list("/api/topics", 200, Topic, headers=headers, params={"language": "en", "level": "A1"})
     # Then: Both topics are returned
     assert len(t) == 2

@@ -11,15 +11,13 @@ from features.topics.topic_model import Topic, TopicCreate
 from routers import topics_pages
 
 router = APIRouter(tags=["Topics"])
-ITEM_PATH = "/{target_language}/{level}/{topic_id}"
+ITEM_PATH = "/{topic_id}"
 
 
-@router.get("/{target_language}/{level}", response_model=List[Topic])
-async def get_all(
-    service: TopicServiceDep, target_language: Language, level: Level, token_payload: OptionalTokenPayloadDep
-):
+@router.get("", response_model=List[Topic])
+async def get_all(service: TopicServiceDep, language: Language, level: Level, token_payload: OptionalTokenPayloadDep):
     username = token_payload.sub if token_payload else None
-    return JsonStreamingResponse(service.get_list(target_language, level, username))
+    return JsonStreamingResponse(service.get_list(language, level, username))
 
 
 @router.post("")

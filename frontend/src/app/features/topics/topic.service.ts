@@ -41,15 +41,20 @@ export class TopicService {
     constructor(private httpClient: HttpClient) { }
 
     getEndpoint(): string {
-        return `/api/native-topics/${this.language()}/${this.level()}/${this.uiLanguage()}`;
+        return `/api/native-topics/${this.uiLanguage()}`;
     }
 
     getAll(): Observable<Topic[]> {
-        return this.httpClient.get<Topic[]>(this.getEndpoint());
+        return this.httpClient.get<Topic[]>(this.getEndpoint(), {
+            params: {
+                language: this.language(),
+                level: this.level()
+            }
+        });
     }
 
     getPages(topic_id: string): Observable<PageHeader[]> {
-        if (topic_id == "definition-guess") {
+        if (topic_id === "definition-guess") {
             return of([
                 {
                     id: "id",
@@ -62,6 +67,6 @@ export class TopicService {
     }
 
     delete(topic_id: string): Observable<void> {
-        return this.httpClient.delete<void>(`/api/topics/${this.language()}/${this.level()}/${topic_id}`);
+        return this.httpClient.delete<void>(`/api/topics/${topic_id}`);
     }
 }

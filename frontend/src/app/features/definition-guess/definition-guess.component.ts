@@ -21,7 +21,6 @@ import { DefinitionGuessExercise, DefinitionGuessService, NativeSentence, Senten
     styleUrl: './definition-guess.component.scss',
 })
 export class DefinitionGuessComponent {
-    level = input.required<string>();
     topicId = input.required<string>();
     id = input.required<string>();
 
@@ -49,10 +48,9 @@ export class DefinitionGuessComponent {
 
     constructor() {
         effect(() => {
-            const level = this.level();
             const topicId = this.topicId();
             const id = this.id();
-            this.service.get(level, topicId, id).subscribe(e => {
+            this.service.get(topicId, id).subscribe(e => {
                 this.answer = null;
                 this.exercise = e;
                 const sentenceIndex = Math.floor(Math.random() * this.exercise.sentences.length)

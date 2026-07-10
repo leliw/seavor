@@ -75,7 +75,7 @@ async def test_generate_image(
         )
     )
     # When: The generate_image method is called
-    await page_image_workflow.execute(topic.language, topic.level, topic.id, page.id)
+    await page_image_workflow.execute(topic.id, page.id)
     # Then: Image is stored in page
     page = await page_service.get(page.id)
     assert page.type == PageType.DEFINITION_GUESS

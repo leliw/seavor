@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from "@angular/material/icon";
@@ -17,75 +17,75 @@ import { DefinitionGuessService } from '../../definition-guess/definition-guess.
 
 
 @Component({
-  selector: 'app-repetition-view',
-  imports: [
-    CommonModule,
-    GapFillChoiceComponent,
-    DefinitionGuessComponent,
-    BottomNavComponent,
-    MatToolbarModule,
-    MatIconModule,
-    MatMenuModule,
-    MatButtonModule,
-    RouterModule,
-  ],
-  templateUrl: './repetition-view.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './repetition-view.component.scss',
+    selector: 'app-repetition-view',
+    imports: [
+        CommonModule,
+        GapFillChoiceComponent,
+        DefinitionGuessComponent,
+        BottomNavComponent,
+        MatToolbarModule,
+        MatIconModule,
+        MatMenuModule,
+        MatButtonModule,
+        RouterModule,
+    ],
+    templateUrl: './repetition-view.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrl: './repetition-view.component.scss',
 })
-export class RepetitionViewComponent {
-  router = inject(Router);
-  dialog = inject(MatDialog);
-  repetitionService = inject(RepetitionService)
-  userSettingsStore = inject(UserSettingsStore)
+export class RepetitionViewComponent implements OnInit {
+    router = inject(Router);
+    dialog = inject(MatDialog);
+    repetitionService = inject(RepetitionService)
+    userSettingsStore = inject(UserSettingsStore)
 
-  repetitions!: RepetitionCardHeader[];
-  repetitionIndex: number = 0;
-  repetition: RepetitionCardHeader | undefined;
+    repetitions!: RepetitionCardHeader[];
+    repetitionIndex: number = 0;
+    repetition: RepetitionCardHeader | undefined;
 
-  ngOnInit(): void {
-    this.repetitionService.getOverdue().subscribe(reps => {
-      this.repetitions = reps;
-      this.repetitionIndex = 0;
-      this.repetition = this.repetitions[this.repetitionIndex];
-    })
-  }
-
-  onPreviousPage() {
-    if (this.repetitionIndex > 0) {
-      this.repetitionIndex -= 1;
+    ngOnInit(): void {
+        this.repetitionService.getOverdue().subscribe(reps => {
+            this.repetitions = reps;
+            this.repetitionIndex = 0;
+            this.repetition = this.repetitions[this.repetitionIndex];
+        })
     }
-  }
 
-  onNextPage() {
-    if (this.repetitionIndex + 1 < this.repetitions.length) {
-      this.repetitionIndex += 1;
-      this.repetition = this.repetitions[this.repetitionIndex];
-    } else {
-      this.dialog.open(SimpleDialogComponent, {
-        data: {
-          title: $localize`Congratulations!`,
-          message: $localize`That's all!`
+    onPreviousPage() {
+        if (this.repetitionIndex > 0) {
+            this.repetitionIndex -= 1;
         }
-      }).afterClosed().subscribe(() => {
-        this.repetitions = [];
-        this.repetition = undefined;
-        this.repetitionService.getSchedule().subscribe();
-      });
     }
-  }
 
-  loader = inject(FullscreenLoaderService);
-  definitionGuessService = inject(DefinitionGuessService);
-
-  addImage() {
-    if (!this.repetition || this.repetition.type != 'definition-guess') {
-      return;
+    onNextPage() {
+        if (this.repetitionIndex + 1 < this.repetitions.length) {
+            this.repetitionIndex += 1;
+            this.repetition = this.repetitions[this.repetitionIndex];
+        } else {
+            this.dialog.open(SimpleDialogComponent, {
+                data: {
+                    title: $localize`Congratulations!`,
+                    message: $localize`That's all!`
+                }
+            }).afterClosed().subscribe(() => {
+                this.repetitions = [];
+                this.repetition = undefined;
+                this.repetitionService.getSchedule().subscribe();
+            });
+        }
     }
-    this.loader.show({ message: 'Generating & adding image...' });
-    this.definitionGuessService.addImage(this.repetition.level, this.repetition.topic_id, this.repetition.page_id).subscribe({
-      complete: () => this.loader.hide(),
-      error: () => this.loader.hide()
-    });
-  }
+
+    loader = inject(FullscreenLoaderService);
+    definitionGuessService = inject(DefinitionGuessService);
+
+    addImage() {
+        if (!this.repetition || this.repetition.type != 'definition-guess') {
+            return;
+        }
+        this.loader.show({ message: 'Generating & adding image...' });
+        this.definitionGuessService.addImage(this.repetition.topic_id, this.repetition.page_id).subscribe({
+            complete: () => this.loader.hide(),
+            error: () => this.loader.hide()
+        });
+    }
 }

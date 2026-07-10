@@ -45,7 +45,7 @@ async def test_private_definition_guess(
         response='{\n  "native_phrase": "Witaj",\n  "native_definition": "Powszechne wyra\u017cenie u\u017cywane do powitania kogo\u015b lub, w j\u0119zyku angielskim, tak\u017ce do odebrania telefonu.",\n  "native_sentences": [\n    {\n      "text": "Wesz\u0142a do pokoju i powiedzia\u0142a: \'____, wszystkim!\'"\n    },\n    {\n      "text": "Kiedy zadzwoni\u0142 telefon, odebra\u0142 go i po prostu powiedzia\u0142: \'____?\'"\n    },\n    {\n      "text": "To dobre maniery, \u017ceby powiedzie\u0107 ____, kiedy poznajesz kogo\u015b nowego."\n    }\n  ],\n  "native_alternatives": [\n    {\n      "value": "Cze\u015b\u0107",\n      "explanation": "To bardziej nieformalne powitanie, cz\u0119sto u\u017cywane w\u015br\u00f3d przyjaci\u00f3\u0142 lub w swobodnych okoliczno\u015bciach, podczas gdy \'Witaj\' jest nieco bardziej formalne lub uroczyste, cho\u0107 r\u00f3wnie\u017c uniwersalne."\n    },\n    {\n      "value": "Dzie\u0144 dobry/popo\u0142udnie/wiecz\u00f3r",\n      "explanation": "Te powitania s\u0105 bardziej formalne i specyficzne dla pory dnia, zmieniaj\u0105 si\u0119 w zale\u017cno\u015bci od tego, jaka jest godzina, w przeciwie\u0144stwie do \'Witaj\', kt\u00f3re jest odpowiednie o ka\u017cdej porze."\n    },\n    {\n      "value": "Jak si\u0119 masz?",\n      "explanation": "To bardzo tradycyjne i formalne powitanie, szczeg\u00f3lnie powszechne przy pierwszym spotkaniu z kim\u015b, i cz\u0119sto nie oczekuje dos\u0142ownej odpowiedzi na pytanie \'jak\'."\n    }\n  ],\n  "native_distractors": [\n    {\n      "value": "Do widzenia",\n      "explanation": "To wyra\u017cenie jest u\u017cywane na po\u017cegnanie, czyli jest ca\u0142kowitym przeciwie\u0144stwem powitania."\n    },\n    {\n      "value": "Przepraszam",\n      "explanation": "U\u017cywa si\u0119 tego, aby uprzejmie zwr\u00f3ci\u0107 czyj\u0105\u015b uwag\u0119 lub przeprosi\u0107, a nie zainicjowa\u0107 powitanie."\n    },\n    {\n      "value": "Prosz\u0119",\n      "explanation": "To s\u0142owo jest u\u017cywane do uprzejmej pro\u015bby lub podkre\u015blenia zaproszenia, a nie jako samodzielne powitanie."\n    }\n  ],\n  "native_hint": "To, co m\u00f3wisz, kiedy po raz pierwszy kogo\u015b spotykasz lub odbierasz telefon, prosty spos\u00f3b na potwierdzenie czyjej\u015b obecno\u015bci.",\n  "native_explanation": null\n}',
     )
     mocker_ai_model.add(
-        message_containing='Please generate an image prompt',
+        message_containing="Please generate an image prompt",
         response='{"image_prompt": "A person, gender-neutral, is navigating a dynamic and slightly unpredictable environment, like an obstacle course or a path with unexpected, playful elements. They are in an active, alert stance, perhaps on the balls of their feet, with a focused and ready expression. The scene should convey a sense of constant vigilance and readiness for minor surprises or changes, preventing them from becoming too relaxed. The background could be a vibrant, engaging setting, like a game show stage or a fantastical training ground. No text or words in the image."}',
     )
     mocker_image_generator.add(response=b"Mocked image bytes")
@@ -65,17 +65,15 @@ async def test_private_definition_guess(
     assert ctx.result_id is not None
     r = client.get_typed(f"/api/repetitions/{ctx.result_id}", 200, RepetitionCard, headers=headers)
     # Then: A private topic exists
-    topic = client.get_typed(f"/api/topics/{language}/{level}/{r.topic_id}", 200, Topic, headers=headers)
+    topic = client.get_typed(f"/api/topics/{r.topic_id}", 200, Topic, headers=headers)
     assert topic.private
     # And: A definition in this topic exists
-    page = client.get_typed(
-        f"/api/topics/{language}/{level}/{r.topic_id}/pages/{r.page_id}", 200, DefinitionGuess, headers=headers
-    )
+    page = client.get_typed(f"/api/topics/{r.topic_id}/pages/{r.page_id}", 200, DefinitionGuess, headers=headers)
     # And: Image is generated and stored in page
     assert page.image_names
     # And: Native private topic exists
     ntopic = client.get_typed(
-        f"/api/native-topics/{language}/{level}/pl/{r.topic_id}",
+        f"/api/native-topics/pl/{r.topic_id}",
         200,
         NativeTopic,
         headers=headers,
@@ -84,7 +82,7 @@ async def test_private_definition_guess(
 
     # And: Native private page exists
     npage = client.get_typed(
-        f"/api/native-topics/{language}/{level}/pl/{r.topic_id}/pages/{r.page_id}",
+        f"/api/native-topics/pl/{r.topic_id}/pages/{r.page_id}",
         200,
         NativeDefinitionGuess,
         headers=headers,
@@ -108,14 +106,12 @@ async def test_private_definition_guess(
     assert len(schedule.root) == 1
     assert list(schedule.root.items())[0][1] == 1
     # And: They are not available for unauthorized users
-    client.get(f"/api/topics/{language}/{level}/{r.topic_id}", 403)
-    client.get(f"/api/topics/{language}/{level}/{r.topic_id}/pages/{r.page_id}", 403)
-    client.get(f"/api/native-topics/{language}/{level}/pl/{r.topic_id}", 403)
-    client.get(f"/api/native-topics/{language}/{level}/pl/{r.topic_id}/pages/{r.page_id}", 403)
+    client.get(f"/api/topics/{r.topic_id}", 403)
+    client.get(f"/api/topics/{r.topic_id}/pages/{r.page_id}", 403)
+    client.get(f"/api/native-topics/pl/{r.topic_id}", 403)
+    client.get(f"/api/native-topics/pl/{r.topic_id}/pages/{r.page_id}", 403)
     # And: They are not available for other authorized users
-    client.get(f"/api/topics/{language}/{level}/{r.topic_id}", 403, headers=second_user_headers)
-    client.get(f"/api/topics/{language}/{level}/{r.topic_id}/pages/{r.page_id}", 403, headers=second_user_headers)
-    client.get(f"/api/native-topics/{language}/{level}/pl/{r.topic_id}", 403, headers=second_user_headers)
-    client.get(
-        f"/api/native-topics/{language}/{level}/pl/{r.topic_id}/pages/{r.page_id}", 403, headers=second_user_headers
-    )
+    client.get(f"/api/topics/{r.topic_id}", 403, headers=second_user_headers)
+    client.get(f"/api/topics/{r.topic_id}/pages/{r.page_id}", 403, headers=second_user_headers)
+    client.get(f"/api/native-topics/pl/{r.topic_id}", 403, headers=second_user_headers)
+    client.get(f"/api/native-topics/pl/{r.topic_id}/pages/{r.page_id}", 403, headers=second_user_headers)

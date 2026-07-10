@@ -21,12 +21,11 @@ async def post(
     page_service: PageServiceDep,
     translator: NativePageTranslatorDep,
     native_page_service: NativePageServiceDep,
-    target_language: Language,
     native_language: Language,
     id: UUID,
 ) -> NativePage:
     page = await page_service.get(id)
-    native_page = await translator.translate_page_to_native(target_language, native_language, page)
+    native_page = await translator.translate_page_to_native(native_language, page)
     return await native_page_service.create(native_page)
 
 

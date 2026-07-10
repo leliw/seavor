@@ -59,23 +59,15 @@ export class DefinitionGuessService {
 
     constructor(private httpClient: HttpClient) { }
 
-    getEndpoint(level: string | undefined = undefined): string {
-        return `/api/topics/${this.language()}/${level ?? this.level()}`;
+    get(topicId: string, pageId: string): Observable<DefinitionGuessExercise> {
+        return this.httpClient.get<DefinitionGuessExercise>(`/api/native-topics/${this.uiLanguage()}/${topicId}/pages/${pageId}`);
     }
 
-    getNativeEndpoint(level: string | undefined): string {
-        return `/api/native-topics/${this.language()}/${level ?? this.level()}/${this.uiLanguage()}`;
-    }
-
-    get(level: string, topicId: string, pageId: string): Observable<DefinitionGuessExercise> {
-        return this.httpClient.get<DefinitionGuessExercise>(`${this.getNativeEndpoint(level)}/${topicId}/pages/${pageId}`);
-    }
-
-    addImage(level: string, topicId: string, pageId: string): Observable<void> {
-        return this.httpClient.post<void>(`${this.getEndpoint(level)}/${topicId}/pages/${pageId}/generate-image`, {});
+    addImage(topicId: string, pageId: string): Observable<void> {
+        return this.httpClient.post<void>(`/api/topics/${topicId}/pages/${pageId}/generate-image`, {});
     }
 
     evaluate(topicId: string, pageId: string, rate: number): Observable<void> {
-        return this.httpClient.post<void>(`${this.getEndpoint()}/${topicId}/pages/${pageId}/evaluate`, { rating: rate });
+        return this.httpClient.post<void>(`/api/topics/${topicId}/pages/${pageId}/evaluate`, { rating: rate });
     }
 }
