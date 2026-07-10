@@ -125,7 +125,7 @@ class DefinitionGuessWorkflow(BaseWorkflow[DefinitionGuessWorkflowContext]):
             return ctx
         if ctx.content is None:
             raise ValueError("Content is required")
-        page_service = self.page_service_factory.create(ctx.language, ctx.level, ctx.required_topic.id)
+        page_service = self.page_service_factory.create(ctx.required_topic.id)
         page = await page_service.post(ctx.content)
         ctx.page = page
         return ctx
@@ -133,9 +133,7 @@ class DefinitionGuessWorkflow(BaseWorkflow[DefinitionGuessWorkflowContext]):
     async def translate_page(self, ctx: DefinitionGuessWorkflowContext) -> DefinitionGuessWorkflowContext:
         if ctx.native_page is not None:
             return ctx
-        native_page_service = self.native_page_service_factory.create(
-            ctx.language, ctx.level, ctx.native_language, ctx.required_topic.id
-        )
+        native_page_service = self.native_page_service_factory.create(ctx.native_language, ctx.required_topic.id)
         native_page = await self.page_translator.translate_page_to_native(
             ctx.language, ctx.native_language, ctx.required_page
         )
@@ -177,6 +175,6 @@ class DefinitionGuessWorkflow(BaseWorkflow[DefinitionGuessWorkflowContext]):
         if ctx.required_page.type != PageType.DEFINITION_GUESS:
             raise ValueError(f"Unsupported page type: {ctx.required_page.type}")
         ctx.image_name = blob.name
-        page_service = self.page_service_factory.create(ctx.language, ctx.level, ctx.required_topic.id)
+        page_service = self.page_service_factory.create(ctx.required_topic.id)
         await page_service.add_image_name(ctx.required_page.id, blob.name)
         return ctx

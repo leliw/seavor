@@ -67,7 +67,7 @@ class LetterShuffleTranslationService:
             topic_service.save(NativeTopic.from_letter_shuffle_translation(level, value), level) for level in levels
         ]
         native_calls = [
-            native_topic_service.save(NativeTopic.from_letter_shuffle_translation(level, value), level)
+            native_topic_service.save(NativeTopic.from_letter_shuffle_translation(level, value))
             for level in levels
         ]
         await asyncio.gather(*calls, *native_calls)

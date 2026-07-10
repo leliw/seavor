@@ -20,7 +20,6 @@ from fastapi.background import BackgroundTasks
 from fastapi.concurrency import asynccontextmanager
 from fastapi.security import OAuth2PasswordBearer
 from features.languages import Language
-from features.levels import Level
 from features.native_pages.native_page_service import NativePageService, NativePageServiceFactory
 from features.native_pages.native_page_translator import NativePageTranslator
 from features.native_topics.native_topic_service import NativeTopicService
@@ -104,13 +103,9 @@ def not_production(app_state: AppStateDep) -> bool:
     return not app_state.config.production
 
 
-def get_page_service(
-    target_language: Language,
-    level: Level,
-    topic_id: UUID,
-):
+def get_page_service(topic_id: UUID):
     page_service_factory = DependencyRegistry.get(PageServiceFactory)
-    return page_service_factory.create(target_language, level, topic_id)
+    return page_service_factory.create(topic_id)
 
 
 PageServiceDep = Annotated[PageService, Depends(get_page_service)]
@@ -188,26 +183,22 @@ RepetitionServiceDep = Annotated[RepetitionService, Depends(get_repetition_servi
 
 async def get_topic_for_user(
     service: TopicServiceDep,
-    target_language: Language,
-    level: Level,
     topic_id: UUID,
     token_payload: OptionalTokenPayloadDep,
 ) -> Topic:
     username = token_payload.sub if token_payload else None
-    return await service.get_for_user(target_language, level, topic_id, username)
+    return await service.get_for_user(topic_id, username)
 
 
 AuthorizedTopicDep = Annotated[Topic, Depends(get_topic_for_user)]
 
 
 def get_native_page_service(
-    target_language: Language,
-    level: Level,
     native_language: Language,
     topic_id: UUID,
 ):
     native_page_service_factory = DependencyRegistry.get(NativePageServiceFactory)
-    return native_page_service_factory.create(target_language, level, native_language, topic_id)
+    return native_page_service_factory.create(native_language, topic_id)
 
 
 NativePageServiceDep = Annotated[NativePageService, Depends(get_native_page_service)]

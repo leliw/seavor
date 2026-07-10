@@ -3,7 +3,7 @@ import re
 from typing import Any, Literal, Optional, Self, override
 from uuid import uuid4
 
-from features.pages.page_base_model import BasePage_v2, BasePageCreate, PageType
+from features.pages.page_base_model import BasePage, BasePageCreate, PageType
 from pydantic import BaseModel
 
 
@@ -106,7 +106,8 @@ class DefinitionGuessPatch(BaseModel):
     def model_post_init(self, __context):
         self.__pydantic_fields_set__.add("type")
 
-class DefinitionGuess_v2(BasePage_v2):
+
+class DefinitionGuess(BasePage):
     CURRENT_VERSION = 2
 
     type: Literal[PageType.DEFINITION_GUESS] = PageType.DEFINITION_GUESS
@@ -176,6 +177,3 @@ class DefinitionGuess_v2(BasePage_v2):
     @override
     def get_image_file_names(self) -> set[str]:
         return set(self.image_names) if self.image_names else set()
-
-
-DefinitionGuess = DefinitionGuess_v2

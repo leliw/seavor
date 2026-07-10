@@ -3,7 +3,6 @@ from uuid import UUID
 
 from core.translator_ai_model import TranslatorAIModel
 from features.languages import LANGUAGE_NAMES, Language
-from features.levels import Level
 from features.native_topics.native_topic_model import NativeTopic
 from features.topics.topic_service import TopicService
 from haintech.ai import AITaskExecutor
@@ -14,11 +13,9 @@ class NativeTopicTranslator:
         self.service = service
         self.ai_model = ai_model
 
-    async def translate_topic_to_native(
-        self, language: Language, level: Level, native_language: Language, topic_id: UUID
-    ) -> NativeTopic:
-        topic = await self.service.get(language, level, topic_id)
-        native = await self._translate(language, native_language, topic.title, topic.description)
+    async def translate_topic_to_native(self, native_language: Language, topic_id: UUID) -> NativeTopic:
+        topic = await self.service.get(topic_id)
+        native = await self._translate(topic.language, native_language, topic.title, topic.description)
         return NativeTopic.from_topic(topic, native_language, native.get("title", ""), native.get("description", ""))
 
     async def _translate(

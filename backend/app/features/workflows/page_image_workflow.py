@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from uuid import NAMESPACE_DNS, UUID, uuid5
 
 from ampf.base import KeyNotExistsException
-
 from features.languages import Language
 from features.levels import Level
 from features.native_pages.native_page_service import NativePageServiceFactory
@@ -23,8 +22,8 @@ class PageImageWorkflow:
     prompt_executor_image: PromptExecutorImage
 
     async def execute(self, language: Language, level: Level, topic_id: UUID, page_id: UUID) -> None:
-        page_service = self.page_service_factory.create(language=language, level=level, topic_id=topic_id)
-        topic = await self.topic_service.get(language=language, level=level, id=topic_id)
+        page_service = self.page_service_factory.create(topic_id=topic_id)
+        topic = await self.topic_service.get(topic_id)
         page = await page_service.get(page_id)
         if page.type == PageType.DEFINITION_GUESS:
             text = page.phrase
@@ -52,11 +51,8 @@ class PageImageWorkflow:
         page = await page_service.add_image_name(page_id, blob.name)
         if page:
             for native_language in Language:
-                native_page_service = self.native_page_service_factory.create(target_language=language, level=level, native_language=native_language, topic_id=topic_id)
+                native_page_service = self.native_page_service_factory.create(native_language, topic_id)
                 try:
                     await native_page_service.patch(page_id, page.model_dump(include={"image_names"}))
                 except KeyNotExistsException:
                     pass
-
-
-        

@@ -1,5 +1,3 @@
-from ampf.base import BlobLocation
-from ampf.local import LocalFactory
 from haintech.testing import MockerAIModel
 import pytest
 from features.languages import Language
@@ -61,9 +59,7 @@ async def test_generate_image(
         )
     )
     # And: A definition guess page
-    page_service = page_image_workflow.page_service_factory.create(
-        language=Language.EN, level=Level.B1, topic_id=topic.id
-    )
+    page_service = page_image_workflow.page_service_factory.create(topic_id=topic.id)
     page = await page_service.post(
         DefinitionGuessCreate(
             language=Language.EN,

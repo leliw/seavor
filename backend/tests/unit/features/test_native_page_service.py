@@ -16,7 +16,7 @@ from shared.images.image_service import ImageService
 def native_page_service(
     native_page_service_factory: NativePageServiceFactory,
 ) -> NativePageService:
-    return native_page_service_factory.create(Language.EN, Level.A1, Language.PL, uuid4())
+    return native_page_service_factory.create(Language.PL, uuid4())
 
 
 @pytest.mark.asyncio

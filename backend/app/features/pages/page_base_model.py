@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import StrEnum
+from typing import Any
 from uuid import UUID
 
 from ampf.base import VersionedBaseModel
@@ -38,21 +39,7 @@ class BasePageCreate(BaseModel):
         self.__pydantic_fields_set__.add("type")
 
 
-class BasePage_v1(BaseModel):
-    """Common fields for ALL page types"""
-
-    model_config = ConfigDict(extra="forbid")
-
-    id: UUID
-    target_language: Language
-    level: Level
-    order: int
-    type: PageType  # literal below will override this
-    created_at: datetime
-    updated_at: datetime
-
-
-class BasePage_v2(VersionedBaseModel, ABC):
+class BasePage(VersionedBaseModel, ABC):
     """Common fields for ALL page types"""
 
     model_config = ConfigDict(extra="forbid")
@@ -66,7 +53,7 @@ class BasePage_v2(VersionedBaseModel, ABC):
     updated_at: datetime
 
     def model_post_init(self, __context):
-        """ Enforce default type value as send by user (for patch() methods)"""
+        """Enforce default type value as sent by user (for patch() methods)"""
         super().model_post_init(__context)
         self.__pydantic_fields_set__.add("type")
 
@@ -80,5 +67,21 @@ class BasePage_v2(VersionedBaseModel, ABC):
         """Returns all image file names used in the page"""
         pass
 
+    @classmethod
+    def from_storage(cls, data: dict[str, Any]):
+        """Convert the data from storage format to the model instance.
 
-BasePage = BasePage_v2
+        Args:
+            data: The data to convert.
+        Returns:
+            The converted data.
+        """
+        return cls.model_validate(data)
+
+    def to_storage(self) -> dict[str, Any]:
+        """Convert the data to storage format.
+
+        Returns:
+            The converted data.
+        """
+        return self.model_dump(by_alias=True, exclude_none=True)

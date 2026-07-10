@@ -24,7 +24,7 @@ async def test_delete_topic(
     )
     topic = await topic_service.create(topic_create)
     # And: Stored pages
-    page_service = topic_service.page_service_factory.create(topic.language, topic.level, topic.id)
+    page_service = topic_service.page_service_factory.create(topic.id)
     page_create = InfoPageCreate(
         language=Language.EN,
         level=Level.A1,
@@ -40,10 +40,10 @@ async def test_delete_topic(
     await native_topic_service.create(native_topic)
     assert await native_topic_service.get(Language.PL, native_topic.id)
     # When: The topic is deleted
-    await topic_service.delete(topic.language, topic.level, topic.id)
+    await topic_service.delete(topic.id)
     # Then: The topic is deleted
     with pytest.raises(KeyNotExistsException):
-        await topic_service.get(topic.language, topic.level, topic.id)
+        await topic_service.get(topic.id)
     # And: The pages are deleted too
     with pytest.raises(KeyNotExistsException):
         await page_service.get(page.id)

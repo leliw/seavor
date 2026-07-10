@@ -16,7 +16,7 @@ def page_service(
 ) -> PageService:
     page_service_factory = DependencyRegistry.get(PageServiceFactory)
 
-    return page_service_factory.create(Language.EN, Level.A1, uuid4())
+    return page_service_factory.create(uuid4())
 
 
 @pytest.mark.asyncio
