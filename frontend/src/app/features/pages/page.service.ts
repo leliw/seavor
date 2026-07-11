@@ -57,6 +57,19 @@ export class PageService {
 
     constructor(private httpClient: HttpClient) { }
 
+    new(): DefinitionGuessExercise {
+        return {
+            id: '',
+            language: '',
+            level: '',
+            phrase: '',
+            definition: '',
+            sentences: [],
+            alternatives: [],
+            distractors: [],
+        }
+    }
+
     get(topicId: string, pageId: string): Observable<DefinitionGuessExercise> {
         return this.httpClient.get<DefinitionGuessExercise>(`/api/native-topics/${this.uiLanguage()}/${topicId}/pages/${pageId}`);
     }

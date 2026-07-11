@@ -62,8 +62,11 @@ export const routes: Routes = [
             {
                 path: 'topics/:topic_id',
                 loadComponent: () => import('./features/topics/topic-view/topic-view.component').then(m => m.TopicViewComponent)
+            },
+            {
+                path: 'topics/:topicId/pages/:pageId',
+                loadComponent: () => import('./features/pages/page-edit-form/page-edit-form.component').then(m => m.PageEditFormComponent)
             }
-
         ]
     },
     {

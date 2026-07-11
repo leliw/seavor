@@ -11,11 +11,18 @@
 </mat-toolbar>
 
 <mat-menu #menu="matMenu">
-    <button mat-menu-item (click)="addImage()">
-        <mat-icon>add_photo_alternate</mat-icon>
-        <span i18n>Generate & Add image</span>
-    </button>
+    <ng-template matMenuContent>
+        <button mat-menu-item [routerLink]="['/topics', topicId, 'pages', pages[page_no].id]">
+            <mat-icon>edit</mat-icon>
+            <span i18n>Edit page</span>
+        </button>
+        <button mat-menu-item (click)="addImage()">
+            <mat-icon>add_photo_alternate</mat-icon>
+            <span i18n>Generate & Add image</span>
+        </button>
+    </ng-template>
 </mat-menu>
+
 @if (pages) {
 @if (pages[page_no].type=="gap-fill-choice") {
 <app-gap-fill-choice [topicId]="topicId" [id]="pages[page_no].id" (previousPage)="onPreviousPage()"
