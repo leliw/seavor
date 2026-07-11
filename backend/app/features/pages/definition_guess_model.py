@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 import re
-from typing import Any, Literal, Optional, Self, override
+from typing import Any, Literal, Self, override
 from uuid import uuid4
 
 from features.pages.page_base_model import BasePage, BasePageCreate, PageType
@@ -87,21 +87,21 @@ class DefinitionGuessCreate(BasePageCreate):
 class DefinitionGuessPatch(BaseModel):
     type: Literal[PageType.DEFINITION_GUESS] = PageType.DEFINITION_GUESS
 
-    phrase: Optional[str] = None
-    definition: Optional[str] = None
+    phrase: str | None = None
+    definition: str | None = None
 
-    sentences: Optional[list[Sentence]] = None
-    alternatives: Optional[list[AnswerOption]] = None
-    distractors: Optional[list[AnswerOption]] = None
+    sentences: list[Sentence] | None = None
+    alternatives: list[AnswerOption] | None = None
+    distractors: list[AnswerOption] | None = None
 
-    hint: Optional[str] = None
-    explanation: Optional[str] = None
+    hint: str | None = None
+    explanation: str | None = None
 
-    image_names: Optional[list[str]] = None
-    phrase_audio_file_name: Optional[str] = None
-    definition_audio_file_name: Optional[str] = None
-    hint_audio_file_name: Optional[str] = None
-    explanation_audio_file_name: Optional[str] = None
+    image_names: list[str] | None = None
+    phrase_audio_file_name: str | None = None
+    definition_audio_file_name: str | None = None
+    hint_audio_file_name: str | None = None
+    explanation_audio_file_name: str | None = None
 
     def model_post_init(self, __context):
         self.__pydantic_fields_set__.add("type")
@@ -118,14 +118,14 @@ class DefinitionGuess(BasePage):
     alternatives: list[AnswerOption]
     distractors: list[AnswerOption]
 
-    hint: Optional[str] = None
-    explanation: Optional[str] = None
+    hint: str | None = None
+    explanation: str | None = None
 
-    image_names: Optional[list[str]] = None
-    phrase_audio_file_name: Optional[str] = None
-    definition_audio_file_name: Optional[str] = None
-    hint_audio_file_name: Optional[str] = None
-    explanation_audio_file_name: Optional[str] = None
+    image_names: list[str] | None = None
+    phrase_audio_file_name: str | None = None
+    definition_audio_file_name: str | None = None
+    hint_audio_file_name: str | None = None
+    explanation_audio_file_name: str | None = None
 
     @classmethod
     def create(cls, value_create: DefinitionGuessCreate) -> Self:
