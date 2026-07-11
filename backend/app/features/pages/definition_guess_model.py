@@ -103,8 +103,49 @@ class DefinitionGuessPatch(BaseModel):
     hint_audio_file_name: str | None = None
     explanation_audio_file_name: str | None = None
 
-    def model_post_init(self, __context):
+    def model_post_init(self, __context: Any) -> None:
+        super().model_post_init(__context)
         self.__pydantic_fields_set__.add("type")
+
+    def get_texts_to_synthesize(self) -> set[str]:
+        ret = set()
+        if self.phrase:
+            ret.add(self.phrase)
+        if self.definition:
+            ret.add(self.definition)
+        if self.explanation:
+            ret.add(self.explanation)
+        if self.hint:
+            ret.add(self.hint)
+        if self.sentences:
+            for sentence in self.sentences:
+                ret.add(sentence.answer)
+        if self.alternatives:
+            for alternative in self.alternatives:
+                ret.add(alternative.value)
+        if self.distractors:
+            for distractor in self.distractors:
+                ret.add(distractor.value)
+        return ret
+
+    def set_audio_file_names(self, audio_file_names: dict[str, str]) -> None:
+        if self.phrase:
+            self.phrase_audio_file_name = audio_file_names[self.phrase]
+        if self.definition:
+            self.definition_audio_file_name = audio_file_names[self.definition]
+        if self.sentences:
+            for sentence in self.sentences:
+                sentence.audio_file_name = audio_file_names[sentence.answer]
+        if self.alternatives:
+            for alternative in self.alternatives:
+                alternative.audio_file_name = audio_file_names[alternative.value]
+        if self.distractors:
+            for distractor in self.distractors:
+                distractor.audio_file_name = audio_file_names[distractor.value]
+        if self.explanation:
+            self.explanation_audio_file_name = audio_file_names[self.explanation]
+        if self.hint:
+            self.hint_audio_file_name = audio_file_names[self.hint]
 
 
 class DefinitionGuess(BasePage):

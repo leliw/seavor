@@ -142,7 +142,8 @@ class PageService:
             case PageType.GAP_FILL_CHOICE:
                 pass
             case PageType.DEFINITION_GUESS:
-                pass
+                if value_patch.type == PageType.DEFINITION_GUESS:
+                    value_patch = await self.patch_definition_guess(value, value_patch)
             case _:
                 raise NotImplementedError
         value = await self.storage.patch(uid, value_patch)
@@ -156,6 +157,18 @@ class PageService:
                 _log.error(f"Error patching native page: {e}")
                 pass
         return value
+
+    async def patch_definition_guess(self, value: DefinitionGuess, value_patch: DefinitionGuessPatch) -> DefinitionGuessPatch:
+        texts_to_synthesize = value_patch.get_texts_to_synthesize()
+        audio_file_names = await asyncio.gather(
+            *[
+                self.audio_file_service.generate_and_upload(text=text, language=value.language)
+                for text in texts_to_synthesize
+            ]
+        )
+        text_to_audio = dict(zip(texts_to_synthesize, audio_file_names))
+        value_patch.set_audio_file_names(text_to_audio)
+        return value_patch
 
     async def delete(self, key: UUID) -> None:
         page = await self.storage.get(key)
