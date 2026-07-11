@@ -1,13 +1,27 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject, input, linkedSignal } from '@angular/core';
+import { CommonModule, Location } from '@angular/common';
+import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { form, FormField, required } from '@angular/forms/signals';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { finalize } from 'rxjs';
+import { getChangedData } from '../../../shared/utils/signal-form.util';
 import { PageService } from '../page.service';
-
 
 @Component({
   selector: 'app-page-edit-form',
   imports: [
     CommonModule,
+    FormField,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatProgressSpinnerModule,
+    MatButtonModule
   ],
   templateUrl: './page-edit-form.component.html',
   styleUrl: './page-edit-form.component.scss',
@@ -21,5 +35,47 @@ export class PageEditFormComponent {
     params: () => ({ topicId: this.topicId(), pageId: this.pageId() }),
     stream: ({ params }) => this.service.get(params.topicId, params.pageId)
   });
-  model = linkedSignal(() => this.resource.value() ?? this.service.new());
+  originalModel = linkedSignal(() => structuredClone(this.resource.value() ?? this.service.new()));
+  model = linkedSignal(() => structuredClone(this.originalModel()));
+  form = form(this.model, (s) => {
+    required(s.phrase, { message: 'Phrase is required' });
+    required(s.definition, { message: 'Definition is required' });
+  });
+
+  location = inject(Location);
+  snackBar = inject(MatSnackBar);
+
+  isLoading = linkedSignal(() => this.resource.isLoading());
+  isSaving = signal(false);
+  isBusy = computed(() => this.isLoading() || this.isSaving());
+  canSubmit = computed(() =>
+    !this.isLoading() &&
+    !this.isSaving() &&
+    this.form().dirty() &&
+    !this.form().invalid()
+  );
+
+  submit(event: Event) {
+    event.preventDefault();
+    let changes = getChangedData(this.originalModel(), this.model());
+    changes.type = this.originalModel().type;
+    this.isSaving.set(true);
+    this.service.patch(this.topicId(), this.pageId(), changes).pipe(
+      finalize(() => this.isSaving.set(false))
+    ).subscribe({
+      next: () => {
+        this.snackBar.open('Updated successfully!', 'Close', { duration: 3000 });
+        this.location.back();
+      },
+      error: error => {
+        this.snackBar.open('Error updating.', 'Close', { duration: 3000 });
+        console.error('Error updating:', error);
+      }
+    });
+  }
+
+  cancel(): void {
+    this.location.back();
+  }
+
 }

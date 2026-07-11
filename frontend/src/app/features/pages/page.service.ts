@@ -22,6 +22,7 @@ export interface AnswerOption {
 
 export interface DefinitionGuessExercise {
     id: string;
+    type: string;
     language: string;
     level: string;
 
@@ -40,11 +41,6 @@ export interface DefinitionGuessExercise {
     hint_audio_file_name?: string;
     explanation_audio_file_name?: string;
 
-    native_definition?: string;
-    native_hint?: string;
-    native_explanation?: string;
-    native_sentences?: NativeSentence[];
-
     image_names?: string[];
 }
 
@@ -52,14 +48,12 @@ export interface DefinitionGuessExercise {
     providedIn: 'root',
 })
 export class PageService {
-    private userSettingsStorage = inject(UserSettingsStore);
-    private uiLanguage = computed(() => this.userSettingsStorage.settings().ui_language);
-
-    constructor(private httpClient: HttpClient) { }
+    private httpClient = inject(HttpClient);
 
     new(): DefinitionGuessExercise {
         return {
             id: '',
+            type: '',
             language: '',
             level: '',
             phrase: '',
@@ -70,8 +64,20 @@ export class PageService {
         }
     }
 
+    create(topicId: string, data: Partial<DefinitionGuessExercise>): Observable<void> {
+        return this.httpClient.post<void>(`/api/topics/${topicId}/pages`, data);
+    }
+    
     get(topicId: string, pageId: string): Observable<DefinitionGuessExercise> {
-        return this.httpClient.get<DefinitionGuessExercise>(`/api/native-topics/${this.uiLanguage()}/${topicId}/pages/${pageId}`);
+        return this.httpClient.get<DefinitionGuessExercise>(`/api/topics/${topicId}/pages/${pageId}`);
+    }
+
+    patch(topicId: string, pageId: string, data: Partial<DefinitionGuessExercise>): Observable<void> {
+        return this.httpClient.patch<void>(`/api/topics/${topicId}/pages/${pageId}`, data);
+    }
+
+    delete(topicId: string, pageId: string): Observable<void> {
+        return this.httpClient.delete<void>(`/api/topics/${topicId}/pages/${pageId}`);
     }
 
     addImage(topicId: string, pageId: string): Observable<void> {
