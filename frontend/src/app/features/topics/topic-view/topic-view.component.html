@@ -12,7 +12,7 @@
 
 <mat-menu #menu="matMenu">
     <ng-template matMenuContent>
-        <button mat-menu-item [routerLink]="['/topics', topicId, 'pages', pages[page_no].id]">
+        <button mat-menu-item [routerLink]="['/topics', topicId, 'pages', pages[page_no].id, 'edit']">
             <mat-icon>edit</mat-icon>
             <span i18n>Edit page</span>
         </button>
