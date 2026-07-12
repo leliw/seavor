@@ -6,27 +6,107 @@
             </mat-card-header>
 
             <mat-card-content>
-                <div class="container">
-                    <mat-form-field appearance="fill" class="full-width">
-                        <mat-label>Phrase</mat-label>
-                        <input matInput [formField]="form.phrase" />
-                        @if (form.phrase().invalid() && form.phrase().touched()) {
-                        @for (error of form.phrase().errors(); track $index) {
-                        <mat-error>{{ error.message }}</mat-error>
-                        }
-                        }
-                    </mat-form-field>
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Phrase</mat-label>
+                    <input matInput [formField]="form.phrase" />
+                    @if (form.phrase().invalid() && form.phrase().touched()) {
+                    @for (error of form.phrase().errors(); track $index) {
+                    <mat-error>{{ error.message }}</mat-error>
+                    }
+                    }
+                </mat-form-field>
 
-                    <mat-form-field appearance="fill" class="full-width">
-                        <mat-label>Definition</mat-label>
-                        <textarea matInput rows="4" [formField]="form.definition"></textarea>
-                        @if (form.definition().invalid() && form.definition().touched()) {
-                        @for (error of form.definition().errors(); track $index) {
-                        <mat-error>{{ error.message }}</mat-error>
-                        }
-                        }
-                    </mat-form-field>
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Definition</mat-label>
+                    <textarea matInput rows="4" [formField]="form.definition"></textarea>
+                    @if (form.definition().invalid() && form.definition().touched()) {
+                    @for (error of form.definition().errors(); track $index) {
+                    <mat-error>{{ error.message }}</mat-error>
+                    }
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Hint</mat-label>
+                    <textarea matInput rows="4" [formField]="form.hint"></textarea>
+                    @if (form.hint().invalid() && form.hint().touched()) {
+                    @for (error of form.hint().errors(); track $index) {
+                    <mat-error>{{ error.message }}</mat-error>
+                    }
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Explanation</mat-label>
+                    <textarea matInput rows="4" [formField]="form.explanation"></textarea>
+                    @if (form.explanation().invalid() && form.explanation().touched()) {
+                    @for (error of form.explanation().errors(); track $index) {
+                    <mat-error>{{ error.message }}</mat-error>
+                    }
+                    }
+                </mat-form-field>
+
+                <div class="row">
+                    <h2>Example sentences</h2>
+                    <span class="flex-spacer"></span>
+                    <button type="button" matIconButton (click)="addSentence()">
+                        <mat-icon>add</mat-icon>
+                    </button>
                 </div>
+                @for (sentence of form.sentences; track $index) {
+                <div class="row">
+                    <mat-form-field appearance="fill" class="flex-spacer">
+                        <mat-label>Sentence</mat-label>
+                        <input matInput [formField]="form.sentences[$index].text_with_gap" />
+                    </mat-form-field>
+                    <mat-form-field appearance="fill" class="gap-filler-form">
+                        <mat-label>Filler</mat-label>
+                        <input matInput [formField]="form.sentences[$index].gap_filler_form" />
+                    </mat-form-field>
+                    <button type="button" matIconButton (click)="removeSentence($index)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+                }
+
+                <div class="row">
+                    <h2>Alternatives</h2>
+                    <span class="flex-spacer"></span>
+                    <button type="button" matIconButton (click)="addAlternative()">
+                        <mat-icon>add</mat-icon>
+                    </button>
+                </div>
+                @for (alternative of form.alternatives; track $index) {
+                <div class="row">
+                    <mat-form-field appearance="fill" class="flex-spacer">
+                        <mat-label>Alternative</mat-label>
+                        <input matInput [formField]="form.alternatives[$index].value" />
+                    </mat-form-field>
+                    <button type="button" matIconButton (click)="removeAlternative($index)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+                }
+
+                <div class="row">
+                    <h2>Distractors</h2>
+                    <span class="flex-spacer"></span>
+                    <button type="button" matIconButton (click)="addDistractor()">
+                        <mat-icon>add</mat-icon>
+                    </button>
+                </div>
+                @for (distractor of form.distractors; track $index) {
+                <div class="row">
+                    <mat-form-field appearance="fill" class="flex-spacer">
+                        <mat-label>Distractor</mat-label>
+                        <input matInput [formField]="form.distractors[$index].value" />
+                    </mat-form-field>
+                    <button type="button" matIconButton (click)="removeDistractor($index)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+                }
+
             </mat-card-content>
 
             <mat-card-actions>

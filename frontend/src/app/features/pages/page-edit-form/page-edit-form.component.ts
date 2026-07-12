@@ -5,6 +5,7 @@ import { form, FormField, required } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -21,7 +22,8 @@ import { PageService } from '../page.service';
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
-    MatButtonModule
+    MatButtonModule,
+    MatIconModule
   ],
   templateUrl: './page-edit-form.component.html',
   styleUrl: './page-edit-form.component.scss',
@@ -78,4 +80,24 @@ export class PageEditFormComponent {
     this.location.back();
   }
 
+  addSentence() {
+    this.model.update(m => ({ ...m, sentences: [...m.sentences, { text_with_gap: '', gap_filler_form: m.phrase }] }));
+  }
+  removeSentence(index: number) {
+    this.model.update(m => ({ ...m, sentences: m.sentences.filter((_, i) => i !== index) }));
+  }
+
+  addAlternative() {
+    this.model.update(m => ({ ...m, alternatives: [...m.alternatives, { value: "" }] }));
+  }
+  removeAlternative(index: number) {
+    this.model.update(m => ({ ...m, alternatives: m.alternatives.filter((_, i) => i !== index) }));
+  }
+
+  addDistractor() {
+    this.model.update(m => ({ ...m, distractors: [...m.distractors, { value: "" }] }));
+  }
+  removeDistractor(index: number) {
+    this.model.update(m => ({ ...m, distractors: m.distractors.filter((_, i) => i !== index) }));
+  }
 }

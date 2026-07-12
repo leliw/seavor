@@ -1,1 +1,10 @@
+.row {
+    width: 100%;
+    display: flex;
+    gap: 0.5em;
+    align-items: baseline;
+}
 
+.gap-filler-form {
+    width: 20%;
+}

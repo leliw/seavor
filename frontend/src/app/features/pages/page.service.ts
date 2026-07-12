@@ -33,8 +33,8 @@ export interface DefinitionGuessExercise {
     alternatives: AnswerOption[];
     distractors: AnswerOption[];
 
-    hint?: string;
-    explanation?: string;
+    hint: string;
+    explanation: string;
 
     phrase_audio_file_name?: string;
     definition_audio_file_name?: string;
@@ -58,6 +58,8 @@ export class PageService {
             level: '',
             phrase: '',
             definition: '',
+            hint: '',
+            explanation: '',
             sentences: [],
             alternatives: [],
             distractors: [],
