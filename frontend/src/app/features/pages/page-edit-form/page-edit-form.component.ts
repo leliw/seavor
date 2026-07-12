@@ -3,12 +3,12 @@ import { Component, computed, inject, input, linkedSignal, signal } from '@angul
 import { rxResource } from '@angular/core/rxjs-interop';
 import { form, FormField, required } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { finalize } from 'rxjs';
 import { getChangedData } from '../../../shared/utils/signal-form.util';
 import { PageService } from '../page.service';
@@ -18,13 +18,13 @@ import { PageService } from '../page.service';
   imports: [
     CommonModule,
     FormField,
-    MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
     MatButtonModule,
-    MatIconModule
-  ],
+    MatIconModule,
+    MatToolbarModule
+],
   templateUrl: './page-edit-form.component.html',
   styleUrl: './page-edit-form.component.scss',
 })
