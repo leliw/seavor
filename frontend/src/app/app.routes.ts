@@ -8,7 +8,7 @@ export const routes: Routes = [
     {
         path: 'change-password', title: "Change password", canActivate: [authGuard],
         loadComponent: () => import('./core/auth/change-password-form/change-password-form.component').then(m => m.ChangePasswordFormComponent)
-    },    
+    },
     {
         path: 'reset-password-request', title: "Reset password request",
         loadComponent: () => import('./core/auth/reset-password-request-form/reset-password-request-form.component').then(mod => mod.ResetPasswordRequestFormComponent)
@@ -64,7 +64,7 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/topics/topic-view/topic-view.component').then(m => m.TopicViewComponent)
             },
             {
-                path: 'topics/:topicId/pages/:pageId/edit',
+                path: 'topics/:topicId/pages/:pageId/edit', canActivate: [authGuard], data: { roles: ["admin"] },
                 loadComponent: () => import('./features/pages/page-edit-form/page-edit-form.component').then(m => m.PageEditFormComponent)
             }
         ]

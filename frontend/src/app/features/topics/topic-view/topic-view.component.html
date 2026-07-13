@@ -5,9 +5,11 @@
     <div class="flex-spacer"></div>
     <span i18n>{{topic?.title}}</span>
     <div class="flex-spacer"></div>
+    @if (authService.hasRole("admin") && pages && pages[page_no]) {
     <button mat-icon-button [matMenuTriggerFor]="menu">
         <mat-icon>more_vert</mat-icon>
     </button>
+    }
 </mat-toolbar>
 
 <mat-menu #menu="matMenu">
@@ -23,7 +25,7 @@
     </ng-template>
 </mat-menu>
 
-@if (pages) {
+@if (pages && pages.length > 0) {
 @if (pages[page_no].type=="gap-fill-choice") {
 <app-gap-fill-choice [topicId]="topicId" [id]="pages[page_no].id" (previousPage)="onPreviousPage()"
     (nextPage)="onNextPage()"></app-gap-fill-choice>

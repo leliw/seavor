@@ -14,6 +14,7 @@ import { DefinitionGuessComponent } from "../../definition-guess/definition-gues
 import { GapFillChoiceComponent } from "../../gap-fill-choice/gap-fill-choice.component";
 import { RepetitionCardHeader, RepetitionService } from '../repetition.service';
 import { DefinitionGuessService } from '../../definition-guess/definition-guess.service';
+import { AuthStateService } from '../../../core/auth/auth-state.service';
 
 
 @Component({
@@ -38,6 +39,7 @@ export class RepetitionViewComponent implements OnInit {
     dialog = inject(MatDialog);
     repetitionService = inject(RepetitionService)
     userSettingsStore = inject(UserSettingsStore)
+    authService = inject(AuthStateService);
 
     repetitions!: RepetitionCardHeader[];
     repetitionIndex: number = 0;

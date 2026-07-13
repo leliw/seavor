@@ -5,7 +5,7 @@
     <div class="flex-spacer"></div>
     <span i18n>Repetitions</span>
     <div class="flex-spacer"></div>
-    @if (repetition) {
+    @if (repetition && authService.hasRole("admin")) {
     <button mat-icon-button [matMenuTriggerFor]="menu">
         <mat-icon>more_vert</mat-icon>
     </button>
