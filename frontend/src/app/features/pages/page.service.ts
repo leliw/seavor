@@ -22,6 +22,7 @@ export interface AnswerOption {
 
 export interface DefinitionGuessExercise {
     id: string;
+    type: string;
     language: string;
     level: string;
 
@@ -32,18 +33,13 @@ export interface DefinitionGuessExercise {
     alternatives: AnswerOption[];
     distractors: AnswerOption[];
 
-    hint?: string;
-    explanation?: string;
+    hint: string;
+    explanation: string;
 
     phrase_audio_file_name?: string;
     definition_audio_file_name?: string;
     hint_audio_file_name?: string;
     explanation_audio_file_name?: string;
-
-    native_definition?: string;
-    native_hint?: string;
-    native_explanation?: string;
-    native_sentences?: NativeSentence[];
 
     image_names?: string[];
 }
@@ -51,20 +47,43 @@ export interface DefinitionGuessExercise {
 @Injectable({
     providedIn: 'root',
 })
-export class DefinitionGuessService {
-    private userSettingsStorage = inject(UserSettingsStore);
-    private language = computed(() => this.userSettingsStorage.settings().learning_language);
-    private level = computed(() => this.userSettingsStorage.settings().learning_level);
-    private uiLanguage = computed(() => this.userSettingsStorage.settings().ui_language);
+export class PageService {
+    private httpClient = inject(HttpClient);
 
-    constructor(private httpClient: HttpClient) { }
-
-    get(topicId: string, pageId: string): Observable<DefinitionGuessExercise> {
-        return this.httpClient.get<DefinitionGuessExercise>(`/api/native-topics/${this.uiLanguage()}/${topicId}/pages/${pageId}`);
+    new(): DefinitionGuessExercise {
+        return {
+            id: '',
+            type: '',
+            language: '',
+            level: '',
+            phrase: '',
+            definition: '',
+            hint: '',
+            explanation: '',
+            sentences: [],
+            alternatives: [],
+            distractors: [],
+        }
     }
 
-    addImage(topicId: string, pageId: string): Observable<DefinitionGuessExercise> {
-        return this.httpClient.post<DefinitionGuessExercise>(`/api/topics/${topicId}/pages/${pageId}/generate-image`, {});
+    create(topicId: string, data: Partial<DefinitionGuessExercise>): Observable<void> {
+        return this.httpClient.post<void>(`/api/topics/${topicId}/pages`, data);
+    }
+    
+    get(topicId: string, pageId: string): Observable<DefinitionGuessExercise> {
+        return this.httpClient.get<DefinitionGuessExercise>(`/api/topics/${topicId}/pages/${pageId}`);
+    }
+
+    patch(topicId: string, pageId: string, data: Partial<DefinitionGuessExercise>): Observable<void> {
+        return this.httpClient.patch<void>(`/api/topics/${topicId}/pages/${pageId}`, data);
+    }
+
+    delete(topicId: string, pageId: string): Observable<void> {
+        return this.httpClient.delete<void>(`/api/topics/${topicId}/pages/${pageId}`);
+    }
+
+    addImage(topicId: string, pageId: string): Observable<void> {
+        return this.httpClient.post<void>(`/api/topics/${topicId}/pages/${pageId}/generate-image`, {});
     }
 
     evaluate(topicId: string, pageId: string, rate: number): Observable<void> {

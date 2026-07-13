@@ -12,8 +12,10 @@
             {{ exercise.native_definition }}
             } @else {
             {{ exercise.definition }}
+            @if (exercise.definition_audio_file_name) {
             <app-play-audio-button #definitionAudioButton
                 [srcUrl]="'/api/audio-files/' + exercise.definition_audio_file_name" [autoPlay]="true" />
+            }
             }
         </div>
         @if (showHint) {
@@ -22,21 +24,27 @@
             ({{ exercise.native_hint }})
             } @else {
             <span>({{ exercise.hint }})</span>
+            @if (exercise.hint_audio_file_name) {
             <app-play-audio-button #hintAudioButton [srcUrl]="'/api/audio-files/' + exercise.hint_audio_file_name" />
+            }
             }
         </div>
         }
     </div>
     <div class="part right vertically-centered">
-        @if (showAnswer) {
+        @if (showAnswer || viewMode()) {
         <div id="phrase" class="text-with-player">
             <span>{{ exercise.phrase }}</span>
+            @if (exercise.phrase_audio_file_name) {
             <app-play-audio-button #phraseAudioButton
                 [srcUrl]="'/api/audio-files/' + exercise.phrase_audio_file_name" />
+            }
         </div>
         <div id="sentence" class="text-with-player">
             <div [innerHTML]="answer"></div>
+             @if (sentence.audio_file_name) {
             <app-play-audio-button #sentenceAudioButton [srcUrl]="'/api/audio-files/' + sentence.audio_file_name" />
+             }
         </div>
         } @else {
         <div id="sentence" [innerHTML]="sentence.text_with_gap"></div>
@@ -47,14 +55,16 @@
         @if (exercise.alternatives.length) {
         <div id="alternatives"><span class="group-title" i18n>Alternatives</span>:
             @for(alt of exercise.alternatives; track alt.value; let last=$last;) {
-            <span [matTooltip]="alt.explanation">{{ alt.value }}</span>@if (!last) {, } @else {.}
+            <span [matTooltip]="alt.explanation" [matTooltipDisabled]="!alt.explanation">{{ alt.value }}</span>@if
+            (!last) {, } @else {.}
             }
         </div>
         }
         @if (exercise.distractors.length) {
         <div id="distractors"><span class="group-title" i18n>Distractors</span>:
             @for(distr of exercise.distractors; track distr.value; let last=$last;) {
-            <span [matTooltip]="distr.explanation">{{ distr.value }}</span>@if (!last) {, } @else {.}
+            <span [matTooltip]="distr.explanation" [matTooltipDisabled]="!distr.explanation">{{ distr.value }}</span>@if
+            (!last) {, } @else {.}
             }
         </div>
         }
@@ -62,9 +72,14 @@
     </div>
     }
 </div>
+@if (viewMode()) {
+<app-bottom-nav [showPreviousPage]="true" [showNextPage]="true" [showTranslate]="true"
+    (previousPage)="previousPage.emit()" (nextPage)="nextPage.emit()" (translate)="native = !native"></app-bottom-nav>
+} @else {
 @if (!showAnswer) {
 <app-bottom-nav [showCheck]="true" [showHint]="true" [showTranslate]="true" (check)="check()" (hint)="onShowHint()"
     [disabledHint]="showHint" (translate)="native = !native"></app-bottom-nav>
 } @else {
 <app-evaluation-bar (evaluation)="onEvaluation($event)"></app-evaluation-bar>
+}
 }

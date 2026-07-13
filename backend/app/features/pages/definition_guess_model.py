@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 import re
-from typing import Any, Literal, Optional, Self, override
+from typing import Any, Literal, Self, override
 from uuid import uuid4
 
 from features.pages.page_base_model import BasePage, BasePageCreate, PageType
@@ -87,24 +87,65 @@ class DefinitionGuessCreate(BasePageCreate):
 class DefinitionGuessPatch(BaseModel):
     type: Literal[PageType.DEFINITION_GUESS] = PageType.DEFINITION_GUESS
 
-    phrase: Optional[str] = None
-    definition: Optional[str] = None
+    phrase: str | None = None
+    definition: str | None = None
 
-    sentences: Optional[list[Sentence]] = None
-    alternatives: Optional[list[AnswerOption]] = None
-    distractors: Optional[list[AnswerOption]] = None
+    sentences: list[Sentence] | None = None
+    alternatives: list[AnswerOption] | None = None
+    distractors: list[AnswerOption] | None = None
 
-    hint: Optional[str] = None
-    explanation: Optional[str] = None
+    hint: str | None = None
+    explanation: str | None = None
 
-    image_names: Optional[list[str]] = None
-    phrase_audio_file_name: Optional[str] = None
-    definition_audio_file_name: Optional[str] = None
-    hint_audio_file_name: Optional[str] = None
-    explanation_audio_file_name: Optional[str] = None
+    image_names: list[str] | None = None
+    phrase_audio_file_name: str | None = None
+    definition_audio_file_name: str | None = None
+    hint_audio_file_name: str | None = None
+    explanation_audio_file_name: str | None = None
 
-    def model_post_init(self, __context):
+    def model_post_init(self, __context: Any) -> None:
+        super().model_post_init(__context)
         self.__pydantic_fields_set__.add("type")
+
+    def get_texts_to_synthesize(self) -> set[str]:
+        ret = set()
+        if self.phrase:
+            ret.add(self.phrase)
+        if self.definition:
+            ret.add(self.definition)
+        if self.explanation:
+            ret.add(self.explanation)
+        if self.hint:
+            ret.add(self.hint)
+        if self.sentences:
+            for sentence in self.sentences:
+                ret.add(sentence.answer)
+        if self.alternatives:
+            for alternative in self.alternatives:
+                ret.add(alternative.value)
+        if self.distractors:
+            for distractor in self.distractors:
+                ret.add(distractor.value)
+        return ret
+
+    def set_audio_file_names(self, audio_file_names: dict[str, str]) -> None:
+        if self.phrase:
+            self.phrase_audio_file_name = audio_file_names[self.phrase]
+        if self.definition:
+            self.definition_audio_file_name = audio_file_names[self.definition]
+        if self.sentences:
+            for sentence in self.sentences:
+                sentence.audio_file_name = audio_file_names[sentence.answer]
+        if self.alternatives:
+            for alternative in self.alternatives:
+                alternative.audio_file_name = audio_file_names[alternative.value]
+        if self.distractors:
+            for distractor in self.distractors:
+                distractor.audio_file_name = audio_file_names[distractor.value]
+        if self.explanation:
+            self.explanation_audio_file_name = audio_file_names[self.explanation]
+        if self.hint:
+            self.hint_audio_file_name = audio_file_names[self.hint]
 
 
 class DefinitionGuess(BasePage):
@@ -118,14 +159,14 @@ class DefinitionGuess(BasePage):
     alternatives: list[AnswerOption]
     distractors: list[AnswerOption]
 
-    hint: Optional[str] = None
-    explanation: Optional[str] = None
+    hint: str | None = None
+    explanation: str | None = None
 
-    image_names: Optional[list[str]] = None
-    phrase_audio_file_name: Optional[str] = None
-    definition_audio_file_name: Optional[str] = None
-    hint_audio_file_name: Optional[str] = None
-    explanation_audio_file_name: Optional[str] = None
+    image_names: list[str] | None = None
+    phrase_audio_file_name: str | None = None
+    definition_audio_file_name: str | None = None
+    hint_audio_file_name: str | None = None
+    explanation_audio_file_name: str | None = None
 
     @classmethod
     def create(cls, value_create: DefinitionGuessCreate) -> Self:

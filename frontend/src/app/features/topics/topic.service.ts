@@ -66,6 +66,9 @@ export class TopicService {
         return this.httpClient.get<PageHeader[]>(`${this.getEndpoint()}/${topic_id}/pages`);
     }
 
+    get(topic_id: string): Observable<Topic> {
+        return this.httpClient.get<Topic>(`${this.getEndpoint()}/${topic_id}`);
+    }
     delete(topic_id: string): Observable<void> {
         return this.httpClient.delete<void>(`/api/topics/${topic_id}`);
     }

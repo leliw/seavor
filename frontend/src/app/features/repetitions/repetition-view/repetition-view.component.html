@@ -5,29 +5,37 @@
     <div class="flex-spacer"></div>
     <span i18n>Repetitions</span>
     <div class="flex-spacer"></div>
+    @if (repetition && authService.hasRole("admin")) {
     <button mat-icon-button [matMenuTriggerFor]="menu">
         <mat-icon>more_vert</mat-icon>
     </button>
+    }
 </mat-toolbar>
 
 <mat-menu #menu="matMenu">
-    <button mat-menu-item (click)="addImage()">
-        <mat-icon>add_photo_alternate</mat-icon>
-        <span i18n>Generate & Add image</span>
-    </button>
+    <ng-template matMenuContent>
+        <button mat-menu-item [routerLink]="['/topics', repetition?.topic_id, 'pages', repetition?.page_id, 'edit']">
+            <mat-icon>edit</mat-icon>
+            <span i18n>Edit page</span>
+        </button>
+        <button mat-menu-item (click)="addImage()">
+            <mat-icon>add_photo_alternate</mat-icon>
+            <span i18n>Generate & Add image</span>
+        </button>
+    </ng-template>
 </mat-menu>
 
 @if (repetition) {
-@if (repetition.type=="gap-fill-choice") {
+@if (repetition.type==="gap-fill-choice") {
 <app-gap-fill-choice [topicId]="repetition.topic_id" [id]="repetition.page_id" (previousPage)="onPreviousPage()"
     (nextPage)="onNextPage()"></app-gap-fill-choice>
-} @else if (repetition.type=="definition-guess") {
-<app-definition-guess [topicId]="repetition.topic_id" [id]="repetition.page_id"
-    (previousPage)="onPreviousPage()" (nextPage)="onNextPage()"></app-definition-guess>
+} @else if (repetition.type==="definition-guess") {
+<app-definition-guess [topicId]="repetition.topic_id" [id]="repetition.page_id" (previousPage)="onPreviousPage()"
+    (nextPage)="onNextPage()"></app-definition-guess>
 } @else {
 <pre>{{repetition | json}}</pre>
 }
-} @else if ( repetitions && repetitions.length==0) {
+} @else if ( repetitions && repetitions.length===0) {
 <div class="full-screen-container vertically-centered">
     <h2 i18n>All done!</h2>
     <h3 i18n>Get back at {{repetitionService.earliestOverdue$ | async |
