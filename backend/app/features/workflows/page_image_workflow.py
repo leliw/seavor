@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from uuid import NAMESPACE_DNS, UUID, uuid5
+from uuid import UUID, uuid4
 
 from ampf.base import KeyNotExistsException
 from features.languages import Language
@@ -35,7 +35,7 @@ class PageImageWorkflow:
         )
         if not blob_create:
             return
-        name = uuid5(NAMESPACE_DNS, f"{page.language.value}-{text}").hex
+        name = uuid4().hex
         blob = ImageBlob(
             name=name,
             content=blob_create.content,
