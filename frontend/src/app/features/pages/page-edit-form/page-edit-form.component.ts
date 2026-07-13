@@ -17,23 +17,25 @@ import { FullscreenLoaderService } from '../../../shared/fullscreen-loader.servi
 import { getChangedData } from '../../../shared/utils/signal-form.util';
 import { DefinitionGuessService } from '../../definition-guess/definition-guess.service';
 import { PageService } from '../page.service';
+import { PlayAudioButtonComponent } from "../../../shared/play-audio-button/play-audio-button.component";
 
 @Component({
     selector: 'app-page-edit-form',
     imports: [
-        NgOptimizedImage,
-        CommonModule,
-        FormField,
-        MatFormFieldModule,
-        MatInputModule,
-        MatProgressSpinnerModule,
-        MatButtonModule,
-        MatIconModule,
-        MatToolbarModule,
-        MatTabsModule,
-        MatCardModule,
-        MatTooltip
-    ],
+    NgOptimizedImage,
+    CommonModule,
+    FormField,
+    MatFormFieldModule,
+    MatInputModule,
+    MatProgressSpinnerModule,
+    MatButtonModule,
+    MatIconModule,
+    MatToolbarModule,
+    MatTabsModule,
+    MatCardModule,
+    MatTooltip,
+    PlayAudioButtonComponent,
+],
     templateUrl: './page-edit-form.component.html',
     styleUrl: './page-edit-form.component.scss',
 })

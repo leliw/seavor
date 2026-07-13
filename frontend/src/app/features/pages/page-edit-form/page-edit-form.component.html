@@ -146,5 +146,61 @@
                 </button>
             </div>
         </mat-tab>
+        <mat-tab label="Voices">
+            <div class="full-screen-container layout-container-1 vertically-centered">
+                <div class="text-with-player">
+                    <span>{{ model().phrase }}</span>
+                    @if (model().phrase_audio_file_name) {
+                    <app-play-audio-button [srcUrl]="'/api/audio-files/' + model().phrase_audio_file_name" />
+                    }
+                </div>
+                <div class="text-with-player">
+                    <span>{{ model().definition }}</span>
+                    @if (model().definition_audio_file_name) {
+                    <app-play-audio-button [srcUrl]="'/api/audio-files/' + model().definition_audio_file_name" />
+                    }
+                </div>
+                <div class="text-with-player">
+                    <span>{{ model().hint }}</span>
+                    @if (model().hint_audio_file_name) {
+                    <app-play-audio-button [srcUrl]="'/api/audio-files/' + model().hint_audio_file_name" />
+                    }
+                </div>
+                @if (model().explanation) {
+                <div class="text-with-player">
+                    <span>{{ model().explanation }}</span>
+                    @if (model().explanation_audio_file_name) {
+                    <app-play-audio-button [srcUrl]="'/api/audio-files/' + model().explanation_audio_file_name" />
+                    }
+                </div>
+                }
+                @for(sentence of model().sentences; track $index) {
+                <div class="text-with-player">
+                    <span>{{ (sentence.text_with_gap || '').replace(/_{3,}/g, sentence.gap_filler_form) }}</span>
+                    @if (sentence.audio_file_name) {
+                    <app-play-audio-button [srcUrl]="'/api/audio-files/' + sentence.audio_file_name" />
+                    }
+                </div>
+                }
+
+                @for(answer of model().alternatives; track $index) {
+                <div class="text-with-player">
+                    <span>{{ answer.value }}</span>
+                    @if (answer.audio_file_name) {
+                    <app-play-audio-button [srcUrl]="'/api/audio-files/' + answer.audio_file_name" />
+                    }
+                </div>
+                }
+
+                @for(answer of model().distractors; track $index) {
+                <div class="text-with-player">
+                    <span>{{ answer.value }}</span>
+                    @if (answer.audio_file_name) {
+                    <app-play-audio-button [srcUrl]="'/api/audio-files/' + answer.audio_file_name" />
+                    }
+                </div>
+                }
+            </div>
+        </mat-tab>
     </mat-tab-group>
 </form>
