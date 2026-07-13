@@ -63,8 +63,8 @@ export class DefinitionGuessService {
         return this.httpClient.get<DefinitionGuessExercise>(`/api/native-topics/${this.uiLanguage()}/${topicId}/pages/${pageId}`);
     }
 
-    addImage(topicId: string, pageId: string): Observable<void> {
-        return this.httpClient.post<void>(`/api/topics/${topicId}/pages/${pageId}/generate-image`, {});
+    addImage(topicId: string, pageId: string): Observable<DefinitionGuessExercise> {
+        return this.httpClient.post<DefinitionGuessExercise>(`/api/topics/${topicId}/pages/${pageId}/generate-image`, {});
     }
 
     evaluate(topicId: string, pageId: string, rate: number): Observable<void> {
