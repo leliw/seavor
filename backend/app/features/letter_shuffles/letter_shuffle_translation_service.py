@@ -64,7 +64,7 @@ class LetterShuffleTranslationService:
         await self.storage.create(value)
         levels = Level.ALL.to_list() if value.levels is None or Level.ALL in value.levels else value.levels
         calls = [
-            topic_service.save(NativeTopic.from_letter_shuffle_translation(level, value), level) for level in levels
+            topic_service.save(NativeTopic.from_letter_shuffle_translation(level, value)) for level in levels
         ]
         native_calls = [
             native_topic_service.save(NativeTopic.from_letter_shuffle_translation(level, value))
@@ -88,7 +88,7 @@ class LetterShuffleTranslationService:
         await self.storage.put(code, value)
         topic_service = TopicService(self.factory)
         calls = [
-            topic_service.save(NativeTopic.from_letter_shuffle_translation(level, value), level)
+            topic_service.save(NativeTopic.from_letter_shuffle_translation(level, value))
             for level in value.levels or list(Level)
         ]
         await asyncio.gather(*calls)
