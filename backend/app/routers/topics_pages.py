@@ -2,6 +2,7 @@ from typing import List
 from uuid import UUID
 
 from ampf.fastapi import JsonStreamingResponse
+from pydantic import BaseModel
 from dependencies import (
     ImageServiceDep,
     NativePageServiceFactoryDep,
@@ -85,3 +86,12 @@ async def generate_image(
     )
     await workflow.execute(topic_id, page_id)
     return await service.get(page_id)
+
+
+class GenerateAudioDto(BaseModel):
+    texts: list[str]
+
+
+@router.post(f"{ITEM_PATH}/generate-audio")
+async def generate_audio(service: PageServiceDep, page_id: UUID, payload: GenerateAudioDto) -> Page:
+    return await service.generate_and_update_audio_file_names(page_id, payload.texts)

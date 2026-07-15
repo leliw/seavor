@@ -17,6 +17,7 @@ from features.pages.page_model import (
     GapFillChoiceExerciseCreate,
     GapFillChoiceExercisePatch,
 )
+from shared.audio_files.audio_file_service import AudioFileService
 
 
 @pytest.fixture
@@ -47,7 +48,10 @@ def test_get_all(client: ApiTestClient, endpoint: str):
 
 
 def test_post_get_put_delete(
-    client: ApiTestClient, headers: dict[str, str], endpoint: str, gap_fill_choice_exercise_create: GapFillChoiceExerciseCreate
+    client: ApiTestClient,
+    headers: dict[str, str],
+    endpoint: str,
+    gap_fill_choice_exercise_create: GapFillChoiceExerciseCreate,
 ):
     # POST
     posted_exercise = client.post_typed(
@@ -144,3 +148,17 @@ def test_post_get_put_delete_definition_guess(
     # DELETE
     client.delete(f"{endpoint}/{exercise_id}", 200)
     client.get(f"{endpoint}/{exercise_id}", 404)
+
+@pytest.mark.asyncio
+async def test_regenerate_audio(client: ApiTestClient, endpoint: str, definition_guess_create: DefinitionGuessCreate, audio_file_service: AudioFileService):
+    # Given: A page with removed audio
+    page = client.post_typed(endpoint, 200, DefinitionGuess, json=definition_guess_create)
+    assert page.phrase_audio_file_name
+    await audio_file_service.delete(page.phrase_audio_file_name)
+    # When: An audio is generated again
+    page = client.post_typed(f"{endpoint}/{page.id}/generate-audio", 200, DefinitionGuess, json={ "texts": [page.phrase]})
+    #Then: The audio blob exists
+    assert page.phrase_audio_file_name
+    blob = await audio_file_service.download(page.phrase_audio_file_name)
+    assert blob
+    
