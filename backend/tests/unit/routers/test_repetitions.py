@@ -55,7 +55,7 @@ async def test_send_evaluation(
     assert card.evaluations[0].rating == evaluation.rating
     assert card.evaluations[0].evaluated_at is not None
     # And: It is saved
-    storage = factory.create_storage("users/test/languages/en/levels/A1/repetitions", RepetitionCard, "id")
+    storage = factory.create_storage("users/test/repetitions", RepetitionCard, "id")
     stored = await storage.get(card.id)
     assert stored.due is not None
 

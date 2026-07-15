@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -12,8 +11,6 @@ from features.levels import Level
 from features.repetitions.repetition_scheduler import RepetitionScheduler
 
 from .repetition_model import (
-    LanguageStatus,
-    LevelStatus,
     PageEvaluation,
     RepetitionCard,
     RepetitionCardCreate,
@@ -29,79 +26,34 @@ class RepetitionServiceFactory:
     user_storage: BaseAsyncCollectionStorage[UserInDB]
 
     def create(self, username: str) -> "RepetitionService":
-        return RepetitionService(
-            self.user_storage.get_collection(username, "languages"),
-            self.user_storage.get_collection(username, RepetitionCard),
-        )
+        return RepetitionService(self.user_storage.get_collection(username, RepetitionCard))
 
 
 class RepetitionService:
-    def __init__(
-        self,
-        language_storage: BaseAsyncCollectionStorage[LanguageStatus],
-        new_storage: BaseAsyncCollectionStorage[RepetitionCard],
-    ):
-        self.language_storage = language_storage
+    def __init__(self, new_storage: BaseAsyncCollectionStorage[RepetitionCard]):
         self.new_storage = new_storage
         self.scheduler = RepetitionScheduler()
 
     async def get_all(self) -> AsyncGenerator[RepetitionCardHeader]:
-        async for language in self.language_storage.keys():
-            try:
-                async for repetition in self.get_all_by_language(Language(language)):
-                    yield repetition
-            except Exception as e:
-                _log.warning(e)
+        async for repetition in self.new_storage.get_all():
+            yield repetition
 
     async def get(self, id: UUID) -> RepetitionCard:
         return await self.new_storage.get(id)
 
-    async def get_all_by_language(self, language: Language) -> AsyncGenerator[RepetitionCardHeader]:
-        level_storage = self.language_storage.get_collection(language, "levels")
-        async for level in level_storage.keys():
-            try:
-                async for repetition in self.get_all_by_level(language, Level(level)):
-                    yield repetition
-            except Exception as e:
-                _log.warning(e)
-
-    async def get_all_by_level(self, language: Language, level: Level) -> AsyncGenerator[RepetitionCardHeader]:
-        level_storage = self.language_storage.get_collection(language, "levels")
-        repetition_storage = level_storage.get_collection(level, RepetitionCard)
-        async for repetition in repetition_storage.get_all():
-            yield repetition
-
     async def create(self, value_create: RepetitionCardCreate) -> RepetitionCard:
-        level_storage = self.language_storage.get_collection(value_create.language, "levels")
-        repetition_storage = level_storage.get_collection(value_create.level, RepetitionCard)
         value = self.scheduler.update_repetition_card_due(value_create)
-        for res in await asyncio.gather(
-            self.language_storage.save(LanguageStatus(language=value_create.language)),
-            level_storage.save(LevelStatus(level=value_create.level)),
-            repetition_storage.create(value),
-            self.new_storage.create(value),
-            return_exceptions=True,
-        ):
-            if isinstance(res, Exception):
-                _log.warning(f"Error creating repetition card: {res}")
+        await self.new_storage.create(value)
         return value
 
     async def evaluate(
         self, language: Language, level: Level, topic_id: UUID, page_id: UUID, evaluation: PageEvaluation
     ) -> RepetitionCard:
-        level_storage = self.language_storage.get_collection(language, "levels")
-        repetition_storage = level_storage.get_collection(level, RepetitionCard)
         try:
-            value = await repetition_storage.get(RepetitionCard.get_id(topic_id, page_id))
+            value = await self.get(RepetitionCard.get_id(topic_id, page_id))
             value.evaluations.append(evaluation)
             self.scheduler.update_repetition_card_due(value)
-            for res in await asyncio.gather(
-                repetition_storage.save(value),
-                self.new_storage.save(value),
-                return_exceptions=True,
-            ):
-                if isinstance(res, Exception):
-                    _log.warning(f"Error saving repetition card: {res}")
+            await self.new_storage.save(value)
             return value
         except KeyNotExistsException:
             return await self.create(
@@ -115,7 +67,7 @@ class RepetitionService:
             )
 
     async def get_schedule(self) -> RepetitionSchedule:
-        schedule = {}
+        schedule: dict[str, int] = {}
         groups = self.create_groups()
         async for rch in self.get_all():
             for group in groups:
@@ -123,7 +75,7 @@ class RepetitionService:
                     s_group = str(group)
                     schedule[s_group] = schedule.get(s_group, 0) + 1
                     break
-        return RepetitionSchedule(root=schedule)
+        return RepetitionSchedule(root=dict(sorted(schedule.items())))
 
     def create_groups(self) -> list[datetime]:
         groups = []
@@ -134,6 +86,6 @@ class RepetitionService:
             curr = curr + timedelta(minutes=5)
         # Next month per 1 day
         for i in range(31):
-            curr = curr + timedelta(days=1)
             groups.append(curr)
+            curr = curr + timedelta(days=1)
         return groups

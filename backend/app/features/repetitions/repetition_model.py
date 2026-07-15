@@ -20,6 +20,7 @@ class LevelStatus(BaseModel):
 class PageEvaluation(BaseModel):
     rating: Rating
     evaluated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    next_due_at: datetime | None = None
 
 
 class RepetitionCardCreate(BaseModel):
@@ -76,7 +77,11 @@ class RepetitionCard(RepetitionCardHeader):
         self.step = card.step
         self.stability = card.stability
         self.difficulty = card.difficulty
+        if len(self.evaluations) >= 2 and not self.evaluations[-2].next_due_at:
+            self.evaluations[-2].next_due_at = self.due
         self.due = card.due
+        if len(self.evaluations) >= 1:
+            self.evaluations[-1].next_due_at = card.due
 
     @classmethod
     def create(cls, value_create: RepetitionCardCreate, card: Card | None = None) -> "RepetitionCard":
@@ -95,6 +100,7 @@ class RepetitionCard(RepetitionCardHeader):
             difficulty=card.difficulty,
             due=card.due,
         )
+
 
 class RepetitionSchedule(RootModel):
     root: dict[str, int]
