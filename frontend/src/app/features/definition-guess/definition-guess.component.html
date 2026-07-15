@@ -1,6 +1,5 @@
-<div class="layout-container-2 full-screen-container">
+<div class="layout-container-2">
     @if (exercise) {
-
     <div class="part left vertically-centered">
         @if (imageSrc) {
         <div class="image-container">
@@ -42,9 +41,9 @@
         </div>
         <div id="sentence" class="text-with-player">
             <div [innerHTML]="answer"></div>
-             @if (sentence.audio_file_name) {
+            @if (sentence.audio_file_name) {
             <app-play-audio-button #sentenceAudioButton [srcUrl]="'/api/audio-files/' + sentence.audio_file_name" />
-             }
+            }
         </div>
         } @else {
         <div id="sentence" [innerHTML]="sentence.text_with_gap"></div>
@@ -72,6 +71,7 @@
     </div>
     }
 </div>
+
 @if (viewMode()) {
 <app-bottom-nav [showPreviousPage]="true" [showNextPage]="true" [showTranslate]="true"
     (previousPage)="previousPage.emit()" (nextPage)="nextPage.emit()" (translate)="native = !native"></app-bottom-nav>
