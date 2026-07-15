@@ -1,8 +1,4 @@
 .navigation-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
     padding: 0px;
     padding-bottom: env(safe-area-inset-bottom);
     height: calc(var(--app-bar-height) + env(safe-area-inset-bottom));
