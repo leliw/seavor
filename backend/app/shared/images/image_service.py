@@ -18,8 +18,8 @@ class ImageService:
     async def download(self, name: str) -> ImageBlob:
         return await self.storage.download_async(name)
 
-    def delete(self, name: str):
-        return self.storage.delete(name)
+    async def delete(self, name: str) -> None:
+        await self.storage.delete_async(name)
 
     async def generate_and_upload(self, text: str, language_code: Language) -> str:
         if not self.image_gen_service:

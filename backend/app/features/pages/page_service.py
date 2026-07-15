@@ -173,9 +173,9 @@ class PageService:
     async def delete(self, key: UUID) -> None:
         page = await self.storage.get(key)
         for file_name in page.get_audio_file_names():
-            self.audio_file_service.delete(name=file_name)
+            await self.audio_file_service.delete(name=file_name)
         for image_name in page.get_image_file_names():
-            self.image_service.delete(name=image_name)
+            await self.image_service.delete(name=image_name)
         await self.storage.delete(key)
 
     async def add_image_name(self, page_id: UUID, image_name: str) -> Page | None:

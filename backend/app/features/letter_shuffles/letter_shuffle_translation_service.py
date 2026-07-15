@@ -98,7 +98,7 @@ class LetterShuffleTranslationService:
         value = await self.storage.get(code)
         for i in value.items:
             if i.native_phrase_audio_file_name:
-                self.audio_file_service.delete(i.native_phrase_audio_file_name)
+                await self.audio_file_service.delete(i.native_phrase_audio_file_name)
             if i.native_description_audio_file_name:
-                self.audio_file_service.delete(i.native_description_audio_file_name)
+                await self.audio_file_service.delete(i.native_description_audio_file_name)
         await self.storage.delete(code)

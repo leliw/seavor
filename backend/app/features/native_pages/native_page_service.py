@@ -70,12 +70,12 @@ class NativePageService:
         page = await self.storage.get(key)
         for audio_file_name in page.get_audio_file_names():
             try:
-                self.audio_file_service.delete(audio_file_name)
+                await self.audio_file_service.delete(audio_file_name)
             except KeyNotExistsException:
                 pass
         for image_file_name in page.get_image_file_names():
             try:
-                self.image_service.delete(image_file_name)
+                await self.image_service.delete(image_file_name)
             except KeyNotExistsException:
                 pass
         await self.storage.delete(key)

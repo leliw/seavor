@@ -76,7 +76,7 @@ class LetterShuffleService:
         value = await self.storage.get(uid)
         for i in value.items:
             if i.target_phrase_audio_file_name:
-                self.audio_file_service.delete(i.target_phrase_audio_file_name)
+                await self.audio_file_service.delete(i.target_phrase_audio_file_name)
             if i.target_description_audio_file_name:
-                self.audio_file_service.delete(i.target_description_audio_file_name)
+                await self.audio_file_service.delete(i.target_description_audio_file_name)
         await self.storage.delete(uid)

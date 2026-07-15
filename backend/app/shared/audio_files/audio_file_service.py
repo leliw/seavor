@@ -16,8 +16,8 @@ class AudioFileService:
     async def download(self, name: str) -> AudioFileBlob:
         return await self.storage.download_async(name)
 
-    def delete(self, name: str):
-        return self.storage.delete(name)
+    async def delete(self, name: str) -> None:
+        await  self.storage.delete_async(name)
 
     async def generate_and_upload(self, text: str, language: str) -> str:
         audio = await self.tts_service.text_to_speech_async(text, language)
