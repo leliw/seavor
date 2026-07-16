@@ -22,20 +22,20 @@ import { PlayAudioButtonComponent } from "../../../shared/play-audio-button/play
 @Component({
     selector: 'app-page-edit-form',
     imports: [
-    NgOptimizedImage,
-    CommonModule,
-    FormField,
-    MatFormFieldModule,
-    MatInputModule,
-    MatProgressSpinnerModule,
-    MatButtonModule,
-    MatIconModule,
-    MatToolbarModule,
-    MatTabsModule,
-    MatCardModule,
-    MatTooltip,
-    PlayAudioButtonComponent,
-],
+        NgOptimizedImage,
+        CommonModule,
+        FormField,
+        MatFormFieldModule,
+        MatInputModule,
+        MatProgressSpinnerModule,
+        MatButtonModule,
+        MatIconModule,
+        MatToolbarModule,
+        MatTabsModule,
+        MatCardModule,
+        MatTooltip,
+        PlayAudioButtonComponent,
+    ],
     templateUrl: './page-edit-form.component.html',
     styleUrl: './page-edit-form.component.scss',
 })
@@ -66,6 +66,11 @@ export class PageEditFormComponent {
         !this.isSaving() &&
         this.form().dirty() &&
         !this.form().invalid()
+    );
+    canGenerateAudio = computed(() =>
+        !this.isLoading() &&
+        !this.isSaving() &&
+        !this.form().dirty()
     );
 
     submit(event: Event) {
@@ -122,6 +127,24 @@ export class PageEditFormComponent {
             complete: () => this.loader.hide(),
             error: () => this.loader.hide()
         });
+    }
+
+    generateAudio(texts: string[]) {
+        this.loader.show({ message: 'Generating audio voices...' });
+        this.definitionGuessService.generateAudio(this.topicId(), this.pageId(), texts).subscribe({
+            next: (page) => {
+                const cloned = structuredClone(page);
+                this.originalModel.set(cloned);
+                this.model.set(structuredClone(cloned));
+            },
+            complete: () => this.loader.hide(),
+            error: (error) => {
+                this.loader.hide(),
+                this.snackBar.open('Error generating audio.', 'Close', { duration: 3000 });
+                console.error('Error generating audio:', error);
+            }
+        });
+
     }
 
     removeImage(index: number) {

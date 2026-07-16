@@ -22,6 +22,7 @@ export interface AnswerOption {
 
 export interface DefinitionGuessExercise {
     id: string;
+    type: string;
     language: string;
     level: string;
 
@@ -32,8 +33,8 @@ export interface DefinitionGuessExercise {
     alternatives: AnswerOption[];
     distractors: AnswerOption[];
 
-    hint?: string;
-    explanation?: string;
+    hint: string;
+    explanation: string;
 
     phrase_audio_file_name?: string;
     definition_audio_file_name?: string;
@@ -65,6 +66,10 @@ export class DefinitionGuessService {
 
     addImage(topicId: string, pageId: string): Observable<DefinitionGuessExercise> {
         return this.httpClient.post<DefinitionGuessExercise>(`/api/topics/${topicId}/pages/${pageId}/generate-image`, {});
+    }
+
+    generateAudio(topicId: string, pageId: string, texts: string[]): Observable<DefinitionGuessExercise> {
+        return this.httpClient.post<DefinitionGuessExercise>(`/api/topics/${topicId}/pages/${pageId}/generate-audio`, { texts });
     }
 
     evaluate(topicId: string, pageId: string, rate: number): Observable<void> {
