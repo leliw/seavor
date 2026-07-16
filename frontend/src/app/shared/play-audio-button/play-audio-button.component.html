@@ -7,3 +7,8 @@
     <mat-icon>play_circle</mat-icon>
 </button>
 }
+@if (showGenerateButton()) {
+<button type="button" matIconButton (click)="generate.emit()" matTooltip="Generate audio">
+    <mat-icon>change_circle</mat-icon>
+</button>
+}
