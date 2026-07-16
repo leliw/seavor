@@ -1,5 +1,5 @@
 import pytest
-from app.integrations.gtts.gtts_service import GttsService
+from app.integrations.tts.gtts_service import GttsService
 
 
 def test_gtts(tmp_path):

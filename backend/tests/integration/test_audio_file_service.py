@@ -1,7 +1,7 @@
 import pytest
 from ampf.base import BaseAsyncFactory
 from ampf.in_memory import InMemoryAsyncFactory
-from integrations.gtts.gtts_service import GttsService
+from integrations.tts.gtts_service import GttsService
 from shared.audio_files.audio_file_service import AudioFileService
 
 

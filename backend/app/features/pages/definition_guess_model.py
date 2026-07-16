@@ -218,3 +218,30 @@ class DefinitionGuess(BasePage):
     @override
     def get_image_file_names(self) -> set[str]:
         return set(self.image_names) if self.image_names else set()
+
+    def create_patch_audio_file_names(self, audio_file_names: dict[str, str]) -> DefinitionGuessPatch:
+        ret = DefinitionGuessPatch()
+        if self.phrase and self.phrase in audio_file_names:
+            ret.phrase_audio_file_name = audio_file_names[self.phrase]
+        if self.definition and self.definition in audio_file_names:
+            ret.definition_audio_file_name = audio_file_names[self.definition]
+        if self.explanation and self.explanation in audio_file_names:
+            ret.explanation_audio_file_name = audio_file_names[self.explanation]
+        if self.hint and self.hint in audio_file_names:
+            ret.hint_audio_file_name = audio_file_names[self.hint]
+        if self.sentences:
+            ret.sentences = [s.model_copy() for s in self.sentences]
+            for sentence in ret.sentences:
+                if sentence.answer in audio_file_names:
+                    sentence.audio_file_name = audio_file_names[sentence.answer]
+        if self.alternatives:
+            ret.alternatives = [a.model_copy() for a in self.alternatives]
+            for alternative in ret.alternatives:
+                if alternative.value in audio_file_names:
+                    alternative.audio_file_name = audio_file_names[alternative.value] 
+        if self.distractors:
+            ret.distractors = [d.model_copy() for d in self.distractors]
+            for distractor in ret.distractors:
+                if distractor.value in audio_file_names:
+                    distractor.audio_file_name = audio_file_names[distractor.value]
+        return ret

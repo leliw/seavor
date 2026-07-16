@@ -1,48 +1,10 @@
 import { HttpClient } from '@angular/common/http';
-import { computed, inject, Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { UserSettingsStore } from '../../core/user-settings/user-settings.store';
+import { DefinitionGuessExercise } from '../definition-guess/definition-guess.service';
 
-export interface Sentence {
-    text_with_gap: string;
-    gap_filler_form: string;
-    audio_file_name?: string;
-}
 
-export interface NativeSentence {
-    text: string;
-    audio_file_name?: string;
-}
 
-export interface AnswerOption {
-    value: string;
-    explanation?: string;
-    audio_file_name?: string;
-}
-
-export interface DefinitionGuessExercise {
-    id: string;
-    type: string;
-    language: string;
-    level: string;
-
-    phrase: string;
-    definition: string;
-    sentences: Sentence[];
-
-    alternatives: AnswerOption[];
-    distractors: AnswerOption[];
-
-    hint: string;
-    explanation: string;
-
-    phrase_audio_file_name?: string;
-    definition_audio_file_name?: string;
-    hint_audio_file_name?: string;
-    explanation_audio_file_name?: string;
-
-    image_names?: string[];
-}
 
 @Injectable({
     providedIn: 'root',
@@ -69,7 +31,7 @@ export class PageService {
     create(topicId: string, data: Partial<DefinitionGuessExercise>): Observable<void> {
         return this.httpClient.post<void>(`/api/topics/${topicId}/pages`, data);
     }
-    
+
     get(topicId: string, pageId: string): Observable<DefinitionGuessExercise> {
         return this.httpClient.get<DefinitionGuessExercise>(`/api/topics/${topicId}/pages/${pageId}`);
     }

@@ -187,3 +187,19 @@ class PageService:
         if image_name not in page.image_names:
             page.image_names.append(image_name)
             return await self.patch(page_id, DefinitionGuessPatch(image_names=page.image_names))
+
+    async def generate_and_update_audio_file_names(self, key: UUID, texts_to_synthesize: list[str]) -> Page:
+        value = await self.get(key)
+        audio_file_names = await asyncio.gather(
+            *[
+                self.audio_file_service.generate_and_upload(text=text, language=value.language)
+                for text in texts_to_synthesize
+            ]
+        )
+        text_to_audio = dict(zip(texts_to_synthesize, audio_file_names))
+        match value.type:
+            case PageType.DEFINITION_GUESS:
+                value_patch = value.create_patch_audio_file_names(text_to_audio)
+                return await self.patch(key, value_patch)
+            case _:
+                raise NotImplementedError

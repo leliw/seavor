@@ -10,6 +10,7 @@ dependencies = [
     "authlib>=1.7.2",
     "fastapi[standard]>=0.128.0",
     "fsrs>=6.3.1",
+    "google-cloud-texttospeech>=2.37.0",
     "google-genai>=1.56.0",
     "gtts>=2.5.4",
     "gunicorn>=23.0.0",

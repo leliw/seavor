@@ -1,7 +1,9 @@
 from io import BytesIO
 
+from .base_tts_service import BaseTTSService
 
-class GttsService:
+
+class GttsService(BaseTTSService):
     def text_to_speech(self, text: str, lang: str) -> BytesIO:
         from gtts import gTTS
 

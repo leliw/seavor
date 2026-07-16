@@ -22,7 +22,7 @@ from features.topics.topic_service import TopicService
 from haintech.ai import BaseImageGenerator
 from haintech.ai.google_genai import GenAIImageGenerator, GoogleAIModel
 from haintech.ai.prompts import PromptExecutor, PromptService
-from integrations.gtts.gtts_service import GttsService
+from integrations.tts.gtts_service import GttsService
 from main import app as main_app
 from shared.audio_files.audio_file_service import AudioFileService
 from shared.images.image_service import ImageService
