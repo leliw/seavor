@@ -1,6 +1,5 @@
 from io import BytesIO
 
-from google.api_core.client_options import ClientOptions
 from google.cloud.texttospeech import (
     AudioConfig,
     AudioEncoding,
@@ -14,10 +13,11 @@ from .base_tts_service import BaseTTSService
 
 
 class GoogleTTSService(BaseTTSService):
-    def __init__(self):
-        self.client = TextToSpeechAsyncClient(client_options=ClientOptions())
+    client = None
 
     async def text_to_speech_async(self, text: str, lang: str) -> BytesIO:
+        if not self.client:
+            self.client = TextToSpeechAsyncClient()
         synthesis_input = SynthesisInput(text=text)
         voice = VoiceSelectionParams(language_code=lang, ssml_gender=SsmlVoiceGender.NEUTRAL)
         audio_config = AudioConfig(audio_encoding=AudioEncoding.MP3)

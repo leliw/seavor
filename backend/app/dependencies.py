@@ -34,6 +34,7 @@ from features.workflows.workflow_factory import WorkflowFactory
 from haintech.ai import BaseImageGenerator
 from haintech.ai.google_genai import GenAIImageGenerator, GoogleAIModel
 from haintech.ai.prompts.prompt_service import PromptService
+from integrations.tts.google_tts_service import GoogleTTSService
 from integrations.tts.gtts_service import GttsService
 from shared.audio_files.audio_file_service import AudioFileService
 from shared.images.image_service import ImageService
@@ -52,6 +53,7 @@ def lifespan(config: AppConfig):
     DependencyRegistry.add(app_state.user_storage, BaseAsyncCollectionStorage[UserInDB])
     DependencyRegistry.add(app_state.task_runner, TaskRunner)
     DependencyRegistry.register_class(GttsService)
+    DependencyRegistry.register_class(GoogleTTSService)
     DependencyRegistry.register_class(AudioFileService)
     DependencyRegistry.register_class(TranslatorAIModel)
     DependencyRegistry.register_class(TeacherAIModel)
