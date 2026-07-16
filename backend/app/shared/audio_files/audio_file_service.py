@@ -1,7 +1,7 @@
 from uuid import NAMESPACE_DNS, uuid5
 
 from ampf.base import BaseAsyncFactory
-from integrations.gtts.gtts_service import GttsService
+from integrations.tts.gtts_service import GttsService
 from shared.audio_files.audio_file_model import AudioFileBlob, AudioFileMetadata
 
 
