@@ -1,12 +1,12 @@
 from uuid import NAMESPACE_DNS, uuid5
 
 from ampf.base import BaseAsyncFactory
-from integrations.tts.google_tts_service import GoogleTTSService
+from integrations.tts.base_tts_service import BaseTTSService
 from shared.audio_files.audio_file_model import AudioFileBlob, AudioFileMetadata
 
 
 class AudioFileService:
-    def __init__(self, factory: BaseAsyncFactory, tts_service: GoogleTTSService):
+    def __init__(self, factory: BaseAsyncFactory, tts_service: BaseTTSService):
         self.storage = factory.create_blob_storage("audio-files", clazz=AudioFileMetadata, content_type="audio/mpeg")
         self.tts_service = tts_service
 
