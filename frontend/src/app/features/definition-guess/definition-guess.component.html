@@ -80,6 +80,7 @@
 <app-bottom-nav [showCheck]="true" [showHint]="true" [showTranslate]="true" (check)="check()" (hint)="onShowHint()"
     [disabledHint]="showHint" (translate)="native = !native"></app-bottom-nav>
 } @else {
-<app-evaluation-bar (evaluation)="onEvaluation($event)"></app-evaluation-bar>
+<app-evaluation-bar [showTranslate]="true" (evaluation)="onEvaluation($event)"
+    (translate)="native = !native"></app-evaluation-bar>
 }
 }

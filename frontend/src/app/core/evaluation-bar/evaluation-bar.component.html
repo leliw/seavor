@@ -16,5 +16,11 @@
             <mat-icon matListItemIcon>sentiment_very_satisfied</mat-icon>
             <span matListItemTitle i18n>Easy</span>
         </a>
+        @if (showTranslate()) {
+        <a mat-list-item (click)="translate.emit()" i18n-matTooltip matTooltip="Switch language">
+            <mat-icon matListItemIcon>g_translate</mat-icon>
+            <span matListItemTitle i18n>Translate</span>
+        </a>
+        }
     </mat-nav-list>
 </mat-toolbar>
