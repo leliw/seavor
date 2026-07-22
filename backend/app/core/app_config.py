@@ -5,7 +5,7 @@ from ampf.auth import AuthConfig, DefaultUser, ResetPasswordMailConfig, SmtpConf
 from ampf.tasks import TaskRunner
 from ampf.tasks.background_runner import BackgroundRunner
 from ampf.tasks.pubsub_push_runner import PubsubPushRunner
-from pydantic import BaseModel, Field, field_validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from version import __version__
 
@@ -31,8 +31,8 @@ class AppConfig(BaseSettings):
 
     session_secret_key: str | None = None
     google_oauth_client_id: str | None = None
-    google_oauth_client_secret: str | None = None 
-    
+    google_oauth_client_secret: str | None = None
+
     google_api_key: str  # Google GenAI API key
 
     translator_ai_model_name: str = "gemini-2.5-flash-lite"
@@ -84,7 +84,3 @@ class AppConfig(BaseSettings):
                 return PubsubPushRunner
             case _:
                 raise ValueError(f"Unknown task runner type: {self.task_runner}")
-
-
-class ClientConfig(BaseModel):
-    version: str

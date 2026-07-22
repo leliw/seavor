@@ -7,7 +7,7 @@ def test_get_client_config(client):
     r = response.json()
     # Then: The response status code is 200
     assert 200 == response.status_code
-    # And: The response has "version" and "google_oauth_client_id"
+    # And: The response has "version"
     assert 1 == len(r)
     pattern = r"^\d+\.\d+\.\d+$"
     assert re.match(pattern, r["version"])
