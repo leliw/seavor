@@ -12,7 +12,7 @@ from pydantic import computed_field
 
 from shared.images.image_model import ImageBlob, ImageMetadata
 from shared.images.image_service import ImageService
-from shared.prompts.prompt_executor_image import PromptExecutorImage
+from haintech.ai.prompts import PromptExecutorImage
 
 from .base_workflow import BaseWorkflow, BaseWorkflowContext, TaskType
 

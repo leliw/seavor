@@ -12,8 +12,7 @@ from features.repetitions.repetition_model import RepetitionCard, RepetitionSche
 from features.teacher.teacher_model import TeacherDefinitionGuessCreate
 from features.topics.topic_model import Topic
 from ampf.tasks import TaskHeader, TaskStatus
-from haintech.testing import MockerAIModel
-from tests.mocker_image_generator import *
+from haintech.testing import MockerAIModel, MockerImageGenerator
 
 # User can add their own private definition guess:
 

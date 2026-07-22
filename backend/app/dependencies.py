@@ -38,7 +38,7 @@ from integrations.tts.base_tts_service import BaseTTSService
 from integrations.tts.google_tts_service import GoogleTTSService
 from shared.audio_files.audio_file_service import AudioFileService
 from shared.images.image_service import ImageService
-from shared.prompts.prompt_executor_image import PromptExecutorImage
+from haintech.ai.prompts import PromptExecutorImage
 
 load_dotenv()
 

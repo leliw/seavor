@@ -1,5 +1,5 @@
 from ampf.base import Blob
-from shared.prompts.prompt_executor_image import ImageGeneratedMetadata
+from haintech.ai.prompts import ImageGeneratedMetadata
 
 
 class ImageMetadata(ImageGeneratedMetadata):

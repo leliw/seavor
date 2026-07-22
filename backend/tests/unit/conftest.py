@@ -26,7 +26,7 @@ from integrations.tts.gtts_service import GttsService
 from main import app as main_app
 from shared.audio_files.audio_file_service import AudioFileService
 from shared.images.image_service import ImageService
-from shared.prompts.prompt_executor_image import PromptExecutorImage
+from haintech.ai.prompts import PromptExecutorImage
 
 
 @pytest.fixture

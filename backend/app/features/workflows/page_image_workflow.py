@@ -9,7 +9,7 @@ from features.pages.page_service import PageServiceFactory
 from features.topics.topic_service import TopicService
 from shared.images.image_model import ImageBlob, ImageMetadata
 from shared.images.image_service import ImageService
-from shared.prompts.prompt_executor_image import PromptExecutorImage
+from haintech.ai.prompts import PromptExecutorImage
 
 
 @dataclass

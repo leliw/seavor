@@ -1,4 +1,4 @@
-from haintech.testing import MockerAIModel
+from haintech.testing import MockerAIModel, MockerImageGenerator
 import pytest
 from features.languages import Language
 from features.levels import Level
@@ -11,9 +11,7 @@ from features.topics.topic_service import TopicService
 
 from features.workflows.page_image_workflow import PageImageWorkflow
 from shared.images.image_service import ImageService
-from shared.prompts.prompt_executor_image import PromptExecutorImage
-from tests.mocker_image_generator import *
-
+from haintech.ai.prompts import PromptExecutorImage
 
 @pytest.fixture()
 def page_image_workflow(
@@ -24,7 +22,7 @@ def page_image_workflow(
     prompt_executor_image: PromptExecutorImage,
 ):
     return PageImageWorkflow(
-        topic_service=topic_service,
+        topic_service=topic_service, 
         page_service_factory=page_service_factory,
         native_page_service_factory=native_page_service_factory,
         image_service=image_service,
